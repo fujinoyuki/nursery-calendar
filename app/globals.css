@@ -1,0 +1,246 @@
+:root {
+  --color-base: #FFFFFF;
+  --color-text: #000000;
+  --color-accent-1: #FF0000;
+  --color-accent-2: #0000FF;
+  --color-accent-3: #FFFF00;
+  --border-width: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: default; /* すべての要素でデフォルトカーソルを使用 */
+}
+
+/* リンクボタンなど、クリック可能な要素には標準のポインタカーソルを使用 */
+a, button, .event-item, input[type="submit"], input[type="button"] {
+  cursor: pointer;
+}
+
+/* テキスト入力フィールドには標準のテキスト入力カーソルを使用 */
+input[type="text"], input[type="password"], textarea {
+  cursor: text;
+}
+
+/* カスタムカーソルの設定を削除 */
+html:not(.overlay-open) body *:not(.overlay):not(.overlay *) {
+  /* cursor: url('/cursor.svg'), crosshair; の記述を削除 */
+}
+
+/* オーバーレイが開いているときのクラスをbodyに追加するためのスタイル */
+body.overlay-open {
+  overflow: hidden; /* オーバーレイ表示中はスクロールを防止 */
+}
+
+html,
+body {
+  font-family: 'Courier New', monospace;
+  background-color: var(--color-base);
+  color: var(--color-text);
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+}
+
+a {
+  color: var(--color-accent-2);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-accent-1);
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+button {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  background-color: var(--color-base);
+  border: var(--border-width) solid var(--color-text);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--color-accent-3);
+  color: var(--color-text);
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
+
+input {
+  font-family: 'Courier New', monospace;
+  font-size: 1.25rem;
+  padding: 0.75rem;
+  border: var(--border-width) solid var(--color-text);
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.month-card {
+  border: var(--border-width) solid var(--color-text);
+  padding: 1.5rem;
+  background-color: var(--color-base);
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+}
+
+.month-card:hover {
+  transform: rotate(1deg);
+  transition: transform 0.3s ease;
+}
+
+.month-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 50px 50px 0;
+  border-color: transparent var(--color-accent-1) transparent transparent;
+}
+
+.event-list {
+  list-style-type: none;
+  margin-top: 1rem;
+}
+
+.event-item {
+  padding: 0.75rem;
+  border-bottom: 2px solid var(--color-text);
+  cursor: pointer;
+}
+
+.event-item:hover {
+  background-color: var(--color-accent-3);
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+}
+
+/* オーバーレイ関連の古いスタイルを削除 */
+/* .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  cursor: default;
+}
+
+.overlay * {
+  cursor: default;
+}
+
+.overlay button, .overlay a {
+  cursor: pointer;
+}
+
+.modal {
+  background-color: var(--color-base);
+  border: var(--border-width) solid var(--color-text);
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  position: relative;
+  z-index: 10000;
+  max-height: 80vh;
+  overflow-y: auto;
+} */
+
+/* ×ボタンのみカーソルをポインターに */
+/* モーダル関連のスタイルをリセット */
+.modal-overlay {
+  /* パフォーマンスを向上させるプロパティ */
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.modal-content {
+  /* パフォーマンスを向上させるプロパティ */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* モーダル表示時のbodyスタイル */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--color-base);
+}
+
+.login-form {
+  border: var(--border-width) solid var(--color-text);
+  padding: 3rem;
+  background-color: var(--color-base);
+  width: 100%;
+  max-width: 500px;
+}
+
+.login-title {
+  margin-bottom: 2rem;
+  text-align: center;
+}
