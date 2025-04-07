@@ -1,6 +1,4 @@
-import { read_file, natural_language_write_file } from "./temp/tools";
-
-const PostPage = () => {
+ const PostPage = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const title = (event.currentTarget.elements.namedItem('title') as HTMLInputElement)?.value;
@@ -30,18 +28,19 @@ const PostPage = () => {
     let existingData: any[] = [];
     try {
       const fileData = await read_file({ path: "temp.json" });
-           existingData = JSON.parse(fileData.result);
+      existingData = JSON.parse(fileData.result);
     } catch (error) {
       console.error("Error reading /home/user/nursery-calendar/temp.json:", error);
       existingData = [];
     }
     const newData = [...existingData, data];
     console.log(newData);
-    const currentFileData = await read_file({ path: "/home/user/nursery-calendar/temp.json" });
-       console.log("temp.json before save:", currentFileData.result);
+    const currentFileData = await read_file({ path: "temp.json" });
+    console.log("temp.json before save:", currentFileData.result);
     try {
       await natural_language_write_file({
-       path: "temp.json",
+        path: "temp.json",
+
         prompt: `${JSON.stringify(newData)}`,
       });
         console.log("Data saved to temp.json");

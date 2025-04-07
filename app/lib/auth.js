@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const [error, setError] = useState('');
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -14,6 +16,7 @@ export function AuthProvider({ children }) {
   // Check if user is already logged in
   useEffect(() => {
     const loggedInUser = localStorage.getItem('user');
+   
     if (loggedInUser) {
       setUser(JSON.parse(loggedInUser));
     }
@@ -22,6 +25,8 @@ export function AuthProvider({ children }) {
 
   // Basic authentication function
   const login = async (userId, password) => {
+    setError('')
+
     // In a real application, you would validate against a backend
     // For this demo, we'll use a simple check
     // The credentials would typically be BASE64 encoded for Basic Auth
@@ -43,14 +48,35 @@ export function AuthProvider({ children }) {
     });
   };
 
+  const createUser = async (userId, password) => {
+    setError('')
+
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            // シンプルな登録処理（実際はサーバーサイドで処理）
+          if (userId && password) {
+          console.log("ユーザー登録に成功しました。");
+          router.push('/');
+          resolve(true);
+          } else {
+            setError('ユーザー登録に失敗しました。');
+            reject(false);
+          }
+        }, 500);
+      
+    });
+  };
+
+
   const logout = () => {
     localStorage.removeItem('user');
+   
     setUser(null);
     router.push('/');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, error, createUser }}>
       {children}
     </AuthContext.Provider>
   );

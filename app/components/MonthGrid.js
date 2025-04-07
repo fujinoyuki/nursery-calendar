@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import EventItem from './EventItem';
-import { eventData } from '../lib/data';
+import { eventData } from '../lib/data.ts';
 
 export default function MonthGrid() {
   const [months, setMonths] = useState([]);
@@ -46,7 +46,7 @@ export default function MonthGrid() {
   if (loading) {
     return (
       <div className="container" style={{ textAlign: 'center', padding: '5rem' }}>
-        <h2>読み込み中...</h2>
+        <h2>読み込み中</h2>
       </div>
     );
   }
