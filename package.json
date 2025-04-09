@@ -1,5 +1,5 @@
 {
-  "name": "brutalist-nursery-calendar",
+  "name": "childcare-event-ideas",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "firebase": "^11.5.0",
-    "next": "15.2.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/node": "22.13.13",
-    "@types/react": "19.0.12",
-    "eslint": "^9",
-    "eslint-config-next": "15.2.2"
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.31.0",
+    "@types/node": "20.4.5",
+    "@types/react": "18.2.18",
+    "@types/react-dom": "18.2.7",
+    "next": "^15.2.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.1.6"
   }
 }

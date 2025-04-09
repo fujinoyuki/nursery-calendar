@@ -1,0 +1,129 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.content {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  background-color: #FFFFFF;
+  border: 5px solid #000000;
+  padding: 40px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+  transform: rotate(-1deg);
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(50px) rotate(-1deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotate(-1deg);
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #000000;
+  background-color: #FFFFFF;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.closeButton:hover {
+  background-color: #FF0000;
+  color: #FFFFFF;
+  transform: rotate(90deg);
+}
+
+.eventTitle {
+  font-family: 'Courier New', monospace;
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 30px;
+  position: relative;
+  display: inline-block;
+}
+
+.eventTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #0000FF;
+}
+
+.eventDescription {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.eventDescription p {
+  margin-bottom: 15px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.deleteButton {
+  font-family: 'Courier New', monospace;
+  background-color: #FF0000;
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 25px;
+  font-weight: bold;
+  font-size: 16px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.deleteButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.deleteButton:hover {
+  transform: translateY(-3px);
+}
+
+.deleteButton:hover::before {
+  left: 0;
+}

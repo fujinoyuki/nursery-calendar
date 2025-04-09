@@ -1,0 +1,55 @@
+/*!*************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./app/globals.css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************/
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background-color: #FFFFFF;
+  color: #000000;
+  line-height: 1.6;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="none" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+button, a, input, textarea, select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="black" stroke="black" stroke-width="1"/></svg>') 12 12, pointer;
+}
+
+/* For WebKit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
+  border-left: 2px solid #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF0000;
+}
+
+/* Custom cursor */
+html, body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="none" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+button, a, input {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="black" stroke="black" stroke-width="1"/></svg>') 12 12, pointer;
+}
+
