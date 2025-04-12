@@ -1,4 +1,4 @@
-// File: /home/user/nursery-calendar/app/page.tsx
+// File: /home/user/nursery-calendar/nursery-calendar/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
