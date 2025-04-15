@@ -1,0 +1,25 @@
+{
+  "version": "0.2",
+  "language": "en,ja",
+  "words": [
+    "supabase",
+    "SUPABASE",
+    "postgrest",
+    "whatwg",
+    "webidl",
+    "streamsearch",
+    "opencollective",
+    "libvips",
+    "linuxmusl",
+    "msvc",
+    "libc",
+    "arrayish",
+    "emnapi"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "package-lock.json",
+    ".next/**",
+    "public/**"
+  ]
+} 

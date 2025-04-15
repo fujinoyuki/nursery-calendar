@@ -1,0 +1,119 @@
+.mainContainer {
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.mainContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 49.5%, #0000FF 49.5%, #0000FF 50.5%, transparent 50.5%),
+              linear-gradient(0deg, transparent 49.5%, #0000FF 49.5%, #0000FF 50.5%, transparent 50.5%);
+  background-size: 50px 50px;
+  opacity: 0.05;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 4px solid #000000;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #FF0000;
+}
+
+.logoutButton {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  padding: 10px 20px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.logoutButton:hover {
+  background-color: #FF0000;
+  transform: rotate(-2deg);
+}
+
+.monthsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1200px) {
+  .monthsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .monthsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .monthsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Scroll snap container */
+.scrollContainer {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
+
+/* Custom cursor continues from login page */
+.customCursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="none" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+.clickableCursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="black" stroke="black" stroke-width="1"/></svg>') 12 12, pointer;
+}
