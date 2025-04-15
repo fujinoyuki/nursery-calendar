@@ -7,7 +7,7 @@ interface MonthCardProps {
   monthName: string;
   events: Event[];
   onEventClick: (event: Event) => void;
-  onAddEvent: () => void;
+  onAddEvent: (month: number) => void;
 }
 
 export default function MonthCard({
@@ -39,7 +39,7 @@ export default function MonthCard({
           </div>
         ))}
       </div>
-      <button onClick={onAddEvent} className={styles.addButton}>
+      <button onClick={() => onAddEvent(month)} className={styles.addButton}>
         イベントを追加
       </button>
     </div>

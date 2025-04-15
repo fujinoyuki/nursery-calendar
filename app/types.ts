@@ -5,9 +5,13 @@ export interface Event {
   date: string;
   age_group: string;
   category: string;
+  materials: string;
+  duration: string;
+  preparation: string;
+  objective: string;
   user_id: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface User {

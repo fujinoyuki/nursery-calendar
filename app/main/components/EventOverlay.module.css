@@ -1,90 +1,52 @@
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
 }
 
 .content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  position: relative;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  @apply bg-white rounded-lg p-6 w-full max-w-2xl mx-4 relative;
 }
 
 .closeButton {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
-}
-
-.closeButton:hover {
-  color: #000;
+  @apply absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold;
 }
 
 .title {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
+  @apply text-2xl font-bold mb-2 text-gray-800;
 }
 
 .date {
-  color: #666;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  @apply text-sm text-gray-500 mb-4;
+}
+
+.meta {
+  @apply flex gap-2 mb-4;
+}
+
+.ageGroup,
+.category {
+  @apply px-2 py-1 text-sm rounded-full;
+}
+
+.ageGroup {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.category {
+  @apply bg-green-100 text-green-800;
 }
 
 .description {
-  color: #444;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  white-space: pre-wrap;
+  @apply text-gray-700 mb-6;
 }
 
 .actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
+  @apply flex justify-end gap-2;
 }
 
 .editButton {
-  padding: 0.5rem 1rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.editButton:hover {
-  background-color: #45a049;
+  @apply px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700;
 }
 
 .deleteButton {
-  padding: 0.5rem 1rem;
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.deleteButton:hover {
-  background-color: #ff0000;
+  @apply px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700;
 }

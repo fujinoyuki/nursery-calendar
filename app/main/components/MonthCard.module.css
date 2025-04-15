@@ -1,7 +1,6 @@
 .monthCard {
+  @apply bg-white rounded-lg shadow-md p-4;
   border: 4px solid #000000;
-  padding: 25px;
-  background-color: #FFFFFF;
   position: relative;
   transition: transform 0.3s ease;
   --accent-color: #FF0000; /* Default accent color, will be overridden */
@@ -24,11 +23,9 @@
 }
 
 .monthTitle {
+  @apply text-xl font-bold mb-4 text-gray-800;
   font-family: 'Courier New', monospace;
-  font-size: 28px;
-  font-weight: bold;
   margin-top: 0;
-  margin-bottom: 20px;
   position: relative;
   display: inline-block;
 }
@@ -43,19 +40,20 @@
   background-color: var(--accent-color);
 }
 
-.eventsList {
+.eventList {
+  @apply space-y-2;
   list-style: none;
   padding: 0;
   margin: 0 0 20px 0;
 }
 
 .eventItem {
+  @apply p-2 rounded-md hover:bg-gray-50 cursor-pointer flex flex-col;
   font-family: 'Courier New', monospace;
   padding: 12px;
   margin-bottom: 10px;
   border: 3px solid #000000;
   transition: transform 0.2s ease, background-color 0.2s ease;
-  cursor: pointer;
   position: relative;
   overflow: hidden;
 }
@@ -81,6 +79,14 @@
   left: 0;
 }
 
+.eventDate {
+  @apply text-sm text-gray-500;
+}
+
+.eventTitle {
+  @apply font-medium text-gray-700;
+}
+
 .noEvents {
   font-family: 'Courier New', monospace;
   font-style: italic;
@@ -90,17 +96,26 @@
 }
 
 .addButton {
+  @apply mt-4 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors;
   font-family: 'Courier New', monospace;
   background-color: transparent;
   border: 3px dashed #000000;
-  padding: 10px;
-  width: 100%;
   text-align: center;
   font-weight: bold;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.addButton:hover {
-  background-color: #000000;
-  color: #FFFFFF;
+.spring {
+  @apply border-l-4 border-green-400;
+}
+
+.summer {
+  @apply border-l-4 border-yellow-400;
+}
+
+.autumn {
+  @apply border-l-4 border-orange-400;
+}
+
+.winter {
+  @apply border-l-4 border-blue-400;
 }

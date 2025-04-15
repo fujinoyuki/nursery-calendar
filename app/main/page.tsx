@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import styles from './main.module.css';
 import MonthCard from './components/MonthCard';
 import EventOverlay from './components/EventOverlay';
-import AddEventForm from './components/AddEventForm';
+import AddEventForm from '../components/AddEventForm';
 import EditEventForm from '../components/EditEventForm';
 import { Event } from '../types';
+
+type EventFormData = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
 
 export default function MainPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -18,72 +20,130 @@ export default function MainPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
 
-  const supabase = createBrowserClient(
+  const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  ), []);
 
+  const redirectToLogin = useCallback(() => {
+    console.log('ログインページへリダイレクト');
+    router.replace('/');
+  }, [router]);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        redirectToLogin();
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      console.log('イベントを取得中...');
+
+      const { data, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('date', { ascending: true });
+
+      if (eventsError) {
+        throw eventsError;
+      }
+
+      console.log('取得したイベント:', data);
+      setEvents(data || []);
+    } catch (error) {
+      console.error('イベント取得エラー:', error);
+      setError('イベントの取得に失敗しました');
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, redirectToLogin]);
+
+  // 初期化処理
   useEffect(() => {
-    const initializeApp = async () => {
+    let mounted = true;
+
+    const initialize = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('初期化開始');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          throw sessionError;
+        }
+
         if (!session) {
-          router.push('/');
+          console.log('セッションなし');
+          redirectToLogin();
           return;
         }
-        console.log('認証済みユーザー:', session.user.email);
-        await fetchEvents();
+
+        if (mounted) {
+          console.log('セッション有効 - データ取得開始');
+          await fetchEvents();
+        }
       } catch (error) {
         console.error('初期化エラー:', error);
-        router.push('/');
+        if (mounted) {
+          setError('アプリケーションの初期化に失敗しました');
+        }
+      } finally {
+        if (mounted) {
+          setIsInitialized(true);
+          setLoading(false);
+        }
       }
     };
 
-    initializeApp();
+    initialize();
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase, fetchEvents, redirectToLogin]);
+
+  // 認証状態の監視
+  useEffect(() => {
+    if (!isInitialized) return;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN') {
-        await fetchEvents();
-      } else if (event === 'SIGNED_OUT') {
-        setEvents([]);
-        router.push('/');
+      console.log('認証状態の変更:', event, session);
+
+      switch (event) {
+        case 'SIGNED_IN':
+          console.log('サインイン検知');
+          await fetchEvents();
+          break;
+        case 'SIGNED_OUT':
+          console.log('サインアウト検知');
+          setEvents([]);
+          redirectToLogin();
+          break;
+        case 'TOKEN_REFRESHED':
+          console.log('トークン更新');
+          await fetchEvents();
+          break;
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [isInitialized, supabase, fetchEvents, redirectToLogin]);
 
-  const fetchEvents = async () => {
+  const handleLogout = async () => {
     try {
-      setError(null);
-      console.log('イベントを取得中...');
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('認証されていません');
-      }
-
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('date', { ascending: true });
-
-      if (error) {
-        console.error('イベント取得エラー:', error);
-        setError('イベントの取得に失敗しました');
-        throw error;
-      }
-      
-      console.log('取得したイベント:', data);
-      setEvents(data || []);
+      setLoading(true);
+      await supabase.auth.signOut();
     } catch (error) {
-      console.error('イベントの取得に失敗しました:', error);
-      setError('イベントの取得に失敗しました');
+      console.error('ログアウトエラー:', error);
+      setError('ログアウトに失敗しました');
     } finally {
       setLoading(false);
     }
@@ -102,29 +162,31 @@ export default function MainPage() {
     setShowAddForm(true);
   };
 
-  const handleAddEventSubmit = async (
-    title: string,
-    description: string,
-    date: string,
-    age_group: string = '0歳児',
-    category: string = '季節行事'
-  ) => {
+  const handleAddEventSubmit = async (eventData: EventFormData) => {
     try {
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error('認証されていません');
+        setError('認証されていません');
+        return;
       }
 
-      console.log('イベント追加中...', { title, date, age_group, category });
+      if (selectedMonth === null) {
+        setError('月が選択されていません');
+        return;
+      }
+
+      const date = new Date();
+      date.setMonth(selectedMonth >= 9 ? selectedMonth - 9 : selectedMonth + 3);
+      date.setDate(1);
+
+      console.log('イベント追加中...', { ...eventData, date: date.toISOString() });
       const { data, error } = await supabase
         .from('events')
         .insert([
           {
-            title,
-            description,
-            date,
-            age_group,
-            category,
+            ...eventData,
+            date: date.toISOString(),
             user_id: session.user.id
           }
         ])
@@ -132,70 +194,78 @@ export default function MainPage() {
 
       if (error) {
         console.error('イベント追加エラー:', error);
+        setError('イベントの追加に失敗しました');
         return;
       }
 
       if (data) {
         console.log('追加されたイベント:', data);
-        await fetchEvents();
+        setEvents(prev => [...prev, ...data]);
+        setShowAddForm(false);
+        setSelectedMonth(null);
       }
-      setShowAddForm(false);
-      setSelectedMonth(null);
     } catch (error) {
       console.error('Error:', error);
+      setError('予期せぬエラーが発生しました');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEditEventSubmit = async (
-    id: string,
-    title: string,
-    description: string,
-    date: string,
-    age_group: string,
-    category: string
-  ) => {
+  const handleEditEventSubmit = async (eventData: EventFormData) => {
     try {
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error('認証されていません');
+        setError('認証されていません');
+        return;
       }
 
-      console.log('イベント更新中...', { id, title, date });
+      if (!selectedEvent) {
+        setError('編集するイベントが選択されていません');
+        return;
+      }
+
+      console.log('イベント更新中...', { ...eventData, id: selectedEvent.id });
       const { data, error } = await supabase
         .from('events')
         .update({
-          title,
-          description,
-          date,
-          age_group,
-          category,
+          ...eventData,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id)
+        .eq('id', selectedEvent.id)
         .eq('user_id', session.user.id)
         .select();
 
       if (error) {
         console.error('イベント更新エラー:', error);
+        setError('イベントの更新に失敗しました');
         return;
       }
 
       if (data) {
         console.log('更新されたイベント:', data);
-        await fetchEvents();
+        setEvents(prev => prev.map(event => 
+          event.id === selectedEvent.id ? data[0] : event
+        ));
+        setShowEditForm(false);
+        setSelectedEvent(null);
       }
-      setShowEditForm(false);
-      setSelectedEvent(null);
     } catch (error) {
       console.error('Error:', error);
+      setError('予期せぬエラーが発生しました');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteEvent = async (id: string) => {
     try {
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error('認証されていません');
+        setError('認証されていません');
+        return;
       }
 
       const { error } = await supabase
@@ -206,6 +276,7 @@ export default function MainPage() {
 
       if (error) {
         console.error('イベント削除エラー:', error);
+        setError('イベントの削除に失敗しました');
         return;
       }
 
@@ -213,29 +284,39 @@ export default function MainPage() {
       setSelectedEvent(null);
     } catch (error) {
       console.error('Error:', error);
+      setError('予期せぬエラーが発生しました');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
-  };
-
-  if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+  if (!isInitialized || loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p>データを読み込んでいます...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className={styles.error}>{error}</div>;
+    return (
+      <div className={styles.errorContainer}>
+        <p>エラーが発生しました: {error}</p>
+        <button onClick={fetchEvents}>再試行</button>
+      </div>
+    );
   }
 
   const months = [
-    '1月', '2月', '3月', '4月', '5月', '6月',
-    '7月', '8月', '9月', '10月', '11月', '12月'
+    '4月', '5月', '6月', '7月', '8月', '9月',
+    '10月', '11月', '12月', '1月', '2月', '3月'
   ];
 
   const getMonthFromDate = (dateStr: string) => {
-    return new Date(dateStr).getMonth() + 1;
+    const month = new Date(dateStr).getMonth() + 1; // 1-12
+    // 4月始まりの配列インデックスに変換
+    return month >= 4 ? month - 3 : month + 9;
   };
 
   return (
@@ -248,7 +329,7 @@ export default function MainPage() {
       <div className={styles.monthsGrid}>
         {months.map((monthName, index) => {
           const monthNumber = index + 1;
-          const monthEvents = events.filter(event => 
+          const monthEvents = events.filter(event =>
             getMonthFromDate(event.date) === monthNumber
           );
           
@@ -259,7 +340,7 @@ export default function MainPage() {
               monthName={monthName}
               events={monthEvents}
               onEventClick={handleEventClick}
-              onAddEvent={() => handleAddEvent(monthNumber)}
+              onAddEvent={handleAddEvent}
             />
           );
         })}
@@ -274,23 +355,27 @@ export default function MainPage() {
         />
       )}
 
-      {showAddForm && selectedMonth && (
-        <AddEventForm
-          month={selectedMonth}
-          onSubmit={handleAddEventSubmit}
-          onClose={() => setShowAddForm(false)}
-        />
+      {showAddForm && (
+        <div className={styles.overlay}>
+          <div className={styles.modal}>
+            <AddEventForm
+              onSubmit={handleAddEventSubmit}
+              onCancel={() => setShowAddForm(false)}
+            />
+          </div>
+        </div>
       )}
 
       {showEditForm && selectedEvent && (
-        <EditEventForm
-          event={selectedEvent}
-          onSubmit={handleEditEventSubmit}
-          onClose={() => {
-            setShowEditForm(false);
-            setSelectedEvent(null);
-          }}
-        />
+        <div className={styles.overlay}>
+          <div className={styles.modal}>
+            <EditEventForm
+              event={selectedEvent}
+              onSubmit={handleEditEventSubmit}
+              onCancel={() => setShowEditForm(false)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
