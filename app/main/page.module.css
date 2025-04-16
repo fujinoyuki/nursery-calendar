@@ -1,0 +1,499 @@
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 3px solid #ff9b9b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #FF6B88;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #FFB5C5, #FFB347);
+}
+
+.logoutButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #FF8BA7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(255, 139, 167, 0.2);
+}
+
+.logoutButton:hover {
+  background-color: #FF6B88;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 139, 167, 0.3);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(255, 139, 167, 0.2);
+}
+
+.descriptionContainer {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 15px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 2px dashed #B5E6B5;
+}
+
+.descriptionContainer::before,
+.descriptionContainer::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.descriptionContainer::before {
+  top: -15px;
+  left: -15px;
+  background: #FFB5C5;
+}
+
+.descriptionContainer::after {
+  bottom: -15px;
+  right: -15px;
+  background: #A7D2FF;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.description:last-child {
+  margin-bottom: 0;
+}
+
+.eventsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, minmax(220px, auto));
+  gap: 1.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* タブレット向け */
+@media (max-width: 1024px) {
+  .eventsContainer {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, minmax(220px, auto));
+  }
+  
+  .container {
+    padding: 1.5rem;
+  }
+}
+
+/* スマートフォン向け */
+@media (max-width: 640px) {
+  .eventsContainer {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(12, minmax(220px, auto));
+    gap: 1rem;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* 季節ごとの色分け */
+.spring {
+  border: 2px solid #FFB5C5;
+  background-color: rgba(255, 181, 197, 0.1);
+  box-shadow: 0 4px 6px rgba(255, 181, 197, 0.1);
+}
+
+.spring .monthHeader {
+  border-bottom-color: #FFB5C5;
+}
+
+.spring .addButton {
+  background-color: #FFB5C5;
+}
+
+.spring .addButton:hover {
+  background-color: #ff9bab;
+}
+
+.summer {
+  border: 2px solid #87CEEB;
+  background-color: rgba(135, 206, 235, 0.1);
+  box-shadow: 0 4px 6px rgba(135, 206, 235, 0.1);
+}
+
+.summer .monthHeader {
+  border-bottom-color: #87CEEB;
+}
+
+.summer .addButton {
+  background-color: #87CEEB;
+}
+
+.summer .addButton:hover {
+  background-color: #75bcd6;
+}
+
+.autumn {
+  border: 2px solid #FFB347;
+  background-color: rgba(255, 179, 71, 0.1);
+  box-shadow: 0 4px 6px rgba(255, 179, 71, 0.1);
+}
+
+.autumn .monthHeader {
+  border-bottom-color: #FFB347;
+}
+
+.autumn .addButton {
+  background-color: #FFB347;
+}
+
+.autumn .addButton:hover {
+  background-color: #ff9f2e;
+}
+
+.winter {
+  border: 2px solid #B0E0E6;
+  background-color: rgba(176, 224, 230, 0.1);
+  box-shadow: 0 4px 6px rgba(176, 224, 230, 0.1);
+}
+
+.winter .monthHeader {
+  border-bottom-color: #B0E0E6;
+}
+
+.winter .addButton {
+  background-color: #B0E0E6;
+}
+
+.winter .addButton:hover {
+  background-color: #9cd1d8;
+}
+
+/* カードのホバーエフェクトを季節ごとに調整 */
+.spring .monthCard:hover {
+  box-shadow: 0 6px 12px rgba(255, 181, 197, 0.2);
+}
+
+.summer .monthCard:hover {
+  box-shadow: 0 6px 12px rgba(135, 206, 235, 0.2);
+}
+
+.autumn .monthCard:hover {
+  box-shadow: 0 6px 12px rgba(255, 179, 71, 0.2);
+}
+
+.winter .monthCard:hover {
+  box-shadow: 0 6px 12px rgba(176, 224, 230, 0.2);
+}
+
+/* ローディング状態のスタイル */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 2rem;
+}
+
+.loadingSpinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #A7D2FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingContainer p {
+  color: #666;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* エラー状態のスタイル */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--background);
+  padding: 2rem;
+  text-align: center;
+}
+
+.errorContainer p {
+  color: var(--destructive);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.errorContainer button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.errorContainer button:hover {
+  background-color: var(--primary-dark);
+}
+
+/* モーダル関連のスタイル */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.monthContainer {
+  background-color: #FFFFFF;
+  border: 4px solid var(--primary-blue);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(107, 155, 210, 0.1);
+}
+
+.monthContainer:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(107, 155, 210, 0.2);
+}
+
+.monthTitle {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--primary-yellow);
+}
+
+.eventList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.eventItem {
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #FFFFFF;
+  border: 2px solid var(--primary-green);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.eventItem:hover {
+  transform: translateX(5px);
+  border-color: var(--accent-salmon);
+}
+
+.eventItem:last-child {
+  margin-bottom: 0;
+}
+
+.eventTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.eventDetails {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.addButton {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background-color: var(--primary-blue);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.addButton:hover {
+  background-color: var(--accent-salmon);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1);
+}
+
+.addButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* 装飾的な要素 */
+.decorationDot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.decorationDot:nth-child(1) {
+  top: 20px;
+  left: 20px;
+  background-color: var(--primary-yellow);
+  opacity: 0.3;
+}
+
+.decorationDot:nth-child(2) {
+  top: 40px;
+  right: 40px;
+  background-color: var(--primary-pink);
+  opacity: 0.3;
+}
+
+.decorationDot:nth-child(3) {
+  bottom: 30px;
+  left: 50%;
+  background-color: var(--primary-green);
+  opacity: 0.3;
+}
+
+.monthCard {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.monthCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.monthHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #FFB5C5;
+}
+
+.monthTitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.addButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #FFB5C5;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  margin-top: auto;
+}
+
+.addButton:hover {
+  background-color: #ff9bab;
+  transform: translateY(-2px);
+}
+
+.eventsList {
+  flex-grow: 1;
+  margin-bottom: 1rem;
+}
+
+.noEvents {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 1rem 0;
+} 

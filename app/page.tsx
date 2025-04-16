@@ -26,7 +26,9 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <h1 className={styles.title}>保育士イベントアイディア</h1>
+        <h1 className={styles.title}>
+          <span>保育士イベントアイディア</span>
+        </h1>
         <AuthForm />
       </div>
     </main>

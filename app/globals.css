@@ -1,5 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
 
+:root {
+  /* メインカラー */
+  --primary-blue: #6B9BD2;    /* より濃いめの青 */
+  --primary-pink: #FF9EAF;    /* 明るい桃色 */
+  --primary-yellow: #FFD23F;  /* 元気な黄色 */
+  --primary-green: #98D8AA;   /* 爽やかな緑 */
+  
+  /* アクセントカラー */
+  --accent-salmon: #FF6B6B;   /* はっきりとした赤 */
+  --accent-orange: #FFA41B;   /* 温かみのあるオレンジ */
+
+  /* テキストカラー */
+  --text-primary: #333333;    /* 濃い目のグレー */
+  --text-secondary: #555555;  /* 中間のグレー */
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -14,7 +30,7 @@ html {
 body {
   font-family: 'Courier New', monospace;
   background-color: #FFFFFF;
-  color: #000000;
+  color: var(--text-primary);
   line-height: 1.6;
 }
 
@@ -25,13 +41,13 @@ body {
 
 ::-webkit-scrollbar-track {
   background: #FFFFFF;
-  border-left: 2px solid #000000;
+  border-left: 2px solid var(--primary-blue);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #000000;
+  background: var(--primary-blue);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF0000;
+  background: var(--accent-salmon);
 }

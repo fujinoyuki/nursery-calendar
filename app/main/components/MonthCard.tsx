@@ -8,6 +8,7 @@ interface MonthCardProps {
   events: Event[];
   onEventClick: (event: Event) => void;
   onAddEvent: (month: number) => void;
+  season: string;
 }
 
 export default function MonthCard({
@@ -15,31 +16,42 @@ export default function MonthCard({
   monthName,
   events,
   onEventClick,
-  onAddEvent
+  onAddEvent,
+  season
 }: MonthCardProps) {
   const getSeason = (month: number) => {
-    if (month >= 3 && month <= 5) return 'spring';
-    if (month >= 6 && month <= 8) return 'summer';
-    if (month >= 9 && month <= 11) return 'autumn';
-    return 'winter';
+    if (month >= 1 && month <= 3) return 'winter';
+    if (month >= 4 && month <= 6) return 'spring';
+    if (month >= 7 && month <= 9) return 'summer';
+    return 'autumn';
   };
 
   return (
-    <div className={`${styles.monthCard} ${styles[getSeason(month)]}`}>
+    <div className={`${styles.monthContainer} ${styles[season]}`}>
       <h2 className={styles.monthTitle}>{monthName}</h2>
       <div className={styles.eventList}>
-        {events.map((event) => (
-          <div
-            key={event.id}
-            className={styles.eventItem}
-            onClick={() => onEventClick(event)}
-          >
-            <span className={styles.eventDate}>{event.date}</span>
-            <span className={styles.eventTitle}>{event.title}</span>
-          </div>
-        ))}
+        {events.length > 0 ? (
+          events.map((event) => (
+            <div
+              key={event.id}
+              className={styles.eventItem}
+              onClick={() => onEventClick(event)}
+            >
+              <h3 className={styles.eventTitle}>{event.title}</h3>
+              <div className={styles.eventDetails}>
+                <span>{event.age_group}</span>
+                <span>{event.category}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className={styles.noEvents}>イベントはまだありません</p>
+        )}
       </div>
-      <button onClick={() => onAddEvent(month)} className={styles.addButton}>
+      <button
+        className={styles.addButton}
+        onClick={() => onAddEvent(month)}
+      >
         イベントを追加
       </button>
     </div>
