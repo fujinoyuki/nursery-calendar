@@ -4,56 +4,90 @@ import React from 'react';
 import styles from './MonthCard.module.css';
 import { Event } from '../types';
 
-interface MonthCardProps {
+type MonthCardProps = {
   month: number;
   monthName: string;
   events: Event[];
   onEventClick: (event: Event) => void;
   onAddEvent: () => void;
-}
+  season: 'spring' | 'summer' | 'autumn' | 'winter';
+};
 
-export default function MonthCard({ month, monthName, events, onEventClick, onAddEvent }: MonthCardProps) {
-  // 月に基づいて季節のクラスを決定
-  const getSeasonClass = () => {
-    if (month >= 3 && month <= 5) return styles.spring;
-    if (month >= 6 && month <= 8) return styles.summer;
-    if (month >= 9 && month <= 11) return styles.autumn;
-    return styles.winter;
+const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
+
+export default function MonthCard({
+  month,
+  monthName,
+  events,
+  onEventClick,
+  onAddEvent,
+  season
+}: MonthCardProps) {
+  // カテゴリーごとに最新のイベントを取得
+  const getLatestEventByCategory = (events: Event[], category: string) => {
+    console.log(`Checking category: ${category}`);
+    console.log('Available events:', events);
+    
+    const filteredEvents = events.filter(event => {
+      // カテゴリーの正規化（スペースを削除して比較）
+      const normalizedEventCategory = (event.category || '').replace(/\s+/g, '');
+      const normalizedCategory = category.replace(/\s+/g, '');
+      const match = normalizedEventCategory === normalizedCategory;
+      console.log(`Comparing normalized: "${normalizedEventCategory}" with "${normalizedCategory}" = ${match}`);
+      return match;
+    });
+
+    return filteredEvents.length > 0
+      ? filteredEvents.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]
+      : null;
   };
 
-  // イベントを日付でソート
-  const sortedEvents = [...events].sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-
   return (
-    <div className={`${styles.monthCard} ${getSeasonClass()}`}>
-      <h3 className={styles.monthName}>{monthName}</h3>
-      <div className={styles.eventList}>
-        {sortedEvents.map(event => (
-          <div
-            key={event.id}
-            className={styles.eventItem}
-            onClick={() => onEventClick(event)}
-          >
-            <div className={styles.eventDate}>
-              {new Date(event.date).toLocaleDateString('ja-JP')}
-            </div>
-            <div className={styles.eventTitle}>{event.title}</div>
-            <div className={styles.eventMeta}>
-              <span className={styles.ageGroup}>{event.age_group}</span>
-              <span className={styles.category}>{event.category}</span>
-            </div>
-          </div>
-        ))}
+    <div className={`${styles.monthCard} ${styles[season]}`}>
+      <div className={styles.monthHeader}>
+        <h2 className={styles.monthTitle}>{monthName}</h2>
       </div>
-      <button
+      
+      <div className={styles.eventsList}>
+        {CATEGORIES.map((category) => {
+          const event = getLatestEventByCategory(events, category);
+          return (
+            <div key={category} className={styles.categorySection}>
+              <div className={styles.categoryLabel} data-category={category}>
+                {category}
+              </div>
+              {event ? (
+                <div className={styles.eventItem} onClick={() => onEventClick(event)}>
+                  <div className={styles.eventHeader}>
+                    <h3 className={styles.eventTitle}>{event.title}</h3>
+                  </div>
+                  <div className={styles.eventMeta}>
+                    <div className={styles.ageTags}>
+                      {event.age_groups?.map((age: string, index: number) => (
+                        <span key={index} className={styles.ageTag} data-age={age}>{age}</span>
+                      ))}
+                    </div>
+                    <span className={styles.duration}>{event.duration}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.emptyEvent}>
+                  <p className={styles.noEvents}>イベントの登録はありません</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <button 
+        onClick={onAddEvent} 
         className={styles.addButton}
-        onClick={onAddEvent}
-        aria-label={`${monthName}のイベントを追加`}
       >
-        ＋
+        イベントを追加
       </button>
     </div>
   );
-} 
+}

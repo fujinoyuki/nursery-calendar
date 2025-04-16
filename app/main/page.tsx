@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import styles from './page.module.css';
-import MonthCard from './components/MonthCard';
-import EventOverlay from './components/EventOverlay';
+import MonthCard from '../components/MonthCard';
+import EventOverlay from '../components/EventOverlay';
 import AddEventForm from '../components/AddEventForm';
 import EditEventForm from '../components/EditEventForm';
 import { Event } from '../types';
+import Link from 'next/link';
 
 type EventFormData = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
 
@@ -27,14 +28,21 @@ export default function MainPage() {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const router = useRouter();
 
-  // セッションチェックとデータ取得を行う関数
-  async function checkSessionAndFetchEvents() {
+  const getMonthNumber = (monthName: string): number => {
+    const monthStr = monthName.replace('月', '');
+    const month = parseInt(monthStr);
+    console.log(`月の変換: ${monthName} -> ${month}`);
+    return month;
+  };
+
+  // イベントを取得する関数
+  async function fetchEvents() {
     try {
       setLoading(true);
       setError(null);
 
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
+      
       if (sessionError) {
         console.error('セッションエラー:', sessionError);
         setError('セッションの取得に失敗しました');
@@ -47,12 +55,11 @@ export default function MainPage() {
         return;
       }
 
-      console.log('セッション有効 - イベント取得開始');
+      console.log('イベントを取得中...');
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
-        .eq('user_id', session.user.id)
-        .order('date', { ascending: true });
+        .eq('user_id', session.user.id);
 
       if (eventsError) {
         console.error('イベント取得エラー:', eventsError);
@@ -60,8 +67,22 @@ export default function MainPage() {
         return;
       }
 
-      console.log('イベント取得成功:', eventsData?.length || 0, '件');
-      setEvents(eventsData || []);
+      console.log('取得したイベントデータ:', eventsData);
+
+      if (eventsData) {
+        // 月の値を数値型に変換
+        const processedEvents = eventsData.map(event => ({
+          ...event,
+          month: Number(event.month)
+        }));
+        
+        console.log('処理後のイベントデータ:', processedEvents);
+        console.log('イベントデータをセット:', processedEvents.length, '件');
+        setEvents(processedEvents);
+      } else {
+        console.log('イベントデータが空です');
+        setEvents([]);
+      }
     } catch (error) {
       console.error('予期せぬエラー:', error);
       setError('予期せぬエラーが発生しました');
@@ -71,15 +92,13 @@ export default function MainPage() {
   }
 
   useEffect(() => {
-    // 初期データ取得
-    checkSessionAndFetchEvents();
+    fetchEvents();
 
-    // 認証状態の変更を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('認証状態変更:', event);
       
       if (event === 'SIGNED_IN') {
-        checkSessionAndFetchEvents();
+        fetchEvents();
       } else if (event === 'SIGNED_OUT') {
         setEvents([]);
         router.push('/');
@@ -108,43 +127,65 @@ export default function MainPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error('認証されていません');
+        setError('認証されていません');
+        return;
       }
 
       if (selectedMonth === null) {
-        throw new Error('月が選択されていません');
+        setError('月が選択されていません');
+        return;
       }
 
-      // 選択された月の日付を設定
+      // 日付を選択された月の1日に設定
       const date = new Date();
-      date.setMonth(selectedMonth >= 9 ? selectedMonth - 9 : selectedMonth + 3);
+      const year = date.getFullYear();
+      date.setMonth(selectedMonth - 1);
       date.setDate(1);
+      date.setHours(0, 0, 0, 0);
 
-      console.log('イベント追加中...', { ...eventData, date: date.toISOString() });
+      if (selectedMonth >= 10) {
+        date.setFullYear(year + 1);
+      }
+
+      // カテゴリーの正規化（全角スペースを保持）
+      const normalizedEventData = {
+        ...eventData,
+        category: eventData.category.trim() // 前後の空白のみ削除
+      };
+
+      console.log('イベント追加中...', {
+        selectedMonth,
+        date: date.toISOString(),
+        normalizedEventData
+      });
+
       const { data, error } = await supabase
         .from('events')
-        .insert([
-          {
-            ...eventData,
-            date: date.toISOString(),
-            user_id: session.user.id
-          }
-        ])
+        .insert({
+          ...normalizedEventData,
+          date: date.toISOString(),
+          month: selectedMonth,
+          user_id: session.user.id,
+          views: 0 // 閲覧数の初期値を設定
+        })
         .select();
 
       if (error) {
         console.error('イベント追加エラー:', error);
+        setError('イベントの追加に失敗しました');
         return;
       }
 
       if (data) {
         console.log('追加されたイベント:', data);
-        await checkSessionAndFetchEvents();
+        await fetchEvents();
+        setShowAddForm(false);
+        setSelectedMonth(null);
+        setError(null);
       }
-      setShowAddForm(false);
-      setSelectedMonth(null);
     } catch (error) {
       console.error('Error:', error);
+      setError('予期せぬエラーが発生しました');
     }
   };
 
@@ -177,7 +218,7 @@ export default function MainPage() {
 
       if (data) {
         console.log('更新されたイベント:', data);
-        await checkSessionAndFetchEvents();
+        await fetchEvents();
       }
       setShowEditForm(false);
       setSelectedEvent(null);
@@ -188,27 +229,36 @@ export default function MainPage() {
 
   const handleDeleteEvent = async (id: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('認証されていません');
-      }
-
       const { error } = await supabase
         .from('events')
         .delete()
-        .eq('id', id)
-        .eq('user_id', session.user.id);
+        .eq('id', id);
 
-      if (error) {
-        console.error('イベント削除エラー:', error);
-        return;
-      }
+      if (error) throw error;
 
       setEvents(events.filter(event => event.id !== id));
       setSelectedEvent(null);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error deleting event:', error);
+      setError('イベントの削除に失敗しました');
     }
+  };
+
+  const getEventsForMonth = (month: number) => {
+    console.log('全イベントの月:', events.map(e => e.month));
+    console.log('全イベント:', events);
+    
+    const monthEvents = events.filter(event => {
+      // 数値型に変換して比較
+      const eventMonth = Number(event.month);
+      const isMatch = eventMonth === month;
+      console.log(`イベントの月を比較 - イベント月: ${eventMonth} (${typeof eventMonth}), 現在の月: ${month} (${typeof month}), 一致: ${isMatch}`);
+      return isMatch;
+    });
+    
+    console.log(`${month}月のイベント数: ${monthEvents.length}`);
+    console.log(`${month}月のイベント:`, monthEvents);
+    return monthEvents;
   };
 
   if (loading) {
@@ -224,7 +274,9 @@ export default function MainPage() {
     return (
       <div className={styles.errorContainer}>
         <p>{error}</p>
-        <button onClick={checkSessionAndFetchEvents}>再試行</button>
+        <button onClick={fetchEvents} className={styles.retryButton}>
+          再試行
+        </button>
       </div>
     );
   }
@@ -235,11 +287,6 @@ export default function MainPage() {
     '10月', '11月', '12月',     // 3行目
     '1月', '2月', '3月'         // 4行目
   ];
-
-  const getMonthFromDate = (dateStr: string) => {
-    const month = new Date(dateStr).getMonth() + 1;
-    return month >= 4 ? month - 3 : month + 9;
-  };
 
   const getSeason = (monthStr: string) => {
     const monthNumber = monthStr.replace('月', '');
@@ -253,60 +300,62 @@ export default function MainPage() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>保育士イベントアイディア</h1>
-        <button onClick={() => supabase.auth.signOut()} className={styles.logoutButton}>
-          ログアウト
-        </button>
+        <h1 className={styles.title}>保育アイデア管理</h1>
+        <div className={styles.headerButtons}>
+          <Link href="/events" className={styles.viewAllLink}>
+            すべてのイベントを見る
+          </Link>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className={styles.logoutButton}
+          >
+            ログアウト
+          </button>
+        </div>
       </header>
 
-      <div className={styles.descriptionContainer}>
-        <p className={styles.description}>
-          このアプリケーションは、保育士の方々が年間を通じて行うイベントやアクティビティのアイディアを管理するためのツールです。
-        </p>
-        <p className={styles.description}>
-          月ごとにイベントを追加・編集・削除することができ、各イベントには目的、準備物、所要時間などの詳細な情報を記録できます。
-        </p>
-      </div>
+      <p className={styles.description}>
+        このアプリケーションは、保育士の方々が年間を通じて行うイベントやアクティビティのアイディアを管理するためのツールです。<br />
+        月ごとにイベントを追加・編集・削除することができ、各イベントには目的、準備物、所要時間などの詳細な情報を記録できます。
+      </p>
 
-      <div className={styles.eventsContainer}>
-        {months.map((monthName, index) => {
-          const monthNumber = parseInt(monthName);
-          const monthEvents = events.filter(event => 
-            getMonthFromDate(event.date) === index
-          );
-          
+      <div className={styles.monthGrid}>
+        {months.map((monthName) => {
+          const month = getMonthNumber(monthName);
+          const monthEvents = getEventsForMonth(month);
           return (
             <MonthCard
-              key={monthNumber}
-              month={monthNumber}
+              key={monthName}
+              month={month}
               monthName={monthName}
               events={monthEvents}
               onEventClick={handleEventClick}
-              onAddEvent={() => handleAddEvent(monthNumber)}
+              onAddEvent={() => handleAddEvent(month)}
               season={getSeason(monthName)}
             />
           );
         })}
       </div>
 
-      {selectedEvent && !showEditForm && (
+      {selectedEvent && (
         <EventOverlay
           event={selectedEvent}
           onClose={handleCloseOverlay}
-          onDelete={handleDeleteEvent}
           onEdit={() => setShowEditForm(true)}
+          onDelete={() => handleDeleteEvent(selectedEvent.id)}
+          season={getSeason(months[selectedEvent.month - 1])}
         />
       )}
 
-      {showAddForm && (
-        <div className={styles.overlay}>
-          <div className={styles.modal}>
-            <AddEventForm
-              onSubmit={handleAddEventSubmit}
-              onCancel={() => setShowAddForm(false)}
-            />
-          </div>
-        </div>
+      {showAddForm && selectedMonth !== null && (
+        <AddEventForm
+          onSubmit={handleAddEventSubmit}
+          onCancel={() => {
+            setShowAddForm(false);
+            setSelectedMonth(null);
+          }}
+          selectedMonth={selectedMonth}
+        />
       )}
 
       {showEditForm && selectedEvent && (

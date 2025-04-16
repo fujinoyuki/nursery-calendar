@@ -1,123 +1,296 @@
-.card {
-  background-color: #FFFFFF;
-  border: 5px solid #000000;
+.monthCard {
+  background: white;
+  border-radius: 20px;
   padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
-  position: relative;
-  transform: rotate(-1deg);
-  transition: transform 0.3s ease;
+  gap: 16px;
+  min-height: 300px;
+  border: 2px solid transparent;
 }
 
-.card:hover {
-  transform: rotate(1deg) translateY(-5px);
+.monthCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.monthTitle {
-  font-family: 'Courier New', monospace;
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  position: relative;
-  display: inline-block;
-}
-
-.monthTitle::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: #FFFF00;
-}
-
-.eventList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex-grow: 1;
-}
-
-.eventItem {
-  background-color: #F0F0F0;
-  padding: 15px;
-  margin-bottom: 10px;
-  border: 3px solid #000000;
-  transition: transform 0.2s ease;
-  cursor: pointer;
-}
-
-.eventItem:hover {
-  transform: translateX(5px);
-  background-color: #E0E0E0;
-}
-
-.eventTitle {
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-.eventDate {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: #666666;
-}
-
-.addButton {
-  font-family: 'Courier New', monospace;
-  background-color: #0000FF;
-  color: #FFFFFF;
-  border: none;
-  padding: 10px 20px;
-  font-weight: bold;
-  margin-top: 15px;
-  transition: transform 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.addButton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background-color: #000000;
-  transition: left 0.3s ease;
-  z-index: 1;
-}
-
-.addButton:hover {
-  transform: translateY(-3px);
-}
-
-.addButton:hover::before {
-  left: 0;
-}
-
-.addButtonText {
-  position: relative;
-  z-index: 2;
-}
-
-/* 季節ごとの背景色 */
+/* 季節ごとの色分け */
 .spring {
-  background: linear-gradient(135deg, #ffccd5 0%, #ffd6a5 100%);
+  border-color: #FFB5C5;
+  background: linear-gradient(135deg, rgba(255, 181, 197, 0.1), rgba(255, 223, 230, 0.1));
+}
+
+.spring .monthHeader {
+  border-bottom-color: #FFB5C5;
+}
+
+.spring .eventItem {
+  background: linear-gradient(135deg, rgba(255, 181, 197, 0.05), rgba(255, 223, 230, 0.05));
+  border-color: rgba(255, 181, 197, 0.3);
 }
 
 .summer {
-  background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%);
+  border-color: #87CEEB;
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.1), rgba(176, 224, 230, 0.1));
+}
+
+.summer .monthHeader {
+  border-bottom-color: #87CEEB;
+}
+
+.summer .eventItem {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.05), rgba(176, 224, 230, 0.05));
+  border-color: rgba(135, 206, 235, 0.3);
 }
 
 .autumn {
-  background: linear-gradient(135deg, #ffb7b2 0%, #ffd3b6 100%);
+  border-color: #FFB347;
+  background: linear-gradient(135deg, rgba(255, 179, 71, 0.1), rgba(255, 198, 112, 0.1));
+}
+
+.autumn .monthHeader {
+  border-bottom-color: #FFB347;
+}
+
+.autumn .eventItem {
+  background: linear-gradient(135deg, rgba(255, 179, 71, 0.05), rgba(255, 198, 112, 0.05));
+  border-color: rgba(255, 179, 71, 0.3);
 }
 
 .winter {
-  background: linear-gradient(135deg, #bde0fe 0%, #a2d2ff 100%);
+  border-color: #B0E0E6;
+  background: linear-gradient(135deg, rgba(176, 224, 230, 0.1), rgba(202, 235, 238, 0.1));
+}
+
+.winter .monthHeader {
+  border-bottom-color: #B0E0E6;
+}
+
+.winter .eventItem {
+  background: linear-gradient(135deg, rgba(176, 224, 230, 0.05), rgba(202, 235, 238, 0.05));
+  border-color: rgba(176, 224, 230, 0.3);
+}
+
+.monthHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 8px;
+}
+
+.monthTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.categorySection {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  display: flex;
+}
+
+.eventItem {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.eventItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.eventHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.categoryLabel {
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: fit-content;
+  color: white;
+}
+
+.categoryLabel[data-category="壁　面"] {
+  background-color: #A7D2FF;
+}
+
+.categoryLabel[data-category="制作物"] {
+  background-color: #FFB5C5;
+}
+
+.categoryLabel[data-category="その他"] {
+  background-color: #B5E6B5;
+}
+
+.emptyEvent {
+  border: 1px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.noEvents {
+  color: #999;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.eventTitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+  flex-grow: 1;
+}
+
+.eventMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ageTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ageTag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+/* 年齢タグの色分け */
+.ageTag[data-age="0歳児"] {
+  background-color: rgba(255, 182, 193, 0.2);
+  color: #d4788f;
+}
+
+.ageTag[data-age="1歳児"] {
+  background-color: rgba(255, 218, 185, 0.2);
+  color: #d49a6a;
+}
+
+.ageTag[data-age="2歳児"] {
+  background-color: rgba(176, 224, 230, 0.2);
+  color: #6a9da3;
+}
+
+.ageTag[data-age="3歳児"] {
+  background-color: rgba(144, 238, 144, 0.2);
+  color: #5fa55f;
+}
+
+.ageTag[data-age="4歳児"] {
+  background-color: rgba(230, 230, 250, 0.2);
+  color: #8484b4;
+}
+
+.ageTag[data-age="5歳児"] {
+  background-color: rgba(255, 239, 213, 0.2);
+  color: #d4b48c;
+}
+
+.duration {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.addButton {
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* 季節ごとのボタンカラー */
+.spring .addButton {
+  background-color: #FFB5C5;
+}
+
+.spring .addButton:hover {
+  background-color: #ff9bab;
+}
+
+.summer .addButton {
+  background-color: #87CEEB;
+}
+
+.summer .addButton:hover {
+  background-color: #75bcd6;
+}
+
+.autumn .addButton {
+  background-color: #FFB347;
+}
+
+.autumn .addButton:hover {
+  background-color: #ff9f2e;
+}
+
+.winter .addButton {
+  background-color: #B0E0E6;
+}
+
+.winter .addButton:hover {
+  background-color: #9cd1d8;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .monthCard {
+    padding: 1rem;
+  }
+
+  .monthTitle {
+    font-size: 1.5rem;
+  }
+
+  .eventTitle {
+    font-size: 0.9rem;
+  }
 } 

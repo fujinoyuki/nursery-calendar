@@ -1,18 +1,20 @@
-export interface Event {
+export type Event = {
   id: string;
   title: string;
   description: string;
   date: string;
-  age_group: string;
+  month: number;
+  age_groups: string[];
   category: string;
-  materials: string;
   duration: string;
-  preparation: string;
-  objective: string;
+  materials: string[];
+  objectives: string[];
   user_id: string;
-  created_at?: string;
-  updated_at?: string;
-}
+  created_at: string;
+  updated_at: string;
+  view_count?: number;
+  media_files?: File[];
+};
 
 export interface User {
   id: string;

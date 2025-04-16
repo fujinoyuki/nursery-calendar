@@ -1,0 +1,6884 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+app/
+  api/
+    admin/
+      route.ts
+    route.ts
+  auth/
+    callback/
+      route.ts
+  components/
+    AddEventForm.module.css
+    AddEventForm.tsx
+    AuthButton.module.css
+    AuthButton.tsx
+    AuthForm.tsx
+    EditEventForm.module.css
+    EditEventForm.tsx
+    EventOverlay.module.css
+    EventOverlay.tsx
+    MonthCard.module.css
+    MonthCard.tsx
+  events/
+    page.module.css
+    page.tsx
+  lib/
+    auth.tsx
+    supabase.ts
+  main/
+    main.module.css
+    page.module.css
+    page.tsx
+  styles/
+    globals.css
+  globals.css
+  layout.tsx
+  page.module.css
+  page.tsx
+  providers.tsx
+  types.ts
+docs/
+  supabase-setup.md
+lib/
+  supabase.ts
+supabase/
+  .gitignore
+  config.toml
+utils/
+  supabase.ts
+.cspell.json
+.gitignore
+middleware.ts
+package.json
+postcss.config.js
+readme.md
+setup.sql
+tailwind.config.js
+tailwind.config.ts
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="app/components/AuthButton.module.css">
+.button {
+  padding: 0.75rem 1.5rem;
+  background-color: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background-color: #FF5252;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+}
+</file>
+
+<file path="app/components/AuthButton.tsx">
+'use client';
+
+import { createBrowserClient } from '@supabase/ssr';
+import styles from './AuthButton.module.css';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default function AuthButton() {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  return (
+    <button onClick={handleLogout} className={styles.button}>
+      ログアウト
+    </button>
+  );
+}
+</file>
+
+<file path="app/components/EventOverlay.module.css">
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 5vh 5vw;
+}
+
+.content {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* スクロールバーのスタイリング */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.closeButton {
+  position: absolute;
+  right: 1.5rem;
+  top: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.categoryLabel {
+  font-size: 0.875rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  width: fit-content;
+  color: white;
+}
+
+.categoryLabel[data-category="壁面"] {
+  background-color: #A7D2FF;
+}
+
+.categoryLabel[data-category="制作物"] {
+  background-color: #FFB5C5;
+}
+
+.categoryLabel[data-category="その他"] {
+  background-color: #B5E6B5;
+}
+
+.title {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #333;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.ageTags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ageTag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+
+/* 年齢タグの色分け */
+.ageTag[data-age="0歳児"] {
+  background-color: rgba(255, 182, 193, 0.2);
+  color: #d4788f;
+}
+
+.ageTag[data-age="1歳児"] {
+  background-color: rgba(255, 218, 185, 0.2);
+  color: #d49a6a;
+}
+
+.ageTag[data-age="2歳児"] {
+  background-color: rgba(176, 224, 230, 0.2);
+  color: #6a9da3;
+}
+
+.ageTag[data-age="3歳児"] {
+  background-color: rgba(144, 238, 144, 0.2);
+  color: #5fa55f;
+}
+
+.ageTag[data-age="4歳児"] {
+  background-color: rgba(230, 230, 250, 0.2);
+  color: #8484b4;
+}
+
+.ageTag[data-age="5歳児"] {
+  background-color: rgba(255, 239, 213, 0.2);
+  color: #d4b48c;
+}
+
+.duration {
+  color: #666;
+  font-size: 0.875rem;
+  background-color: #f5f5f5;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  color: #444;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  position: relative;
+  padding-left: 1rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.sectionTitle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 1em;
+  border-radius: 2px;
+}
+
+.description, .materials, .objectives {
+  color: #666;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+.materials, .objectives {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.materials li, .objectives li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.materials li::before {
+  content: '•';
+  position: absolute;
+  left: 0.5rem;
+  color: #999;
+}
+
+.objectives li::before {
+  content: '✓';
+  position: absolute;
+  left: 0.5rem;
+  color: #999;
+}
+
+.actions {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem 0;
+  margin-top: 3rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  border-top: 1px solid #E5E7EB;
+}
+
+.editButton, .deleteButton {
+  padding: 0.8rem 2.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+/* 季節ごとのスタイル */
+.spring {
+  border-color: #FFB5C5;
+}
+
+.spring .section {
+  background-color: rgba(255, 181, 197, 0.05);
+}
+
+.spring .section:hover {
+  background-color: rgba(255, 181, 197, 0.1);
+}
+
+.spring .sectionTitle::before {
+  background-color: #FFB5C5;
+}
+
+.spring .editButton {
+  background: linear-gradient(135deg, #FFB5C5 0%, #FFD4E5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(255, 181, 197, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.spring .editButton:hover {
+  background: linear-gradient(135deg, #FFD4E5 0%, #FFB5C5 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 181, 197, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.spring .deleteButton {
+  background: linear-gradient(135deg, #FF9B9B 0%, #FFB5B5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(255, 155, 155, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.spring .deleteButton:hover {
+  background: linear-gradient(135deg, #FF8080 0%, #FF9B9B 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 155, 155, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.3),
+    inset 0 3px 6px rgba(255, 255, 255, 0.3);
+}
+
+.summer {
+  border-color: #87CEEB;
+}
+
+.summer .section {
+  background-color: rgba(135, 206, 235, 0.05);
+}
+
+.summer .section:hover {
+  background-color: rgba(135, 206, 235, 0.1);
+}
+
+.summer .sectionTitle::before {
+  background-color: #87CEEB;
+}
+
+.summer .editButton {
+  background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(135, 206, 235, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.summer .editButton:hover {
+  background: linear-gradient(135deg, #B0E0E6 0%, #87CEEB 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(135, 206, 235, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.summer .deleteButton {
+  background: linear-gradient(135deg, #75BCD6 0%, #87CEEB 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(117, 188, 214, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.summer .deleteButton:hover {
+  background: linear-gradient(135deg, #5EABC8 0%, #75BCD6 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(117, 188, 214, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.3),
+    inset 0 3px 6px rgba(255, 255, 255, 0.3);
+}
+
+.autumn {
+  border-color: #FFB347;
+}
+
+.autumn .section {
+  background-color: rgba(255, 179, 71, 0.05);
+}
+
+.autumn .section:hover {
+  background-color: rgba(255, 179, 71, 0.1);
+}
+
+.autumn .sectionTitle::before {
+  background-color: #FFB347;
+}
+
+.autumn .editButton {
+  background: linear-gradient(135deg, #FFB347 0%, #FFD4B2 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(255, 179, 71, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.autumn .editButton:hover {
+  background: linear-gradient(135deg, #FFD4B2 0%, #FFB347 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 179, 71, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.autumn .deleteButton {
+  background: linear-gradient(135deg, #FF9F2E 0%, #FFB347 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(255, 159, 46, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.autumn .deleteButton:hover {
+  background: linear-gradient(135deg, #FF8C00 0%, #FF9F2E 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 159, 46, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.3),
+    inset 0 3px 6px rgba(255, 255, 255, 0.3);
+}
+
+.winter {
+  border-color: #B0E0E6;
+}
+
+.winter .section {
+  background-color: rgba(176, 224, 230, 0.05);
+}
+
+.winter .section:hover {
+  background-color: rgba(176, 224, 230, 0.1);
+}
+
+.winter .sectionTitle::before {
+  background-color: #B0E0E6;
+}
+
+.winter .editButton {
+  background: linear-gradient(135deg, #B0E0E6 0%, #D1EAF5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(176, 224, 230, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.winter .editButton:hover {
+  background: linear-gradient(135deg, #D1EAF5 0%, #B0E0E6 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(176, 224, 230, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.winter .deleteButton {
+  background: linear-gradient(135deg, #9CD1D8 0%, #B0E0E6 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(156, 209, 216, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.winter .deleteButton:hover {
+  background: linear-gradient(135deg, #85C2CA 0%, #9CD1D8 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(156, 209, 216, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.3),
+    inset 0 3px 6px rgba(255, 255, 255, 0.3);
+}
+</file>
+
+<file path="app/events/page.module.css">
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 3px solid #87CEEB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #4FB4E2;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.header h1::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #87CEEB, #B0E0E6);
+}
+
+.backButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #87CEEB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(135, 206, 235, 0.2);
+}
+
+.backButton:hover {
+  background-color: #4FB4E2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(135, 206, 235, 0.3);
+}
+
+.eventList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.eventCard {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.eventCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 季節ごとのスタイル */
+.spring {
+  border: 2px solid #FFB5C5;
+  background-color: rgba(255, 181, 197, 0.1);
+  box-shadow: 0 4px 6px rgba(255, 181, 197, 0.1);
+}
+
+.summer {
+  border: 2px solid #90EE90;
+  background-color: rgba(144, 238, 144, 0.1);
+  box-shadow: 0 4px 6px rgba(144, 238, 144, 0.1);
+}
+
+.autumn {
+  border: 2px solid #FFB347;
+  background-color: rgba(255, 179, 71, 0.1);
+  box-shadow: 0 4px 6px rgba(255, 179, 71, 0.1);
+}
+
+.winter {
+  border: 2px solid #B5C8E6;
+  background-color: rgba(181, 200, 230, 0.1);
+  box-shadow: 0 4px 6px rgba(181, 200, 230, 0.1);
+}
+
+.eventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* カテゴリーのスタイル */
+.category {
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.categoryWall {
+  background-color: #E3F2FD;
+  color: #4FB4E2;
+}
+
+.categoryArt {
+  background-color: #FFE4E1;
+  color: #FF6B88;
+}
+
+.categoryOther {
+  background-color: #E8EAF6;
+  color: #3F51B5;
+}
+
+.date {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.title {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+}
+
+.ageGroups {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* 年齢グループのスタイル */
+.ageGroup {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.age0 {
+  background-color: #E8F5E9;
+  color: #43A047;
+}
+
+.age1 {
+  background-color: #F3E5F5;
+  color: #8E24AA;
+}
+
+.age2 {
+  background-color: #E3F2FD;
+  color: #1E88E5;
+}
+
+.age3 {
+  background-color: #FFF3E0;
+  color: #FB8C00;
+}
+
+.age4 {
+  background-color: #E1F5FE;
+  color: #039BE5;
+}
+
+.age5 {
+  background-color: #F1F8E9;
+  color: #7CB342;
+}
+
+.ageAll {
+  background-color: #EFEBE9;
+  color: #795548;
+}
+
+.duration {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #E3F2FD;
+  border-top: 4px solid #87CEEB;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 2rem;
+  color: #FF6B88;
+  background-color: #FFF5F6;
+  border-radius: 12px;
+  border: 1px solid #FFE5E8;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 1024px) {
+  .eventList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .eventList {
+    grid-template-columns: 1fr;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+}
+
+/* 検索バーのスタイル */
+.searchContainer {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #87CEEB;
+  box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.2);
+}
+
+.searchButton {
+  background-color: #87CEEB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.3s;
+}
+
+.searchButton:hover {
+  background-color: #4FB4E2;
+}
+
+.advancedSearchButton {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.advancedSearchButton:hover {
+  background-color: #e0e0e0;
+}
+
+/* 詳細検索モーダルのスタイル */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalTitle {
+  padding: 1.5rem;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.formGroup input[type="text"],
+.formGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #87CEEB;
+  box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.2);
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.resetButton,
+.cancelButton,
+.applyButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.resetButton {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.resetButton:hover {
+  background-color: #e0e0e0;
+}
+
+.cancelButton {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.cancelButton:hover {
+  background-color: #e0e0e0;
+}
+
+.applyButton {
+  background-color: #87CEEB;
+  color: white;
+  border: none;
+}
+
+.applyButton:hover {
+  background-color: #4FB4E2;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 640px) {
+  .searchForm {
+    flex-direction: column;
+  }
+  
+  .searchInput,
+  .searchButton,
+  .advancedSearchButton {
+    width: 100%;
+  }
+  
+  .modalContent {
+    width: 95%;
+  }
+}
+
+.sortContainer {
+  display: flex;
+  gap: 8px;
+  margin: 1rem 0;
+  justify-content: center;
+}
+
+.sortButton {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: white;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sortButton:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.sortButton.active {
+  background: #4FB4E2;
+  color: white;
+  border-color: #4FB4E2;
+}
+</file>
+
+<file path="app/events/page.tsx">
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
+import Link from 'next/link';
+import styles from './page.module.css';
+import { Event } from '../types';
+import EventOverlay from '../components/EventOverlay';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// 季節を判定する関数
+const getSeason = (month: number) => {
+  if (month >= 4 && month <= 6) return 'spring';
+  if (month >= 7 && month <= 9) return 'summer';
+  if (month >= 10 && month <= 12) return 'autumn';
+  return 'winter';
+};
+
+// 年齢グループの定義
+const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+
+// カテゴリーのスタイルを取得する関数
+const getCategoryStyle = (category: string) => {
+  switch (category) {
+    case '壁面':
+      return styles.categoryWall;
+    case '制作物':
+      return styles.categoryArt;
+    default:
+      return styles.categoryOther;
+  }
+};
+
+// 年齢グループのスタイルを取得する関数
+const getAgeGroupStyle = (age: string) => {
+  switch (age) {
+    case '0歳児':
+      return styles.age0;
+    case '1歳児':
+      return styles.age1;
+    case '2歳児':
+      return styles.age2;
+    case '3歳児':
+      return styles.age3;
+    case '4歳児':
+      return styles.age4;
+    case '5歳児':
+      return styles.age5;
+    default:
+      return styles.ageAll;
+  }
+};
+
+// カテゴリーの表示テキストを取得する関数
+const getCategoryDisplayText = (category: string) => {
+  if (category !== '壁面' && category !== '制作物') {
+    return 'その他';
+  }
+  return category;
+};
+
+export default function EventListPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'popular'>('newest');
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    title: '',
+    description: '',
+    category: '',
+    ageGroups: [] as string[],
+    duration: '',
+    materials: [] as string[],
+    objectives: [] as string[],
+    hasImage: false,
+    hasVideo: false
+  });
+  const router = useRouter();
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        router.push('/');
+        return;
+      }
+
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (eventsError) {
+        setError('イベントの取得に失敗しました');
+        return;
+      }
+
+      console.log('取得したイベントデータ:', eventsData);
+      setEvents(eventsData || []);
+    } catch (error) {
+      setError('予期せぬエラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // イベントが更新されたときにイベント一覧を再取得する
+  useEffect(() => {
+    if (selectedEvent) {
+      const channel = supabase
+        .channel('events_changes')
+        .on('postgres_changes', 
+          { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'events',
+            filter: `id=eq.${selectedEvent.id}`
+          }, 
+          () => {
+            fetchEvents();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [selectedEvent]);
+
+  // 検索機能を実装
+  useEffect(() => {
+    if (events.length === 0) return;
+
+    let filtered = [...events];
+
+    // 基本的な検索（タイトルと説明文）
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(event => 
+        event.title.toLowerCase().includes(query) || 
+        event.description.toLowerCase().includes(query)
+      );
+    }
+
+    // 詳細検索フィルター
+    if (showAdvancedSearch) {
+      // タイトル
+      if (advancedFilters.title) {
+        const titleQuery = advancedFilters.title.toLowerCase();
+        filtered = filtered.filter(event => 
+          event.title.toLowerCase().includes(titleQuery)
+        );
+      }
+
+      // 説明文
+      if (advancedFilters.description) {
+        const descQuery = advancedFilters.description.toLowerCase();
+        filtered = filtered.filter(event => 
+          event.description.toLowerCase().includes(descQuery)
+        );
+      }
+
+      // カテゴリー
+      if (advancedFilters.category) {
+        filtered = filtered.filter(event => 
+          event.category === advancedFilters.category
+        );
+      }
+
+      // 年齢グループ
+      if (advancedFilters.ageGroups.length > 0) {
+        filtered = filtered.filter(event => 
+          advancedFilters.ageGroups.some(age => 
+            event.age_groups.includes(age)
+          )
+        );
+      }
+
+      // 所要時間
+      if (advancedFilters.duration) {
+        filtered = filtered.filter(event => 
+          event.duration.includes(advancedFilters.duration)
+        );
+      }
+
+      // 準備物
+      if (advancedFilters.materials.length > 0) {
+        filtered = filtered.filter(event => 
+          advancedFilters.materials.some(material => 
+            event.materials.includes(material)
+          )
+        );
+      }
+
+      // 目的
+      if (advancedFilters.objectives.length > 0) {
+        filtered = filtered.filter(event => 
+          advancedFilters.objectives.some(objective => 
+            event.objectives.includes(objective)
+          )
+        );
+      }
+
+      // 画像あり
+      if (advancedFilters.hasImage) {
+        filtered = filtered.filter(event => 
+          event.media_files && event.media_files.some(file => 
+            file.type.startsWith('image/')
+          )
+        );
+      }
+
+      // 動画あり
+      if (advancedFilters.hasVideo) {
+        filtered = filtered.filter(event => 
+          event.media_files && event.media_files.some(file => 
+            file.type.startsWith('video/')
+          )
+        );
+      }
+    }
+
+    // 並び替え
+    filtered.sort((a, b) => {
+      switch (sortOrder) {
+        case 'newest':
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case 'oldest':
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'popular':
+          // view_countがundefinedの場合は0として扱う
+          const aCount = a.view_count || 0;
+          const bCount = b.view_count || 0;
+          return bCount - aCount;
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredEvents(filtered);
+  }, [events, searchQuery, showAdvancedSearch, advancedFilters, sortOrder]);
+
+  // 検索クエリの変更を処理
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // 検索ボタンクリック時の処理
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // 検索は自動的に実行されるため、特別な処理は不要
+  };
+
+  // 詳細検索モーダルを開く
+  const openAdvancedSearch = () => {
+    setShowAdvancedSearch(true);
+  };
+
+  // 詳細検索モーダルを閉じる
+  const closeAdvancedSearch = () => {
+    setShowAdvancedSearch(false);
+  };
+
+  // 詳細検索フィルターをリセット
+  const resetAdvancedFilters = () => {
+    setAdvancedFilters({
+      title: '',
+      description: '',
+      category: '',
+      ageGroups: [],
+      duration: '',
+      materials: [],
+      objectives: [],
+      hasImage: false,
+      hasVideo: false
+    });
+  };
+
+  // 詳細検索フィルターを適用
+  const applyAdvancedFilters = () => {
+    // 検索は自動的に実行されるため、モーダルを閉じるだけ
+    setShowAdvancedSearch(false);
+  };
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+  };
+
+  const handleEventDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setEvents(events.filter(event => event.id !== id));
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      setError('イベントの削除に失敗しました');
+    }
+  };
+
+  const handleEventEdit = () => {
+    if (selectedEvent) {
+      router.push(`/main?edit=${selectedEvent.id}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+        <p>データを読み込んでいます...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1>イベント一覧</h1>
+        <Link href="/main" className={styles.backButton}>
+          カレンダーに戻る
+        </Link>
+      </header>
+
+      <div className={styles.searchContainer}>
+        <form onSubmit={handleSearch} className={styles.searchForm}>
+          <input
+            type="text"
+            placeholder="イベントを検索..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className={styles.searchInput}
+          />
+          <button type="submit" className={styles.searchButton}>
+            🔍
+          </button>
+          <button 
+            type="button" 
+            className={styles.advancedSearchButton}
+            onClick={openAdvancedSearch}
+          >
+            詳細検索
+          </button>
+        </form>
+        <div className={styles.sortContainer}>
+          <button
+            className={`${styles.sortButton} ${sortOrder === 'newest' ? styles.active : ''}`}
+            onClick={() => setSortOrder('newest')}
+          >
+            新着順
+          </button>
+          <button
+            className={`${styles.sortButton} ${sortOrder === 'oldest' ? styles.active : ''}`}
+            onClick={() => setSortOrder('oldest')}
+          >
+            古い順
+          </button>
+          <button
+            className={`${styles.sortButton} ${sortOrder === 'popular' ? styles.active : ''}`}
+            onClick={() => setSortOrder('popular')}
+          >
+            人気順
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.eventList}>
+        {filteredEvents.map((event) => (
+          <div 
+            key={event.id} 
+            className={`${styles.eventCard} ${styles[getSeason(event.month)]}`}
+            onClick={() => handleEventClick(event)}
+          >
+            <div className={styles.eventHeader}>
+              <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
+                {getCategoryDisplayText(event.category)}
+              </span>
+              <span className={styles.date}>{event.month}月</span>
+            </div>
+            <h2 className={styles.title}>{event.title}</h2>
+            <p className={styles.description}>{event.description}</p>
+            <div className={styles.details}>
+              <div className={styles.ageGroups}>
+                {event.age_groups.map((age) => (
+                  <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
+                    {age}
+                  </span>
+                ))}
+              </div>
+              <span className={styles.duration}>{event.duration}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selectedEvent && (
+        <EventOverlay
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onDelete={handleEventDelete}
+          onEdit={handleEventEdit}
+          season={getSeason(selectedEvent.month)}
+        />
+      )}
+
+      {/* 詳細検索モーダル */}
+      {showAdvancedSearch && (
+        <div className={styles.modalOverlay} onClick={closeAdvancedSearch}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>詳細検索</h2>
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label>タイトル</label>
+                <input
+                  type="text"
+                  value={advancedFilters.title}
+                  onChange={e => setAdvancedFilters({...advancedFilters, title: e.target.value})}
+                  placeholder="タイトルで検索"
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>説明文</label>
+                <input
+                  type="text"
+                  value={advancedFilters.description}
+                  onChange={e => setAdvancedFilters({...advancedFilters, description: e.target.value})}
+                  placeholder="説明文で検索"
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>カテゴリー</label>
+                <select
+                  value={advancedFilters.category}
+                  onChange={e => setAdvancedFilters({...advancedFilters, category: e.target.value})}
+                >
+                  <option value="">すべて</option>
+                  <option value="壁面">壁面</option>
+                  <option value="制作物">制作物</option>
+                  <option value="その他">その他</option>
+                </select>
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>対象年齢</label>
+                <div className={styles.checkboxGroup}>
+                  {AGE_GROUPS.map(age => (
+                    <label key={age} className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={advancedFilters.ageGroups.includes(age)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setAdvancedFilters({
+                              ...advancedFilters,
+                              ageGroups: [...advancedFilters.ageGroups, age]
+                            });
+                          } else {
+                            setAdvancedFilters({
+                              ...advancedFilters,
+                              ageGroups: advancedFilters.ageGroups.filter(a => a !== age)
+                            });
+                          }
+                        }}
+                      />
+                      {age}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>所要時間</label>
+                <input
+                  type="text"
+                  value={advancedFilters.duration}
+                  onChange={e => setAdvancedFilters({...advancedFilters, duration: e.target.value})}
+                  placeholder="例: 30分"
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>準備物</label>
+                <input
+                  type="text"
+                  value={advancedFilters.materials.join('、')}
+                  onChange={e => {
+                    const items = e.target.value.split(/[、・\s]+/).filter(item => item.trim() !== '');
+                    setAdvancedFilters({...advancedFilters, materials: items});
+                  }}
+                  placeholder="例: 画用紙、クレヨン"
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>目的</label>
+                <input
+                  type="text"
+                  value={advancedFilters.objectives.join('、')}
+                  onChange={e => {
+                    const items = e.target.value.split(/[、・\s]+/).filter(item => item.trim() !== '');
+                    setAdvancedFilters({...advancedFilters, objectives: items});
+                  }}
+                  placeholder="例: 創造性を育む、手先の器用さを養う"
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>メディア</label>
+                <div className={styles.checkboxGroup}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={advancedFilters.hasImage}
+                      onChange={e => setAdvancedFilters({...advancedFilters, hasImage: e.target.checked})}
+                    />
+                    画像ありのみ表示
+                  </label>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={advancedFilters.hasVideo}
+                      onChange={e => setAdvancedFilters({...advancedFilters, hasVideo: e.target.checked})}
+                    />
+                    動画ありのみ表示
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.resetButton} 
+                onClick={resetAdvancedFilters}
+              >
+                リセット
+              </button>
+              <button 
+                className={styles.cancelButton} 
+                onClick={closeAdvancedSearch}
+              >
+                キャンセル
+              </button>
+              <button 
+                className={styles.applyButton} 
+                onClick={applyAdvancedFilters}
+              >
+                適用
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="supabase/.gitignore">
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
+</file>
+
+<file path="supabase/config.toml">
+# For detailed configuration reference documentation, visit:
+# https://supabase.com/docs/guides/local-development/cli/config
+# A string used to distinguish different Supabase projects on the same host. Defaults to the
+# working directory name when running `supabase init`.
+project_id = "nursery-calendar2"
+
+[api]
+enabled = true
+# Port to use for the API URL.
+port = 54321
+# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
+# endpoints. `public` and `graphql_public` schemas are included by default.
+schemas = ["public", "graphql_public"]
+# Extra schemas to add to the search_path of every request.
+extra_search_path = ["public", "extensions"]
+# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
+# for accidental or malicious requests.
+max_rows = 1000
+
+[api.tls]
+# Enable HTTPS endpoints locally using a self-signed certificate.
+enabled = false
+
+[db]
+# Port to use for the local database URL.
+port = 54322
+# Port used by db diff command to initialize the shadow database.
+shadow_port = 54320
+# The database major version to use. This has to be the same as your remote database's. Run `SHOW
+# server_version;` on the remote database to check.
+major_version = 15
+
+[db.pooler]
+enabled = false
+# Port to use for the local connection pooler.
+port = 54329
+# Specifies when a server connection can be reused by other clients.
+# Configure one of the supported pooler modes: `transaction`, `session`.
+pool_mode = "transaction"
+# How many server connections to allow per user/database pair.
+default_pool_size = 20
+# Maximum number of client connections allowed.
+max_client_conn = 100
+
+# [db.vault]
+# secret_key = "env(SECRET_VALUE)"
+
+[db.migrations]
+# Specifies an ordered list of schema files that describe your database.
+# Supports glob patterns relative to supabase directory: "./schemas/*.sql"
+schema_paths = []
+
+[db.seed]
+# If enabled, seeds the database after migrations during a db reset.
+enabled = true
+# Specifies an ordered list of seed files to load during db reset.
+# Supports glob patterns relative to supabase directory: "./seeds/*.sql"
+sql_paths = ["./seed.sql"]
+
+[realtime]
+enabled = true
+# Bind realtime via either IPv4 or IPv6. (default: IPv4)
+# ip_version = "IPv6"
+# The maximum length in bytes of HTTP request headers. (default: 4096)
+# max_header_length = 4096
+
+[studio]
+enabled = true
+# Port to use for Supabase Studio.
+port = 54323
+# External URL of the API server that frontend connects to.
+api_url = "http://127.0.0.1"
+# OpenAI API Key to use for Supabase AI in the Supabase Studio.
+openai_api_key = "env(OPENAI_API_KEY)"
+
+# Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
+# are monitored, and you can view the emails that would have been sent from the web interface.
+[inbucket]
+enabled = true
+# Port to use for the email testing server web interface.
+port = 54324
+# Uncomment to expose additional ports for testing user applications that send emails.
+# smtp_port = 54325
+# pop3_port = 54326
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+[storage]
+enabled = true
+# The maximum file size allowed (e.g. "5MB", "500KB").
+file_size_limit = "50MiB"
+
+# Image transformation API is available to Supabase Pro plan.
+# [storage.image_transformation]
+# enabled = true
+
+# Uncomment to configure local storage buckets
+# [storage.buckets.images]
+# public = false
+# file_size_limit = "50MiB"
+# allowed_mime_types = ["image/png", "image/jpeg"]
+# objects_path = "./images"
+
+[auth]
+enabled = true
+# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
+# in emails.
+site_url = "http://127.0.0.1:3000"
+# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
+additional_redirect_urls = ["https://127.0.0.1:3000"]
+# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
+jwt_expiry = 3600
+# If disabled, the refresh token will never expire.
+enable_refresh_token_rotation = true
+# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
+# Requires enable_refresh_token_rotation = true.
+refresh_token_reuse_interval = 10
+# Allow/disallow new user signups to your project.
+enable_signup = true
+# Allow/disallow anonymous sign-ins to your project.
+enable_anonymous_sign_ins = false
+# Allow/disallow testing manual linking of accounts
+enable_manual_linking = false
+# Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
+minimum_password_length = 6
+# Passwords that do not meet the following requirements will be rejected as weak. Supported values
+# are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
+password_requirements = ""
+
+[auth.rate_limit]
+# Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
+email_sent = 2
+# Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
+sms_sent = 30
+# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
+anonymous_users = 30
+# Number of sessions that can be refreshed in a 5 minute interval per IP address.
+token_refresh = 150
+# Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
+sign_in_sign_ups = 30
+# Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
+token_verifications = 30
+
+# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
+# [auth.captcha]
+# enabled = true
+# provider = "hcaptcha"
+# secret = ""
+
+[auth.email]
+# Allow/disallow new user signups via email to your project.
+enable_signup = true
+# If enabled, a user will be required to confirm any email change on both the old, and new email
+# addresses. If disabled, only the new email is required to confirm.
+double_confirm_changes = true
+# If enabled, users need to confirm their email address before signing in.
+enable_confirmations = false
+# If enabled, users will need to reauthenticate or have logged in recently to change their password.
+secure_password_change = false
+# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
+max_frequency = "1s"
+# Number of characters used in the email OTP.
+otp_length = 6
+# Number of seconds before the email OTP expires (defaults to 1 hour).
+otp_expiry = 3600
+
+# Use a production-ready SMTP server
+# [auth.email.smtp]
+# enabled = true
+# host = "smtp.sendgrid.net"
+# port = 587
+# user = "apikey"
+# pass = "env(SENDGRID_API_KEY)"
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+# Uncomment to customize email template
+# [auth.email.template.invite]
+# subject = "You have been invited"
+# content_path = "./supabase/templates/invite.html"
+
+[auth.sms]
+# Allow/disallow new user signups via SMS to your project.
+enable_signup = false
+# If enabled, users need to confirm their phone number before signing in.
+enable_confirmations = false
+# Template for sending OTP to users
+template = "Your code is {{ .Code }}"
+# Controls the minimum amount of time that must pass before sending another sms otp.
+max_frequency = "5s"
+
+# Use pre-defined map of phone number to OTP for testing.
+# [auth.sms.test_otp]
+# 4152127777 = "123456"
+
+# Configure logged in session timeouts.
+# [auth.sessions]
+# Force log out after the specified duration.
+# timebox = "24h"
+# Force log out if the user has been inactive longer than the specified duration.
+# inactivity_timeout = "8h"
+
+# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
+# [auth.hook.custom_access_token]
+# enabled = true
+# uri = "pg-functions://<database>/<schema>/<hook_name>"
+
+# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+[auth.sms.twilio]
+enabled = false
+account_sid = ""
+message_service_sid = ""
+# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
+# Multi-factor-authentication is available to Supabase Pro plan.
+[auth.mfa]
+# Control how many MFA factors can be enrolled at once per user.
+max_enrolled_factors = 10
+
+# Control MFA via App Authenticator (TOTP)
+[auth.mfa.totp]
+enroll_enabled = false
+verify_enabled = false
+
+# Configure MFA via Phone Messaging
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+otp_length = 6
+template = "Your code is {{ .Code }}"
+max_frequency = "5s"
+
+# Configure MFA via WebAuthn
+# [auth.mfa.web_authn]
+# enroll_enabled = true
+# verify_enabled = true
+
+# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
+# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
+# `twitter`, `slack`, `spotify`, `workos`, `zoom`.
+[auth.external.apple]
+enabled = false
+client_id = ""
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
+# or any other third-party OIDC providers.
+url = ""
+# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
+skip_nonce_check = false
+
+# Use Firebase Auth as a third-party provider alongside Supabase Auth.
+[auth.third_party.firebase]
+enabled = false
+# project_id = "my-firebase-project"
+
+# Use Auth0 as a third-party provider alongside Supabase Auth.
+[auth.third_party.auth0]
+enabled = false
+# tenant = "my-auth0-tenant"
+# tenant_region = "us"
+
+# Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.
+[auth.third_party.aws_cognito]
+enabled = false
+# user_pool_id = "my-user-pool-id"
+# user_pool_region = "us-east-1"
+
+# Use Clerk as a third-party provider alongside Supabase Auth.
+[auth.third_party.clerk]
+enabled = false
+# Obtain from https://clerk.com/setup/supabase
+# domain = "example.clerk.accounts.dev"
+
+[edge_runtime]
+enabled = true
+# Configure one of the supported request policies: `oneshot`, `per_worker`.
+# Use `oneshot` for hot reload, or `per_worker` for load testing.
+policy = "oneshot"
+# Port to attach the Chrome inspector for debugging edge functions.
+inspector_port = 8083
+# The Deno major version to use.
+deno_version = 1
+
+# [edge_runtime.secrets]
+# secret_key = "env(SECRET_VALUE)"
+
+[analytics]
+enabled = true
+port = 54327
+# Configure one of the supported backends: `postgres`, `bigquery`.
+backend = "postgres"
+
+# Experimental features may be deprecated any time
+[experimental]
+# Configures Postgres storage engine to use OrioleDB (S3)
+orioledb_version = ""
+# Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
+s3_host = "env(S3_HOST)"
+# Configures S3 bucket region, eg. us-east-1
+s3_region = "env(S3_REGION)"
+# Configures AWS_ACCESS_KEY_ID for S3 bucket
+s3_access_key = "env(S3_ACCESS_KEY)"
+# Configures AWS_SECRET_ACCESS_KEY for S3 bucket
+s3_secret_key = "env(S3_SECRET_KEY)"
+</file>
+
+<file path="readme.md">
+# 保育園カレンダー
+
+保育園の年間行事を管理するためのアプリケーションです。
+
+## 機能
+
+- 月別のイベント管理
+- イベントの追加・編集・削除
+- 年齢グループ別のイベント表示
+- イベントの詳細情報（準備物、目的など）の管理
+
+## 技術スタック
+
+- Next.js
+- TypeScript
+- Supabase
+- Tailwind CSS
+
+## セットアップ
+
+1. リポジトリをクローン
+
+```bash
+git clone https://github.com/yourusername/nursery-calendar.git
+```
+
+2. 依存関係のインストール
+
+```bash
+npm install
+```
+
+3. 環境変数の設定
+
+```bash
+cp .env.example .env.local
+```
+
+4. 開発サーバーの起動
+
+```bash
+npm run dev
+```
+
+## ライセンス
+
+MIT
+</file>
+
+<file path="app/api/admin/route.ts">
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+export async function POST(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json({ error: '認証されていません' }, { status: 401 });
+    }
+    
+    // ここで管理者かどうかを確認
+    const { data: user } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+    
+    if (user?.role !== 'admin') {
+      return NextResponse.json({ error: '権限がありません' }, { status: 403 });
+    }
+    
+    // 管理者機能の実装
+    // 例: ユーザー一覧の取得
+    const { data: users, error } = await supabase
+      .from('profiles')
+      .select('*');
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    return NextResponse.json({ users });
+    
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+</file>
+
+<file path="app/api/route.ts">
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+export async function GET(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json({ error: '認証されていません' }, { status: 401 });
+    }
+    
+    // イベントデータの取得
+    const { data: events, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('month', { ascending: true });
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    return NextResponse.json({ events });
+    
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json({ error: '認証されていません' }, { status: 401 });
+    }
+    
+    const body = await request.json();
+    const { title, description, month, date } = body;
+    
+    if (!title || !description || !month || !date) {
+      return NextResponse.json({ error: '必須フィールドが不足しています' }, { status: 400 });
+    }
+    
+    // イベントの作成
+    const { data, error } = await supabase
+      .from('events')
+      .insert([
+        { 
+          title, 
+          description, 
+          month, 
+          date,
+          user_id: session.user.id
+        }
+      ])
+      .select();
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    return NextResponse.json({ event: data[0] });
+    
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json({ error: '認証されていません' }, { status: 401 });
+    }
+    
+    const body = await request.json();
+    const { id, title, description, month, date } = body;
+    
+    if (!id || !title || !description || !month || !date) {
+      return NextResponse.json({ error: '必須フィールドが不足しています' }, { status: 400 });
+    }
+    
+    // イベントの更新
+    const { data, error } = await supabase
+      .from('events')
+      .update({ title, description, month, date })
+      .eq('id', id)
+      .eq('user_id', session.user.id)
+      .select();
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    if (data.length === 0) {
+      return NextResponse.json({ error: 'イベントが見つからないか、編集権限がありません' }, { status: 404 });
+    }
+    
+    return NextResponse.json({ event: data[0] });
+    
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json({ error: '認証されていません' }, { status: 401 });
+    }
+    
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ error: 'イベントIDが必要です' }, { status: 400 });
+    }
+    
+    // イベントの削除
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', session.user.id);
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    return NextResponse.json({ success: true });
+    
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+</file>
+
+<file path="app/auth/callback/route.ts">
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
+
+  if (code) {
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              console.error('Cookie設定エラー:', error);
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.delete(name);
+            } catch (error) {
+              console.error('Cookie削除エラー:', error);
+            }
+          },
+        },
+      }
+    );
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error) {
+      return NextResponse.redirect(requestUrl.origin);
+    }
+  }
+
+  // エラーページにリダイレクト
+  return NextResponse.redirect(`${requestUrl.origin}/auth/auth-code-error`);
+}
+</file>
+
+<file path="app/components/AddEventForm.module.css">
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  padding: 5vh 5vw; /* 上下左右5%の余白 */
+}
+
+.content {
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 15px;
+  width: 100%; /* オーバーレイの余白を考慮して100% */
+  height: 100%; /* オーバーレイの余白を考慮して100% */
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #FFB5C5;
+  position: relative;
+  overflow-y: auto; /* 縦方向のスクロールを有効化 */
+}
+
+/* スクロールバーのスタイリング */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #87CEEB;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #6BB5D2;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+  color: #6B9BD2;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  padding-bottom: 0.5rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #FFB5C5, #87CEEB);
+  border-radius: 2px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #555;
+  font-size: 1rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  padding: 0.8rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background-color: #FAFAFA;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  border-color: #87CEEB;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(135, 206, 235, 0.1);
+  transform: translateY(-2px);
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.submitButton,
+.cancelButton {
+  padding: 0.8rem 2.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #FFB5C5 0%, #FFD4E5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(255, 181, 197, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, #FFD4E5 0%, #FFB5C5 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 181, 197, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.submitButton:disabled {
+  background: linear-gradient(135deg, #FFE5EE 0%, #FFE5EE 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #E8F4F8 0%, #D1EAF5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(135, 206, 235, 0.2),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.cancelButton:hover {
+  background: linear-gradient(135deg, #D1EAF5 0%, #E8F4F8 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(135, 206, 235, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.checkboxGroup, .radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox, .radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.8rem 1.2rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
+}
+
+.checkbox:hover, .radioLabel:hover {
+  border-color: #FFB5C5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.checkbox input[type="checkbox"],
+.radioInput {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 年齢グループごとの色設定 */
+.checkbox[data-age="0歳児"].selected {
+  border-color: #FFB5C5;
+  background: #FFF0F5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 197, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="1歳児"].selected {
+  border-color: #FFD4B2;
+  background: #FFF5EB;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 212, 178, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="2歳児"].selected {
+  border-color: #FFF3B8;
+  background: #FFFBEB;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 243, 184, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="3歳児"].selected {
+  border-color: #B5E6B5;
+  background: #F0FFF0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(181, 230, 181, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="4歳児"].selected {
+  border-color: #A7D2FF;
+  background: #F0F8FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 210, 255, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="5歳児"].selected {
+  border-color: #DCC2FF;
+  background: #F8F0FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 194, 255, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+/* カテゴリーごとの色設定 */
+.radioLabel[data-category="壁面"].selected {
+  border-color: #FFB5C5;
+  background: #FFF0F5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 197, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.radioLabel[data-category="制作物"].selected {
+  border-color: #A7D2FF;
+  background: #F0F8FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 210, 255, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.radioLabel[data-category="その他"].selected {
+  border-color: #B5E6B5;
+  background: #F0FFF0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(181, 230, 181, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+@keyframes selectPop {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.02) translateY(-2px); }
+  100% { transform: scale(1) translateY(-2px); }
+}
+
+.otherInput {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: none;
+}
+
+.otherInput.visible {
+  display: block;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 画像・動画アップロード部分 */
+.optionalSection {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px dashed #E5E7EB;
+}
+
+.optionalTitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.optionalTitle::before {
+  content: '📎';
+}
+
+.uploadArea {
+  border: 2px dashed #E5E7EB;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.uploadArea:hover {
+  border-color: #A7D2FF;
+  background: #F0F8FF;
+}
+
+.uploadInput {
+  display: none;
+}
+
+.previewArea {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.previewItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.previewItem img,
+.previewItem video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeButton {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.removeButton:hover {
+  background: #FF9B9B;
+  color: white;
+}
+
+.timeInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timeInputGroup input {
+  width: 80px;
+  text-align: center;
+}
+
+.timeInputGroup span {
+  color: #666;
+  font-size: 0.9rem;
+}
+</file>
+
+<file path="app/components/EventOverlay.tsx">
+'use client';
+
+import React, { useEffect } from 'react';
+import styles from './EventOverlay.module.css';
+import { Event } from '../types';
+import { createBrowserClient } from '@supabase/ssr';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+type EventOverlayProps = {
+  event: Event;
+  onClose: () => void;
+  onDelete: (id: string) => void;
+  onEdit: () => void;
+  season?: 'spring' | 'summer' | 'autumn' | 'winter';
+};
+
+export default function EventOverlay({ event, onClose, onDelete, onEdit, season = 'spring' }: EventOverlayProps) {
+  useEffect(() => {
+    const updateViewCount = async () => {
+      try {
+        const { error } = await supabase
+          .from('events')
+          .update({ view_count: (event.view_count || 0) + 1 })
+          .eq('id', event.id);
+        
+        if (error) {
+          console.error('閲覧回数の更新に失敗しました:', error);
+        }
+      } catch (error) {
+        console.error('Error updating view count:', error);
+      }
+    };
+
+    updateViewCount();
+  }, [event.id]);
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div 
+        className={`${styles.content} ${styles[season]}`} 
+        onClick={e => e.stopPropagation()}
+      >
+        <button className={styles.closeButton} onClick={onClose}>×</button>
+        
+        <div className={styles.header}>
+          <div className={styles.categoryLabel} data-category={event.category}>
+            {event.category}
+          </div>
+          <h2 className={styles.title}>{event.title}</h2>
+        </div>
+
+        <div className={styles.meta}>
+          <div className={styles.ageTags}>
+            {event.age_groups.map((age: string, index: number) => (
+              <span key={index} className={styles.ageTag} data-age={age}>
+                {age}
+              </span>
+            ))}
+          </div>
+          <span className={styles.duration}>{event.duration}</span>
+        </div>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>説明</h3>
+          <p className={styles.description}>{event.description}</p>
+        </div>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>準備物</h3>
+          <ul className={styles.materials}>
+            {event.materials.map((material: string, index: number) => (
+              <li key={index}>{material}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>目的</h3>
+          <ul className={styles.objectives}>
+            {event.objectives.map((objective: string, index: number) => (
+              <li key={index}>{objective}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className={styles.actions}>
+          <button onClick={onEdit} className={styles.editButton}>
+            編集
+          </button>
+          <button onClick={() => onDelete(event.id)} className={styles.deleteButton}>
+            削除
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/components/MonthCard.tsx">
+'use client';
+
+import React from 'react';
+import styles from './MonthCard.module.css';
+import { Event } from '../types';
+
+type MonthCardProps = {
+  month: number;
+  monthName: string;
+  events: Event[];
+  onEventClick: (event: Event) => void;
+  onAddEvent: () => void;
+  season: 'spring' | 'summer' | 'autumn' | 'winter';
+};
+
+const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
+
+export default function MonthCard({
+  month,
+  monthName,
+  events,
+  onEventClick,
+  onAddEvent,
+  season
+}: MonthCardProps) {
+  // カテゴリーごとに最新のイベントを取得
+  const getLatestEventByCategory = (events: Event[], category: string) => {
+    console.log(`Checking category: ${category}`);
+    console.log('Available events:', events);
+    
+    const filteredEvents = events.filter(event => {
+      // カテゴリーの比較（全角スペースを保持）
+      const normalizedEventCategory = event.category || '';
+      const normalizedCategory = category;
+      const match = normalizedEventCategory === normalizedCategory;
+      console.log(`Comparing: "${normalizedEventCategory}" with "${normalizedCategory}" = ${match}`);
+      return match;
+    });
+
+    return filteredEvents.length > 0
+      ? filteredEvents.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]
+      : null;
+  };
+
+  return (
+    <div className={`${styles.monthCard} ${styles[season]}`}>
+      <div className={styles.monthHeader}>
+        <h2 className={styles.monthTitle}>{monthName}</h2>
+      </div>
+      
+      <div className={styles.eventsList}>
+        {CATEGORIES.map((category) => {
+          const event = getLatestEventByCategory(events, category);
+          return (
+            <div key={category} className={styles.categorySection}>
+              <div className={styles.categoryLabel} data-category={category}>
+                {category}
+              </div>
+              {event ? (
+                <div className={styles.eventItem} onClick={() => onEventClick(event)}>
+                  <div className={styles.eventHeader}>
+                    <h3 className={styles.eventTitle}>{event.title}</h3>
+                  </div>
+                  <div className={styles.eventMeta}>
+                    <div className={styles.ageTags}>
+                      {event.age_groups?.map((age: string, index: number) => (
+                        <span key={index} className={styles.ageTag} data-age={age}>{age}</span>
+                      ))}
+                    </div>
+                    <span className={styles.duration}>{event.duration}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.emptyEvent}>
+                  <p className={styles.noEvents}>イベントの登録はありません</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <button 
+        onClick={onAddEvent} 
+        className={styles.addButton}
+      >
+        イベントを追加
+      </button>
+    </div>
+  );
+}
+</file>
+
+<file path="app/lib/auth.tsx">
+'use client';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+export interface AuthError {
+  message: string;
+  code?: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: AuthError | null;
+  signIn: (email: string, password: string) => Promise<{ error?: AuthError }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error?: AuthError }>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<AuthError | null>(null);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    const initSession = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          return;
+        }
+        
+        if (session?.user) {
+          console.log('Session found:', session.user);
+          setUser({
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name
+          });
+        } else {
+          console.log('No session found');
+        }
+      } catch (err) {
+        console.error('Session initialization error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name
+          });
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      console.log('Attempting sign in for:', email);
+      setError(null);
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        const authError: AuthError = {
+          message: signInError.message,
+          code: signInError.status?.toString()
+        };
+        setError(authError);
+        return { error: authError };
+      }
+      
+      if (data?.user) {
+        console.log('Sign in successful:', data.user);
+        const userData: User = {
+          id: data.user.id,
+          email: data.user.email!,
+          name: data.user.user_metadata?.name,
+        };
+        setUser(userData);
+        return {};
+      } else {
+        console.error('No user data received after sign in');
+        return { error: { message: 'ユーザーデータが取得できませんでした' } };
+      }
+    } catch (err: any) {
+      console.error('Unexpected sign in error:', err);
+      const authError: AuthError = {
+        message: err.message || 'ログインに失敗しました',
+        code: err.code
+      };
+      setError(authError);
+      return { error: authError };
+    }
+  };
+
+  const signUp = async (email: string, password: string, name: string) => {
+    try {
+      setError(null);
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name }
+        }
+      });
+
+      if (signUpError) {
+        const authError: AuthError = {
+          message: signUpError.message,
+          code: signUpError.status?.toString()
+        };
+        setError(authError);
+        return { error: authError };
+      }
+
+      return {};
+    } catch (err: any) {
+      const authError: AuthError = {
+        message: err.message || '登録に失敗しました',
+        code: err.code
+      };
+      setError(authError);
+      return { error: authError };
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (err: any) {
+      console.error('Sign out error:', err);
+    }
+  };
+
+  const value: AuthContextType = {
+    user,
+    loading,
+    error,
+    signIn,
+    signUp,
+    signOut,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+</file>
+
+<file path="app/lib/supabase.ts">
+import { createBrowserClient } from '@supabase/ssr';
+
+export const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+</file>
+
+<file path="app/main/page.module.css">
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 3px solid #ff9b9b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #FF6B88;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #FFB5C5, #FFB347);
+}
+
+.viewAllLink {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #A7D2FF, #75bcd6);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(167, 210, 255, 0.2);
+}
+
+.viewAllLink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(167, 210, 255, 0.3);
+}
+
+.viewAllLink:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(167, 210, 255, 0.2);
+}
+
+.logoutButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #FF8BA7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(255, 139, 167, 0.2);
+}
+
+.logoutButton:hover {
+  background-color: #FF6B88;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 139, 167, 0.3);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(255, 139, 167, 0.2);
+}
+
+.descriptionContainer {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 15px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 2px dashed #B5E6B5;
+}
+
+.descriptionContainer::before,
+.descriptionContainer::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.descriptionContainer::before {
+  top: -15px;
+  left: -15px;
+  background: #FFB5C5;
+}
+
+.descriptionContainer::after {
+  bottom: -15px;
+  right: -15px;
+  background: #A7D2FF;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  text-align: center;
+  margin: 2rem 0;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 2px dashed #B5E6B5;
+  position: relative;
+}
+
+.description::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.3;
+  top: -15px;
+  left: -15px;
+  background: #FFB5C5;
+}
+
+.description::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.3;
+  bottom: -15px;
+  right: -15px;
+  background: #A7D2FF;
+}
+
+.description:last-child {
+  margin-bottom: 0;
+}
+
+.eventsContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, minmax(220px, auto));
+  gap: 1.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.monthContainer {
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.monthTitle {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.eventList {
+  flex-grow: 1;
+  min-height: 150px;
+  margin-bottom: 1rem;
+}
+
+.eventItem {
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #FFFFFF;
+  border: 2px solid var(--primary-green);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.eventItem:hover {
+  transform: translateX(5px);
+  border-color: var(--accent-salmon);
+}
+
+.eventItem:last-child {
+  margin-bottom: 0;
+}
+
+.eventTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.eventDetails {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.noEvents {
+  text-align: center;
+  color: #666;
+  padding: 2rem 0;
+}
+
+.addButton {
+  width: 80%;
+  padding: 12px;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: auto auto 0;
+  display: block;
+}
+
+/* 季節ごとの色分け */
+.spring {
+  border: 2px solid #FFB5C5;
+  background-color: rgba(255, 181, 197, 0.1);
+  box-shadow: 0 4px 6px rgba(255, 181, 197, 0.1);
+}
+
+.spring .addButton {
+  background-color: #FFB5C5;
+}
+
+.spring .addButton:hover {
+  background-color: #ff9bab;
+  transform: translateY(-2px);
+}
+
+.summer {
+  border: 2px solid #90EE90;
+  background-color: rgba(144, 238, 144, 0.1);
+  box-shadow: 0 4px 6px rgba(144, 238, 144, 0.1);
+}
+
+.summer .addButton {
+  background-color: #90EE90;
+}
+
+.summer .addButton:hover {
+  background-color: #7ed67e;
+  transform: translateY(-2px);
+}
+
+.autumn {
+  border: 2px solid #FFB347;
+  background-color: rgba(255, 179, 71, 0.1);
+  box-shadow: 0 4px 6px rgba(255, 179, 71, 0.1);
+}
+
+.autumn .addButton {
+  background-color: #FFB347;
+}
+
+.autumn .addButton:hover {
+  background-color: #ff9f2e;
+  transform: translateY(-2px);
+}
+
+.winter {
+  border: 2px solid #B5C8E6;
+  background-color: rgba(181, 200, 230, 0.1);
+  box-shadow: 0 4px 6px rgba(181, 200, 230, 0.1);
+}
+
+.winter .addButton {
+  background-color: #B5C8E6;
+}
+
+.winter .addButton:hover {
+  background-color: #9db3d8;
+  transform: translateY(-2px);
+}
+
+/* モーダル関連のスタイル */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* ローディング状態のスタイル */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 2rem;
+}
+
+.loadingSpinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #FFE4E8;
+  border-top: 6px solid #FF8BA7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingContainer p {
+  color: #666;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* エラー状態のスタイル */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 2rem;
+  text-align: center;
+}
+
+.errorContainer p {
+  color: #ff6b6b;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  padding: 1rem;
+  background-color: #fff0f0;
+  border-radius: 8px;
+  border: 1px solid #ffcdd2;
+}
+
+.retryButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #FF8BA7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(255, 139, 167, 0.2);
+}
+
+.retryButton:hover {
+  background-color: #FF6B88;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 139, 167, 0.3);
+}
+
+.retryButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(255, 139, 167, 0.2);
+}
+
+/* タブレット向け */
+@media (max-width: 1024px) {
+  .eventsContainer {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, minmax(220px, auto));
+  }
+  
+  .container {
+    padding: 1.5rem;
+  }
+}
+
+/* スマートフォン向け */
+@media (max-width: 640px) {
+  .eventsContainer {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(12, minmax(220px, auto));
+    gap: 1rem;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* 装飾的な要素 */
+.decorationDot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.decorationDot:nth-child(1) {
+  top: 20px;
+  left: 20px;
+  background-color: var(--primary-yellow);
+  opacity: 0.3;
+}
+
+.decorationDot:nth-child(2) {
+  top: 40px;
+  right: 40px;
+  background-color: var(--primary-pink);
+  opacity: 0.3;
+}
+
+.decorationDot:nth-child(3) {
+  bottom: 30px;
+  left: 50%;
+  background-color: var(--primary-green);
+  opacity: 0.3;
+}
+
+.monthCard {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid transparent;
+}
+
+.monthCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.monthHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #FFB5C5;
+}
+
+.monthTitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.addButton {
+  width: 80%;
+  padding: 12px;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  margin: auto auto 0;
+  display: block;
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+}
+
+.eventsList {
+  flex-grow: 1;
+  margin-bottom: 1rem;
+}
+
+.noEvents {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+.viewAllButton {
+  display: block;
+  width: fit-content;
+  margin: 2rem auto;
+  padding: 1rem 2rem;
+  background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+  border-radius: 25px;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.viewAllButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.popularSection {
+  margin: 2rem 0 3rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 2px dashed #FFB5C5;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  color: #FF6B88;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #FFB5C5, #FFB347);
+}
+
+.popularEvents {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.popularEventCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.popularEventCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.popularEventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.popularEventMonth {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #666;
+}
+
+.popularEventViews {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.popularEventTitle {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+.popularEventMeta {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.popularEventAges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.popularEventAge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  background-color: #f3f4f6;
+  color: #666;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 2rem auto;
+}
+
+@media (max-width: 1024px) {
+  .monthGrid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .monthGrid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(12, 1fr);
+  }
+}
+</file>
+
+<file path="app/styles/globals.css">
+/* Global styles */
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
+
+html, body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="none" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+button, a, input {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="black" stroke="black" stroke-width="1"/></svg>') 12 12, pointer;
+}
+</file>
+
+<file path="app/layout.tsx">
+import React from 'react';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata = {
+  title: '保育士イベントアイディア',
+  description: '季節ごとの保育士のイベントアイディアを管理するアプリケーション',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
+  return (
+    <html lang="ja">
+      <body className={inter.className}>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/providers.tsx">
+'use client';
+
+import React, { ReactNode } from 'react';
+import { AuthProvider } from './lib/auth';
+
+interface ProvidersProps {
+  children: ReactNode;
+}
+
+export function Providers({ children }: ProvidersProps): JSX.Element {
+  return (
+    <AuthProvider>
+      {children}
+    </AuthProvider>
+  );
+}
+</file>
+
+<file path="docs/supabase-setup.md">
+# Supabase Database Setup Guide
+
+This guide explains how to set up Supabase for the Childcare Event Ideas application.
+
+## Initial Setup
+
+1. Go to [Supabase](https://supabase.com) and create a new account or sign in.
+2. Create a new project and give it a name (e.g., "childcare-event-ideas").
+3. Take note of the URL and anon key (public API key) from the API settings page.
+4. Add these values to your `.env.local` file:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+## Database Schema
+
+### Events Table
+
+Create a new table called `events` with the following structure:
+
+```sql
+CREATE TABLE events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  month INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Add a constraint to ensure month is between 1 and 12
+ALTER TABLE events ADD CONSTRAINT month_range CHECK (month >= 1 AND month <= 12);
+```
+
+### Users Setup
+
+For authentication, Supabase provides built-in user authentication. You can use the Authentication tab in the Supabase dashboard to manage users.
+
+1. Go to Authentication → Settings and make sure Email auth is enabled.
+2. To add a test user, go to Authentication → Users and click "Add User".
+3. Enter an email and password for your test user.
+
+## Row Level Security (RLS) Policies
+
+Set up Row Level Security to ensure data privacy:
+
+```sql
+-- Enable RLS on the events table
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+
+-- Create a policy that allows authenticated users to select events
+CREATE POLICY "Allow users to view all events" ON events
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Create a policy that allows authenticated users to insert their own events
+CREATE POLICY "Allow users to insert their own events" ON events
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Create a policy that allows authenticated users to update their own events
+CREATE POLICY "Allow users to update their own events" ON events
+  FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- Create a policy that allows authenticated users to delete their own events
+CREATE POLICY "Allow users to delete their own events" ON events
+  FOR DELETE USING (auth.role() = 'authenticated');
+```
+
+## Sample Data (Optional)
+
+You can insert some sample data into the `events` table:
+
+```sql
+INSERT INTO events (month, title, description) VALUES
+(1, '雪遊び', '園庭や公園で雪だるま作りや雪合戦を楽しみます。寒さ対策をしっかりと行い、温かい飲み物を用意しておくと良いでしょう。'),
+(1, 'お正月あそび', '羽根つき、コマ回し、福笑いなど、日本の伝統的なお正月遊びを体験します。'),
+(1, '冬の自然観察', '冬ならではの自然現象（霜、氷など）を観察し、季節の変化を学びます。'),
+(4, '花見ピクニック', '近くの公園で桜の花見をしながらピクニックを楽しみます。春の花々についても学びます。'),
+(4, '春の虫探し', '春に現れる虫（てんとう虫、蝶など）を探して観察します。虫かごや図鑑を用意しておくと良いでしょう。'),
+(4, '植物の栽培開始', 'ひまわりやトマトなど、夏に向けての植物の種まきを行います。成長過程を観察する準備をします。'),
+(7, '水遊び', 'プールや水鉄砲、シャボン玉などを使った水遊びを行います。熱中症対策を忘れずに。'),
+(7, '七夕まつり', '七夕の由来を学び、笹に願い事を書いた短冊を飾ります。'),
+(7, '夏の工作', '貝殻や砂などを使った夏らしい工作を楽しみます。'),
+(10, '秋の自然物収集', 'どんぐり、落ち葉、木の実などを集めて工作や装飾に使います。'),
+(10, 'ハロウィンパーティー', '仮装や飾り付け、ハロウィンにまつわるゲームを楽しみます。'),
+(10, '焼き芋パーティー', '安全に配慮しながら、秋の味覚である焼き芋を楽しみます。'),
+(12, 'クリスマス会', 'クリスマスの由来を学び、ツリーの飾り付けやプレゼント交換を行います。'),
+(12, '年賀状づくり', '来年の干支について学び、手作りの年賀状を作成します。'),
+(12, '冬の工作', '雪の結晶や冬をテーマにした工作を楽しみます。');
+```
+
+## Next Steps
+
+1. Connect your frontend application to Supabase using the provided credentials.
+2. Test the authentication flow and database operations.
+3. Set up storage if you want to add image uploads later.
+</file>
+
+<file path="lib/supabase.ts">
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+</file>
+
+<file path="utils/supabase.ts">
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
+</file>
+
+<file path=".cspell.json">
+{
+  "version": "0.2",
+  "language": "en,ja",
+  "words": [
+    "supabase",
+    "SUPABASE",
+    "postgrest",
+    "whatwg",
+    "webidl",
+    "streamsearch",
+    "opencollective",
+    "libvips",
+    "linuxmusl",
+    "msvc",
+    "libc",
+    "arrayish",
+    "emnapi"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "package-lock.json",
+    ".next/**",
+    "public/**"
+  ]
+}
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="middleware.ts">
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: any) {
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+        },
+      },
+    }
+  );
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const path = request.nextUrl.pathname;
+
+    // 未認証ユーザーが/mainにアクセスしようとした場合、ログインページにリダイレクト
+    if (!session && path.startsWith('/main')) {
+      const redirectUrl = new URL('/', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // 認証済みユーザーがルートページにアクセスした場合、/mainにリダイレクト
+    if (session && path === '/') {
+      const redirectUrl = new URL('/main', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return response;
+  } catch (error) {
+    console.error('認証チェックに失敗しました:', error);
+    // エラーが発生した場合は、安全のためにログインページにリダイレクト
+    if (request.nextUrl.pathname.startsWith('/main')) {
+      const redirectUrl = new URL('/', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+    return response;
+  }
+}
+
+export const config = {
+  matcher: ['/', '/main/:path*'],
+};
+</file>
+
+<file path="postcss.config.js">
+module.exports = {
+  plugins: {
+    'postcss-nesting': {},
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+</file>
+
+<file path="setup.sql">
+-- Create profiles table
+CREATE TABLE profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  name TEXT,
+  role TEXT DEFAULT 'user',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Enable RLS
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Create policies
+CREATE POLICY "Allow public read access" ON profiles
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow users to update their own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Allow users to insert their own profile" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- Create function to handle new user profiles
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, name)
+  VALUES (NEW.id, NEW.raw_user_meta_data->>'name');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger for new user profiles
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- Create events table
+CREATE TABLE events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  date DATE NOT NULL,
+  description TEXT NOT NULL,
+  age_group TEXT NOT NULL,
+  category TEXT NOT NULL,
+  user_id UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow users to read all events
+CREATE POLICY "Allow public read access" ON events
+  FOR SELECT USING (true);
+
+-- Create policy to allow authenticated users to insert their own events
+CREATE POLICY "Allow authenticated users to insert their own events" ON events
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Create policy to allow users to update their own events
+CREATE POLICY "Allow users to update their own events" ON events
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Create policy to allow users to delete their own events
+CREATE POLICY "Allow users to delete their own events" ON events
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Create function to automatically update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = TIMEZONE('utc'::text, NOW());
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create trigger to automatically update updated_at timestamp
+CREATE TRIGGER update_events_updated_at
+  BEFORE UPDATE ON events
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+    },
+  },
+  plugins: [],
+}
+</file>
+
+<file path="tailwind.config.ts">
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      },
+    },
+  },
+  plugins: [],
+}
+
+export default config
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="app/components/AddEventForm.tsx">
+'use client';
+
+import React, { useState, useRef } from 'react';
+import styles from './AddEventForm.module.css';
+import { Event } from '../types';
+
+type AddEventFormProps = {
+  onSubmit: (data: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
+  onCancel: () => void;
+  selectedMonth: number;
+};
+
+const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
+type Category = typeof CATEGORIES[number];
+
+export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddEventFormProps) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [ageGroups, setAgeGroups] = useState<string[]>([]);
+  const [category, setCategory] = useState<Category>('壁　面');
+  const [otherCategory, setOtherCategory] = useState('');
+  const [hours, setHours] = useState('');
+  const [minutes, setMinutes] = useState('');
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [objectives, setObjectives] = useState<string[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 所要時間が有効かどうかをチェックする関数
+  const isDurationValid = () => {
+    const hoursNum = parseInt(hours) || 0;
+    const minutesNum = parseInt(minutes) || 0;
+    return hoursNum > 0 || minutesNum > 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isDurationValid()) {
+      alert('所要時間は時間か分のどちらかを1以上に設定してください。');
+      return;
+    }
+    const duration = `${hours || '0'}時間${minutes || '0'}分`;
+    const eventData = {
+      title,
+      description,
+      age_groups: ageGroups,
+      category: category === 'その他' ? otherCategory : category,
+      duration,
+      materials,
+      objectives,
+      date: new Date().toISOString(),
+      month: selectedMonth
+    };
+    onSubmit(eventData);
+  };
+
+  const handleAgeGroupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAgeGroups(prev => 
+      e.target.checked 
+        ? [...prev, value]
+        : prev.filter(group => group !== value)
+    );
+  };
+
+  const handleMaterialsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // 複数の区切り文字（、・　）で分割し、空白を除去
+    const items = e.target.value
+      .split(/[、・\s]+/)
+      .filter(item => item.trim() !== '');
+    setMaterials(items);
+  };
+
+  const handleObjectivesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const items = e.target.value
+      .split(/[、・\s]+/)
+      .filter(item => item.trim() !== '');
+    setObjectives(items);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setMediaFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const renderPreview = (file: File, index: number) => {
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    const url = URL.createObjectURL(file);
+
+    return (
+      <div key={index} className={styles.previewItem}>
+        {isImage && <img src={url} alt="プレビュー" />}
+        {isVideo && <video src={url} />}
+        <button
+          type="button"
+          className={styles.removeButton}
+          onClick={() => handleRemoveFile(index)}
+        >
+          ×
+        </button>
+      </div>
+    );
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onCancel}>
+      <div className={styles.content} onClick={e => e.stopPropagation()}>
+        <h2 className={styles.title}>新しいイベントを追加</h2>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label>
+              タイトル
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              説明
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <p>対象年齢</p>
+            <div className={styles.checkboxGroup}>
+              {AGE_GROUPS.map((age) => (
+                <label
+                  key={age}
+                  className={`${styles.checkbox} ${ageGroups.includes(age) ? styles.selected : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    value={age}
+                    checked={ageGroups.includes(age)}
+                    onChange={handleAgeGroupChange}
+                  />
+                  {age}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <p>カテゴリー</p>
+            <div className={styles.radioGroup}>
+              {CATEGORIES.map((cat) => (
+                <label
+                  key={cat}
+                  className={`${styles.radioLabel} ${category === cat ? styles.selected : ''}`}
+                >
+                  <input
+                    type="radio"
+                    value={cat}
+                    checked={category === cat}
+                    onChange={(e) => setCategory(e.target.value as Category)}
+                    className={styles.radioInput}
+                  />
+                  {cat}
+                </label>
+              ))}
+            </div>
+            {category === 'その他' && (
+              <label>
+                その他のカテゴリー
+                <input
+                  type="text"
+                  className={`${styles.otherInput} ${styles.visible}`}
+                  value={otherCategory}
+                  onChange={(e) => setOtherCategory(e.target.value)}
+                  placeholder="カテゴリーを入力してください"
+                  required={category === 'その他'}
+                />
+              </label>
+            )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <p>所要時間</p>
+            <div className={styles.timeInputGroup}>
+              <label>
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  placeholder="0"
+                />
+                時間
+              </label>
+              <label>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                  placeholder="0"
+                />
+                分
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              準備物
+              <textarea
+                value={materials.join('、')}
+                onChange={handleMaterialsChange}
+                placeholder="例：画用紙、クレヨン、はさみ"
+                rows={3}
+                style={{ resize: 'vertical' }}
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              目的
+              <textarea
+                value={objectives.join('、')}
+                onChange={handleObjectivesChange}
+                placeholder="例：創造性を育む、手先の器用さを養う、集中力を高める"
+                rows={3}
+                style={{ resize: 'vertical' }}
+              />
+            </label>
+          </div>
+
+          <div className={styles.optionalSection}>
+            <h3 className={styles.optionalTitle}>画像・動画（任意）</h3>
+            <div
+              className={styles.uploadArea}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <p>クリックして画像・動画をアップロード</p>
+              <p>または</p>
+              <p>ファイルをドラッグ＆ドロップ</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className={styles.uploadInput}
+                onChange={handleFileChange}
+                accept="image/*,video/*"
+                multiple
+              />
+            </div>
+            {mediaFiles.length > 0 && (
+              <div className={styles.previewArea}>
+                {mediaFiles.map((file, index) => renderPreview(file, index))}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <button type="button" onClick={onCancel} className={styles.cancelButton}>
+              キャンセル
+            </button>
+            <button type="submit" className={styles.submitButton}>
+              追加
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/components/AuthForm.tsx">
+'use client';
+
+import { useState } from 'react';
+import { useAuth } from '../lib/auth';
+import { useRouter } from 'next/navigation';
+import styles from '../page.module.css';
+
+export default function AuthForm() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const router = useRouter();
+  const { signIn, signUp, error: authError } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setFormError(null);
+
+    try {
+      let result;
+      if (isLogin) {
+        result = await signIn(email, password);
+      } else {
+        result = await signUp(email, password, name);
+      }
+
+      if (result.error) {
+        setFormError(result.error.message);
+      } else {
+        router.push('/main');
+      }
+    } catch (err: any) {
+      setFormError(err.message || '予期せぬエラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const displayError = formError || (authError && authError.message);
+
+  return (
+    <div className={styles.authContainer}>
+      <h2 className={styles.formTitle}>
+        {isLogin ? 'ログイン' : '新規登録'}
+      </h2>
+      
+      {displayError && (
+        <div className={styles.errorMessage}>
+          {displayError}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        {!isLogin && (
+          <div className={styles.formGroup}>
+            <label htmlFor="name" className={styles.label}>
+              名前
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              className={styles.input}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className={styles.formGroup}>
+          <label htmlFor="email" className={styles.label}>
+            メールアドレス
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            className={styles.input}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="password" className={styles.label}>
+            パスワード
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            className={styles.input}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={styles.button}
+        >
+          <span className={styles.buttonText}>
+            {loading ? '処理中...' : isLogin ? 'ログイン' : '登録'}
+          </span>
+        </button>
+      </form>
+
+      <div
+        className={styles.switchText}
+        onClick={() => {
+          setIsLogin(!isLogin);
+          setFormError(null);
+        }}
+      >
+        {isLogin ? '新規登録はこちら' : 'ログインはこちら'}
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/components/EditEventForm.module.css">
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  padding: 5vh 5vw;
+}
+
+.content {
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 15px;
+  width: 100%;
+  height: 100%;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #FFB5C5;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* スクロールバーのスタイリング */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #87CEEB;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #6BB5D2;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+  color: #6B9BD2;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  padding-bottom: 0.5rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #FFB5C5, #87CEEB);
+  border-radius: 2px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #555;
+  font-size: 1rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  padding: 0.8rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background-color: #FAFAFA;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  border-color: #87CEEB;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(135, 206, 235, 0.1);
+  transform: translateY(-2px);
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.submitButton,
+.cancelButton {
+  padding: 0.8rem 2.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #FFB5C5 0%, #FFD4E5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(255, 181, 197, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, #FFD4E5 0%, #FFB5C5 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 181, 197, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.submitButton:disabled {
+  background: linear-gradient(135deg, #FFE5EE 0%, #FFE5EE 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #E8F4F8 0%, #D1EAF5 100%);
+  color: #444;
+  box-shadow: 
+    0 4px 15px rgba(135, 206, 235, 0.2),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.cancelButton:hover {
+  background: linear-gradient(135deg, #D1EAF5 0%, #E8F4F8 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(135, 206, 235, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.checkboxGroup,
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox,
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.8rem 1.2rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
+}
+
+.checkbox:hover,
+.radioLabel:hover {
+  border-color: #FFB5C5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.checkbox input[type="checkbox"],
+.radioInput {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 年齢グループごとの色設定 */
+.checkbox[data-age="0歳児"].selected {
+  border-color: #FFB5C5;
+  background: #FFF0F5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 197, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="1歳児"].selected {
+  border-color: #FFD4B2;
+  background: #FFF5EB;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 212, 178, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="2歳児"].selected {
+  border-color: #FFF3B8;
+  background: #FFFBEB;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 243, 184, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="3歳児"].selected {
+  border-color: #B5E6B5;
+  background: #F0FFF0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(181, 230, 181, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="4歳児"].selected {
+  border-color: #A7D2FF;
+  background: #F0F8FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 210, 255, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.checkbox[data-age="5歳児"].selected {
+  border-color: #DCC2FF;
+  background: #F8F0FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 194, 255, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+/* カテゴリーごとの色設定 */
+.radioLabel[data-category="壁面"].selected {
+  border-color: #FFB5C5;
+  background: #FFF0F5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 197, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.radioLabel[data-category="制作物"].selected {
+  border-color: #A7D2FF;
+  background: #F0F8FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 210, 255, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+.radioLabel[data-category="その他"].selected {
+  border-color: #B5E6B5;
+  background: #F0FFF0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(181, 230, 181, 0.2);
+  animation: selectPop 0.3s ease-out;
+}
+
+@keyframes selectPop {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.02) translateY(-2px); }
+  100% { transform: scale(1) translateY(-2px); }
+}
+
+.timeInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timeInputGroup input {
+  width: 80px;
+  text-align: center;
+}
+
+.timeInputGroup span {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* 画像・動画アップロード部分 */
+.optionalSection {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px dashed #E5E7EB;
+}
+
+.optionalTitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.optionalTitle::before {
+  content: '📎';
+}
+
+.uploadArea {
+  border: 2px dashed #E5E7EB;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #FAFAFA;
+}
+
+.uploadArea:hover {
+  border-color: #A7D2FF;
+  background: #F0F8FF;
+}
+
+.uploadInput {
+  display: none;
+}
+
+.previewArea {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.previewItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.previewItem img,
+.previewItem video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeButton {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  color: #666;
+}
+
+.removeButton:hover {
+  background: #FF9B9B;
+  color: white;
+}
+
+/* ボタングループの配置を右下に固定 */
+.buttonGroup {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem 0;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  border-top: 1px solid #E5E7EB;
+}
+</file>
+
+<file path="app/components/EditEventForm.tsx">
+'use client';
+
+import React, { useState, useRef } from 'react';
+import styles from './EditEventForm.module.css';
+import { Event } from '../types';
+
+type EditEventFormProps = {
+  event: Event;
+  onSubmit: (data: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
+  onCancel: () => void;
+};
+
+const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
+type Category = typeof CATEGORIES[number];
+
+export default function EditEventForm({ event, onSubmit, onCancel }: EditEventFormProps) {
+  const [formData, setFormData] = useState<EventFormData>({
+    title: event.title,
+    description: event.description,
+    age_groups: event.age_groups,
+    category: event.category as Category,
+    duration: event.duration,
+    materials: event.materials,
+    objectives: event.objectives,
+    month: event.month
+  });
+  const [otherCategory, setOtherCategory] = useState(
+    CATEGORIES.includes(event.category) ? '' : event.category
+  );
+  const initialDuration = event.duration.match(/(\d+)時間(\d+)分/);
+  const [hours, setHours] = useState(initialDuration ? initialDuration[1] : '0');
+  const [minutes, setMinutes] = useState(initialDuration ? initialDuration[2] : '0');
+  const [mediaFiles, setMediaFiles] = useState<File[]>(event.media_files || []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isDurationValid = () => {
+    const hoursNum = parseInt(hours) || 0;
+    const minutesNum = parseInt(minutes) || 0;
+    return hoursNum > 0 || minutesNum > 0;
+  };
+
+  const handleAgeGroupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      age_groups: e.target.checked
+        ? [...prev.age_groups, value]
+        : prev.age_groups.filter(group => group !== value)
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setMediaFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isDurationValid()) {
+      alert('所要時間は時間か分のどちらかを1以上に設定してください。');
+      return;
+    }
+    const duration = `${hours || '0'}時間${minutes || '0'}分`;
+    onSubmit({
+      title: formData.title,
+      description: formData.description,
+      age_groups: formData.age_groups,
+      category: formData.category === 'その他' ? otherCategory : formData.category,
+      duration,
+      materials: formData.materials,
+      objectives: formData.objectives,
+      date: event.date,
+      month: formData.month,
+      media_files: mediaFiles
+    });
+  };
+
+  const handleMaterialsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      materials: e.target.value.split('\n').filter(item => item.trim() !== '')
+    }));
+  };
+
+  const handleObjectivesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      objectives: e.target.value.split('\n').filter(item => item.trim() !== '')
+    }));
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onCancel}>
+      <div className={styles.content} onClick={e => e.stopPropagation()}>
+        <h2 className={styles.title}>イベントを編集</h2>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label htmlFor="title">タイトル</label>
+            <input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="description">説明</label>
+            <textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>対象年齢</label>
+            <div className={styles.checkboxGroup}>
+              {AGE_GROUPS.map((age) => (
+                <label
+                  key={age}
+                  className={`${styles.checkbox} ${formData.age_groups.includes(age) ? styles.selected : ''}`}
+                  data-age={age}
+                >
+                  <input
+                    type="checkbox"
+                    value={age}
+                    checked={formData.age_groups.includes(age)}
+                    onChange={handleAgeGroupChange}
+                  />
+                  {age}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>カテゴリー</label>
+            <div className={styles.radioGroup}>
+              {CATEGORIES.map((cat) => (
+                <label
+                  key={cat}
+                  className={`${styles.radioLabel} ${formData.category === cat ? styles.selected : ''}`}
+                  data-category={cat}
+                >
+                  <input
+                    type="radio"
+                    value={cat}
+                    checked={formData.category === cat}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as Category }))}
+                    className={styles.radioInput}
+                  />
+                  {cat}
+                </label>
+              ))}
+            </div>
+            {formData.category === 'その他' && (
+              <input
+                type="text"
+                className={`${styles.otherInput} ${styles.visible}`}
+                value={otherCategory}
+                onChange={(e) => setOtherCategory(e.target.value)}
+                placeholder="カテゴリーを入力してください"
+                required={formData.category === 'その他'}
+              />
+            )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>所要時間</label>
+            <div className={styles.timeInputGroup}>
+              <input
+                type="number"
+                min="0"
+                max="24"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+                placeholder="0"
+              />
+              <span>時間</span>
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
+                placeholder="0"
+              />
+              <span>分</span>
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="materials">準備物（1行に1つ）</label>
+            <textarea
+              id="materials"
+              value={formData.materials.join('\n')}
+              onChange={handleMaterialsChange}
+              placeholder="例：画用紙&#13;&#10;クレヨン&#13;&#10;はさみ"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="objectives">目的（1行に1つ）</label>
+            <textarea
+              id="objectives"
+              value={formData.objectives.join('\n')}
+              onChange={handleObjectivesChange}
+              placeholder="例：創造性を育む&#13;&#10;手先の器用さを養う&#13;&#10;集中力を高める"
+            />
+          </div>
+
+          <div className={styles.optionalSection}>
+            <h3 className={styles.optionalTitle}>画像・動画</h3>
+            <div
+              className={styles.uploadArea}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                className={styles.uploadInput}
+                onChange={handleFileChange}
+                accept="image/*,video/*"
+                multiple
+              />
+              <p>クリックして画像・動画を追加</p>
+              <p>または</p>
+              <p>ファイルをドラッグ＆ドロップ</p>
+            </div>
+
+            {mediaFiles.length > 0 && (
+              <div className={styles.previewArea}>
+                {mediaFiles.map((file, index) => (
+                  <div key={index} className={styles.previewItem}>
+                    {file.type.startsWith('image/') ? (
+                      <img src={URL.createObjectURL(file)} alt={`プレビュー ${index + 1}`} />
+                    ) : (
+                      <video src={URL.createObjectURL(file)} controls />
+                    )}
+                    <button
+                      type="button"
+                      className={styles.removeButton}
+                      onClick={() => handleRemoveFile(index)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <button type="button" onClick={onCancel} className={styles.cancelButton}>
+              キャンセル
+            </button>
+            <button type="submit" className={styles.submitButton}>
+              更新
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/components/MonthCard.module.css">
+.monthCard {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 300px;
+  border: 2px solid transparent;
+}
+
+.monthCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 季節ごとの色分け */
+.spring {
+  border-color: #FFB5C5;
+  background: linear-gradient(135deg, rgba(255, 181, 197, 0.1), rgba(255, 223, 230, 0.1));
+}
+
+.spring .monthHeader {
+  border-bottom-color: #FFB5C5;
+}
+
+.spring .eventItem {
+  background: linear-gradient(135deg, rgba(255, 181, 197, 0.05), rgba(255, 223, 230, 0.05));
+  border-color: rgba(255, 181, 197, 0.3);
+}
+
+.summer {
+  border-color: #87CEEB;
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.1), rgba(176, 224, 230, 0.1));
+}
+
+.summer .monthHeader {
+  border-bottom-color: #87CEEB;
+}
+
+.summer .eventItem {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.05), rgba(176, 224, 230, 0.05));
+  border-color: rgba(135, 206, 235, 0.3);
+}
+
+.autumn {
+  border-color: #FFB347;
+  background: linear-gradient(135deg, rgba(255, 179, 71, 0.1), rgba(255, 198, 112, 0.1));
+}
+
+.autumn .monthHeader {
+  border-bottom-color: #FFB347;
+}
+
+.autumn .eventItem {
+  background: linear-gradient(135deg, rgba(255, 179, 71, 0.05), rgba(255, 198, 112, 0.05));
+  border-color: rgba(255, 179, 71, 0.3);
+}
+
+.winter {
+  border-color: #B0E0E6;
+  background: linear-gradient(135deg, rgba(176, 224, 230, 0.1), rgba(202, 235, 238, 0.1));
+}
+
+.winter .monthHeader {
+  border-bottom-color: #B0E0E6;
+}
+
+.winter .eventItem {
+  background: linear-gradient(135deg, rgba(176, 224, 230, 0.05), rgba(202, 235, 238, 0.05));
+  border-color: rgba(176, 224, 230, 0.3);
+}
+
+.monthHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 8px;
+}
+
+.monthTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.categorySection {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  display: flex;
+}
+
+.eventItem {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.eventItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.eventHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.categoryLabel {
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: fit-content;
+  color: white;
+}
+
+.categoryLabel[data-category="壁　面"] {
+  background-color: #A7D2FF;
+}
+
+.categoryLabel[data-category="制作物"] {
+  background-color: #FFB5C5;
+}
+
+.categoryLabel[data-category="その他"] {
+  background-color: #B5E6B5;
+}
+
+.emptyEvent {
+  border: 1px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.noEvents {
+  color: #999;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.eventTitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+  flex-grow: 1;
+}
+
+.eventMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ageTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ageTag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+/* 年齢タグの色分け */
+.ageTag[data-age="0歳児"] {
+  background-color: rgba(255, 182, 193, 0.2);
+  color: #d4788f;
+}
+
+.ageTag[data-age="1歳児"] {
+  background-color: rgba(255, 218, 185, 0.2);
+  color: #d49a6a;
+}
+
+.ageTag[data-age="2歳児"] {
+  background-color: rgba(176, 224, 230, 0.2);
+  color: #6a9da3;
+}
+
+.ageTag[data-age="3歳児"] {
+  background-color: rgba(144, 238, 144, 0.2);
+  color: #5fa55f;
+}
+
+.ageTag[data-age="4歳児"] {
+  background-color: rgba(230, 230, 250, 0.2);
+  color: #8484b4;
+}
+
+.ageTag[data-age="5歳児"] {
+  background-color: rgba(255, 239, 213, 0.2);
+  color: #d4b48c;
+}
+
+.duration {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.addButton {
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* 季節ごとのボタンカラー */
+.spring .addButton {
+  background-color: #FFB5C5;
+}
+
+.spring .addButton:hover {
+  background-color: #ff9bab;
+}
+
+.summer .addButton {
+  background-color: #87CEEB;
+}
+
+.summer .addButton:hover {
+  background-color: #75bcd6;
+}
+
+.autumn .addButton {
+  background-color: #FFB347;
+}
+
+.autumn .addButton:hover {
+  background-color: #ff9f2e;
+}
+
+.winter .addButton {
+  background-color: #B0E0E6;
+}
+
+.winter .addButton:hover {
+  background-color: #9cd1d8;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .monthCard {
+    padding: 1rem;
+  }
+
+  .monthTitle {
+    font-size: 1.5rem;
+  }
+
+  .eventTitle {
+    font-size: 0.9rem;
+  }
+}
+</file>
+
+<file path="app/main/main.module.css">
+.mainContainer {
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.mainContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 49.5%, #0000FF 49.5%, #0000FF 50.5%, transparent 50.5%),
+              linear-gradient(0deg, transparent 49.5%, #0000FF 49.5%, #0000FF 50.5%, transparent 50.5%);
+  background-size: 50px 50px;
+  opacity: 0.05;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 4px solid #000000;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #FF0000;
+}
+
+.logoutButton {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  padding: 10px 20px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.logoutButton:hover {
+  background-color: #FF0000;
+  transform: rotate(-2deg);
+}
+
+.monthsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1200px) {
+  .monthsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .monthsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .monthsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.errorContainer p {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+.errorContainer button {
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.errorContainer button:hover {
+  background-color: #2980b9;
+}
+
+/* Scroll snap container */
+.scrollContainer {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
+
+/* Custom cursor continues from login page */
+.customCursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="none" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+.clickableCursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0 L24 12 L12 24 L0 12 z" fill="black" stroke="black" stroke-width="1"/></svg>') 12 12, pointer;
+}
+</file>
+
+<file path="app/page.tsx">
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
+import AuthForm from './components/AuthForm';
+import styles from './page.module.css';
+
+export default function Home() {
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push('/main');
+      }
+    };
+    checkUser();
+  }, []);
+
+  return (
+    <main className={styles.main}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>
+          <span>保育士イベントアイディア</span>
+        </h1>
+        <AuthForm />
+      </div>
+    </main>
+  );
+}
+</file>
+
+<file path="app/main/page.tsx">
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
+import styles from './page.module.css';
+import MonthCard from '../components/MonthCard';
+import EventOverlay from '../components/EventOverlay';
+import AddEventForm from '../components/AddEventForm';
+import EditEventForm from '../components/EditEventForm';
+import { Event } from '../types';
+import Link from 'next/link';
+
+type EventFormData = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default function MainPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const router = useRouter();
+
+  const getMonthNumber = (monthName: string): number => {
+    const monthStr = monthName.replace('月', '');
+    const month = parseInt(monthStr);
+    console.log(`月の変換: ${monthName} -> ${month}`);
+    return month;
+  };
+
+  // イベントを取得する関数
+  async function fetchEvents() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('セッションエラー:', sessionError);
+        setError('セッションの取得に失敗しました');
+        return;
+      }
+
+      if (!session) {
+        console.log('セッションなし - ログインページへリダイレクト');
+        router.push('/');
+        return;
+      }
+
+      console.log('イベントを取得中...');
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .eq('user_id', session.user.id);
+
+      if (eventsError) {
+        console.error('イベント取得エラー:', eventsError);
+        setError('イベントの取得に失敗しました');
+        return;
+      }
+
+      console.log('取得したイベントデータ:', eventsData);
+
+      if (eventsData) {
+        // 月の値を数値型に変換
+        const processedEvents = eventsData.map(event => ({
+          ...event,
+          month: Number(event.month)
+        }));
+        
+        console.log('処理後のイベントデータ:', processedEvents);
+        console.log('イベントデータをセット:', processedEvents.length, '件');
+        setEvents(processedEvents);
+      } else {
+        console.log('イベントデータが空です');
+        setEvents([]);
+      }
+    } catch (error) {
+      console.error('予期せぬエラー:', error);
+      setError('予期せぬエラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('認証状態変更:', event);
+      
+      if (event === 'SIGNED_IN') {
+        fetchEvents();
+      } else if (event === 'SIGNED_OUT') {
+        setEvents([]);
+        router.push('/');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+  };
+
+  const handleCloseOverlay = () => {
+    setSelectedEvent(null);
+  };
+
+  const handleAddEvent = (month: number) => {
+    setSelectedMonth(month);
+    setShowAddForm(true);
+  };
+
+  const handleAddEventSubmit = async (eventData: EventFormData) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('認証されていません');
+        return;
+      }
+
+      if (selectedMonth === null) {
+        setError('月が選択されていません');
+        return;
+      }
+
+      // 日付を選択された月の1日に設定
+      const date = new Date();
+      const year = date.getFullYear();
+      date.setMonth(selectedMonth - 1);
+      date.setDate(1);
+      date.setHours(0, 0, 0, 0);
+
+      if (selectedMonth >= 10) {
+        date.setFullYear(year + 1);
+      }
+
+      // カテゴリーの正規化（全角スペースを保持）
+      const normalizedEventData = {
+        ...eventData,
+        category: eventData.category.trim() // 前後の空白のみ削除
+      };
+
+      console.log('イベント追加中...', {
+        selectedMonth,
+        date: date.toISOString(),
+        normalizedEventData
+      });
+
+      const { data, error } = await supabase
+        .from('events')
+        .insert({
+          ...normalizedEventData,
+          date: date.toISOString(),
+          month: selectedMonth,
+          user_id: session.user.id,
+          views: 0 // 閲覧数の初期値を設定
+        })
+        .select();
+
+      if (error) {
+        console.error('イベント追加エラー:', error);
+        setError('イベントの追加に失敗しました');
+        return;
+      }
+
+      if (data) {
+        console.log('追加されたイベント:', data);
+        await fetchEvents();
+        setShowAddForm(false);
+        setSelectedMonth(null);
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError('予期せぬエラーが発生しました');
+    }
+  };
+
+  const handleEditEventSubmit = async (eventData: EventFormData) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('認証されていません');
+      }
+
+      if (!selectedEvent) {
+        throw new Error('編集するイベントが選択されていません');
+      }
+
+      console.log('イベント更新中...', { ...eventData, id: selectedEvent.id });
+      const { data, error } = await supabase
+        .from('events')
+        .update({
+          ...eventData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedEvent.id)
+        .eq('user_id', session.user.id)
+        .select();
+
+      if (error) {
+        console.error('イベント更新エラー:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('更新されたイベント:', data);
+        await fetchEvents();
+      }
+      setShowEditForm(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setEvents(events.filter(event => event.id !== id));
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      setError('イベントの削除に失敗しました');
+    }
+  };
+
+  const getEventsForMonth = (month: number) => {
+    console.log('全イベントの月:', events.map(e => e.month));
+    console.log('全イベント:', events);
+    
+    const monthEvents = events.filter(event => {
+      // 数値型に変換して比較
+      const eventMonth = Number(event.month);
+      const isMatch = eventMonth === month;
+      console.log(`イベントの月を比較 - イベント月: ${eventMonth} (${typeof eventMonth}), 現在の月: ${month} (${typeof month}), 一致: ${isMatch}`);
+      return isMatch;
+    });
+    
+    console.log(`${month}月のイベント数: ${monthEvents.length}`);
+    console.log(`${month}月のイベント:`, monthEvents);
+    return monthEvents;
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+        <p>データを読み込んでいます...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <p>{error}</p>
+        <button onClick={fetchEvents} className={styles.retryButton}>
+          再試行
+        </button>
+      </div>
+    );
+  }
+
+  const months = [
+    '4月', '5月', '6月',        // 1行目
+    '7月', '8月', '9月',        // 2行目
+    '10月', '11月', '12月',     // 3行目
+    '1月', '2月', '3月'         // 4行目
+  ];
+
+  const getSeason = (monthStr: string) => {
+    const monthNumber = monthStr.replace('月', '');
+    const month = parseInt(monthNumber);
+    if ([4, 5, 6].includes(month)) return 'spring';    // 4-6月：春
+    if ([7, 8, 9].includes(month)) return 'summer';    // 7-9月：夏
+    if ([10, 11, 12].includes(month)) return 'autumn'; // 10-12月：秋
+    return 'winter';                                   // 1-3月：冬
+  };
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>保育アイデア管理</h1>
+        <div className={styles.headerButtons}>
+          <Link href="/events" className={styles.viewAllLink}>
+            すべてのイベントを見る
+          </Link>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className={styles.logoutButton}
+          >
+            ログアウト
+          </button>
+        </div>
+      </header>
+
+      <p className={styles.description}>
+        このアプリケーションは、保育士の方々が年間を通じて行うイベントやアクティビティのアイディアを管理するためのツールです。<br />
+        月ごとにイベントを追加・編集・削除することができ、各イベントには目的、準備物、所要時間などの詳細な情報を記録できます。
+      </p>
+
+      <div className={styles.monthGrid}>
+        {months.map((monthName) => {
+          const month = getMonthNumber(monthName);
+          const monthEvents = getEventsForMonth(month);
+          return (
+            <MonthCard
+              key={monthName}
+              month={month}
+              monthName={monthName}
+              events={monthEvents}
+              onEventClick={handleEventClick}
+              onAddEvent={() => handleAddEvent(month)}
+              season={getSeason(monthName)}
+            />
+          );
+        })}
+      </div>
+
+      {selectedEvent && (
+        <EventOverlay
+          event={selectedEvent}
+          onClose={handleCloseOverlay}
+          onEdit={() => setShowEditForm(true)}
+          onDelete={() => handleDeleteEvent(selectedEvent.id)}
+          season={getSeason(months[selectedEvent.month - 1])}
+        />
+      )}
+
+      {showAddForm && selectedMonth !== null && (
+        <AddEventForm
+          onSubmit={handleAddEventSubmit}
+          onCancel={() => {
+            setShowAddForm(false);
+            setSelectedMonth(null);
+          }}
+          selectedMonth={selectedMonth}
+        />
+      )}
+
+      {showEditForm && selectedEvent && (
+        <div className={styles.overlay}>
+          <div className={styles.modal}>
+            <EditEventForm
+              event={selectedEvent}
+              onSubmit={handleEditEventSubmit}
+              onCancel={() => setShowEditForm(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="app/page.module.css">
+.main {
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  font-family: 'Courier New', monospace;
+  position: relative;
+  overflow: hidden;
+  padding: 40px;
+}
+
+.main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 20%, var(--primary-pink) 0%, transparent 20%),
+    radial-gradient(circle at 80% 80%, var(--primary-yellow) 0%, transparent 20%),
+    radial-gradient(circle at 50% 50%, var(--primary-blue) 0%, transparent 15%),
+    radial-gradient(circle at 10% 90%, var(--primary-green) 0%, transparent 25%),
+    radial-gradient(circle at 90% 10%, var(--accent-orange) 0%, transparent 20%);
+  opacity: 0.2;
+  z-index: 1;
+}
+
+.container {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  position: relative;
+  display: inline-block;
+  letter-spacing: 2px;
+  padding: 0 15px 15px;
+  color: #6B9BD2;  /* 優しい青色 */
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  text-shadow: 
+    2px 2px 0 #FFB5C5,  /* ピンクの影 */
+    4px 4px 0 #87CEEB;  /* 水色の影 */
+  transform: rotate(-2deg);
+  transition: transform 0.3s ease;
+}
+
+.title:hover {
+  transform: rotate(0deg);
+}
+
+.title::before {
+  content: '✿';  /* 花のアイコン */
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #FFB5C5;
+  text-shadow: none;
+  font-size: 24px;
+}
+
+.title::after {
+  content: '✿';  /* 花のアイコン */
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(-1);  /* 左右反転 */
+  color: #FFB5C5;
+  text-shadow: none;
+  font-size: 24px;
+}
+
+/* 下線のスタイル */
+.title > span {
+  position: relative;
+}
+
+.title > span::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, #FFB5C5, #87CEEB, #FFB5C5);
+  border-radius: 2px;
+}
+
+.authContainer {
+  width: 100%;
+  max-width: 400px;
+  background-color: #FFFFFF;
+  border: 4px solid var(--primary-blue);
+  border-radius: 12px;
+  padding: 40px;
+  position: relative;
+  box-shadow: 
+    0 4px 6px rgba(107, 155, 210, 0.1),
+    0 0 0 8px rgba(107, 155, 210, 0.05);
+}
+
+.formTitle {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  color: var(--text-primary);
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.formGroup {
+  margin-bottom: 25px;
+}
+
+.label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 3px solid var(--primary-blue);
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background-color: #FFFFFF;
+  color: var(--text-primary);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent-salmon);
+  transform: translateX(5px);
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.button {
+  width: 100%;
+  padding: 15px;
+  background-color: var(--primary-blue);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+  background-color: var(--accent-salmon);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1);
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.switchText {
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+  text-decoration: underline;
+  text-decoration-color: var(--primary-blue);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.switchText:hover {
+  color: var(--accent-salmon);
+  text-decoration-color: var(--accent-salmon);
+}
+
+.errorMessage {
+  background-color: #FFFFFF;
+  border: 3px solid var(--accent-salmon);
+  border-radius: 8px;
+  color: var(--accent-salmon);
+  padding: 15px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.1);
+}
+
+.loadingContainer {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #FFFFFF;
+  position: relative;
+}
+
+.loading {
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  color: #000000;
+  padding: 20px;
+  border: 4px solid #000000;
+  background-color: #FFFFFF;
+  transform: rotate(-1deg);
+  transition: transform 0.3s ease;
+}
+
+.loading:hover {
+  transform: rotate(0deg);
+}
+
+/* 装飾的な背景要素 */
+.container::before,
+.container::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.container::before {
+  background: radial-gradient(circle, rgba(107, 155, 210, 0.1) 0%, rgba(107, 155, 210, 0) 70%);
+  top: -100px;
+  left: -100px;
+}
+
+.container::after {
+  background: radial-gradient(circle, rgba(157, 195, 230, 0.1) 0%, rgba(157, 195, 230, 0) 70%);
+  bottom: -100px;
+  right: -100px;
+}
+
+.loginBox {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(107, 155, 210, 0.1);
+  border: 2px dashed #6B9BD2;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  z-index: 1;
+}
+
+.description {
+  text-align: center;
+  color: #4a5568;
+  margin-bottom: 2rem;
+  line-height: 1.8;
+}
+
+.loginButton {
+  width: 100%;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #6B9BD2 0%, #9DC3E6 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(107, 155, 210, 0.2);
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(107, 155, 210, 0.3);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 155, 210, 0.2);
+}
+
+/* アニメーション */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.decoration {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #6B9BD2;
+  opacity: 0.1;
+  border-radius: 50%;
+  animation: float 3s ease-in-out infinite;
+}
+
+.decoration:nth-child(1) {
+  top: 20%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.decoration:nth-child(2) {
+  top: 60%;
+  right: 20%;
+  animation-delay: 0.5s;
+}
+
+.decoration:nth-child(3) {
+  bottom: 20%;
+  left: 40%;
+  animation-delay: 1s;
+}
+</file>
+
+<file path="app/types.ts">
+export type Event = {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  month: number;
+  age_groups: string[];
+  category: string;
+  duration: string;
+  materials: string[];
+  objectives: string[];
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  view_count?: number;
+  media_files?: File[];
+};
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+export interface AuthError {
+  message: string;
+  code?: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: AuthError | null;
+  signIn: (email: string, password: string) => Promise<{ error?: AuthError }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error?: AuthError }>;
+  signOut: () => Promise<void>;
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "childcare-event-ideas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@shadcn/ui": "^0.0.4",
+    "@supabase/ssr": "^0.1.0",
+    "@supabase/supabase-js": "^2.39.7",
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "next": "14.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "postcss-nesting": "^12.0.2",
+    "tailwindcss": "^3.4.1"
+  }
+}
+</file>
+
+<file path="app/globals.css">
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+:root {
+  /* メインカラー */
+  --primary-blue: #6B9BD2;    /* より濃いめの青 */
+  --primary-pink: #FF9EAF;    /* 明るい桃色 */
+  --primary-yellow: #FFD23F;  /* 元気な黄色 */
+  --primary-green: #98D8AA;   /* 爽やかな緑 */
+  
+  /* アクセントカラー */
+  --accent-salmon: #FF6B6B;   /* はっきりとした赤 */
+  --accent-orange: #FFA41B;   /* 温かみのあるオレンジ */
+
+  /* テキストカラー */
+  --text-primary: #333333;    /* 濃い目のグレー */
+  --text-secondary: #555555;  /* 中間のグレー */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Courier Prime', monospace;
+  background-color: #FFFFFF;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* For WebKit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
+  border-left: 2px solid var(--primary-blue);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-blue);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-salmon);
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+</file>
+
+</files>
