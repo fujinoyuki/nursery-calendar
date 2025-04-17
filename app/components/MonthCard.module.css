@@ -1,26 +1,38 @@
 .monthCard {
   background: white;
-  border-radius: 20px;
+  border-radius: 25px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  min-height: 300px;
+  gap: 15px;
   border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.monthCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+  border-radius: 25px 25px 0 0;
 }
 
 .monthCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 /* 季節ごとの色分け */
 .spring {
   border-color: #FFB5C5;
-  background: linear-gradient(135deg, rgba(255, 181, 197, 0.1), rgba(255, 223, 230, 0.1));
+  background: linear-gradient(135deg, #fff, #fff9fa);
 }
 
 .spring .monthHeader {
@@ -28,13 +40,13 @@
 }
 
 .spring .eventItem {
-  background: linear-gradient(135deg, rgba(255, 181, 197, 0.05), rgba(255, 223, 230, 0.05));
+  background: linear-gradient(135deg, #fff, #fff5f7);
   border-color: rgba(255, 181, 197, 0.3);
 }
 
 .summer {
   border-color: #87CEEB;
-  background: linear-gradient(135deg, rgba(135, 206, 235, 0.1), rgba(176, 224, 230, 0.1));
+  background: linear-gradient(135deg, #fff, #f5fafd);
 }
 
 .summer .monthHeader {
@@ -42,13 +54,13 @@
 }
 
 .summer .eventItem {
-  background: linear-gradient(135deg, rgba(135, 206, 235, 0.05), rgba(176, 224, 230, 0.05));
+  background: linear-gradient(135deg, #fff, #f0f8ff);
   border-color: rgba(135, 206, 235, 0.3);
 }
 
 .autumn {
   border-color: #FFB347;
-  background: linear-gradient(135deg, rgba(255, 179, 71, 0.1), rgba(255, 198, 112, 0.1));
+  background: linear-gradient(135deg, #fff, #fff9f0);
 }
 
 .autumn .monthHeader {
@@ -56,13 +68,13 @@
 }
 
 .autumn .eventItem {
-  background: linear-gradient(135deg, rgba(255, 179, 71, 0.05), rgba(255, 198, 112, 0.05));
+  background: linear-gradient(135deg, #fff, #fff5e6);
   border-color: rgba(255, 179, 71, 0.3);
 }
 
 .winter {
   border-color: #B0E0E6;
-  background: linear-gradient(135deg, rgba(176, 224, 230, 0.1), rgba(202, 235, 238, 0.1));
+  background: linear-gradient(135deg, #fff, #f5fafb);
 }
 
 .winter .monthHeader {
@@ -70,7 +82,7 @@
 }
 
 .winter .eventItem {
-  background: linear-gradient(135deg, rgba(176, 224, 230, 0.05), rgba(202, 235, 238, 0.05));
+  background: linear-gradient(135deg, #fff, #f0f8fa);
   border-color: rgba(176, 224, 230, 0.3);
 }
 
@@ -78,106 +90,175 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
   text-align: center;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   padding-bottom: 8px;
+  position: relative;
 }
 
 .monthTitle {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: bold;
-  color: #333;
+  color: #444;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 0;
 }
 
-.eventsList {
+.monthDecoration {
+  margin: 0 6px;
+  font-size: 0.7em;
+}
+
+.monthDecoration.left {
+  left: -20px;
+}
+
+.monthDecoration.right {
+  right: -20px;
+}
+
+/* 冬の装飾 */
+.winterDecoration {
+  color: #B0E0E6;
+}
+
+/* 春の装飾 */
+.springDecoration {
+  color: #FFB5C5;
+}
+
+/* 夏の装飾 */
+.summerDecoration {
+  color: #87CEEB;
+}
+
+/* 秋の装飾 */
+.autumnDecoration {
+  color: #FFB347;
+}
+
+/* 月タイトルの before/after を削除 */
+.monthTitle::before,
+.monthTitle::after {
+  content: none;
+}
+
+.categoryLabels {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex-grow: 1;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .categorySection {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  min-height: 80px;
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.categorySection:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.categoryLabel {
+  font-size: 0.9rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.wallColumn {
+  background: #A7D2FF;
+}
+
+.craftColumn {
+  background: #FFB5C5;
+}
+
+.otherColumn {
+  background: #B5E6B5;
+}
+
+.eventsContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .eventItem {
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  padding: 12px;
+  padding: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  background: white;
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.eventItem::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, rgba(255, 181, 197, 0.5), rgba(135, 206, 235, 0.5));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .eventItem:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.eventItem:hover::after {
+  opacity: 1;
 }
 
 .eventHeader {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.categoryLabel {
-  font-size: 0.875rem;
-  padding: 4px 8px;
-  border-radius: 4px;
-  min-width: fit-content;
-  color: white;
-}
-
-.categoryLabel[data-category="壁　面"] {
-  background-color: #A7D2FF;
-}
-
-.categoryLabel[data-category="制作物"] {
-  background-color: #FFB5C5;
-}
-
-.categoryLabel[data-category="その他"] {
-  background-color: #B5E6B5;
-}
-
-.emptyEvent {
-  border: 1px dashed #e0e0e0;
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-.noEvents {
-  color: #999;
-  margin: 0;
-  font-size: 0.875rem;
+  margin-bottom: 10px;
 }
 
 .eventTitle {
   margin: 0;
   font-size: 1rem;
-  color: #333;
-  flex-grow: 1;
+  color: #444;
+  font-weight: 600;
+  line-height: 1.3;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  flex: 1;
 }
 
 .eventMeta {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
+  align-items: flex-start;
 }
 
 .ageTags {
@@ -187,110 +268,228 @@
 }
 
 .ageTag {
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 12px;
-  font-size: 0.75rem;
-  background-color: #f5f5f5;
-  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
 /* 年齢タグの色分け */
 .ageTag[data-age="0歳児"] {
-  background-color: rgba(255, 182, 193, 0.2);
+  background-color: rgba(255, 182, 193, 0.15);
   color: #d4788f;
 }
 
 .ageTag[data-age="1歳児"] {
-  background-color: rgba(255, 218, 185, 0.2);
+  background-color: rgba(255, 218, 185, 0.15);
   color: #d49a6a;
 }
 
 .ageTag[data-age="2歳児"] {
-  background-color: rgba(176, 224, 230, 0.2);
+  background-color: rgba(176, 224, 230, 0.15);
   color: #6a9da3;
 }
 
 .ageTag[data-age="3歳児"] {
-  background-color: rgba(144, 238, 144, 0.2);
+  background-color: rgba(144, 238, 144, 0.15);
   color: #5fa55f;
 }
 
 .ageTag[data-age="4歳児"] {
-  background-color: rgba(230, 230, 250, 0.2);
+  background-color: rgba(230, 230, 250, 0.15);
   color: #8484b4;
 }
 
 .ageTag[data-age="5歳児"] {
-  background-color: rgba(255, 239, 213, 0.2);
+  background-color: rgba(255, 239, 213, 0.15);
   color: #d4b48c;
 }
 
 .duration {
   color: #666;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.emptyEvent {
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 80px;
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.emptyEvent:hover {
+  border-color: #FFB5C5;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.emptyEvent .categoryLabel {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  min-width: 70px;
+}
+
+.noEvents {
+  color: #888;
+  margin: 0;
+  font-size: 0.9rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  flex: 1;
 }
 
 .addButton {
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
   padding: 12px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   width: 100%;
-  margin: 0 auto;
+  margin-top: auto;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.addButton::before {
+  content: '+';
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
 }
 
 .addButton:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  opacity: 1;
+  transform: translateY(-2px);
 }
 
 /* 季節ごとのボタンカラー */
 .spring .addButton {
-  background-color: #FFB5C5;
+  background: linear-gradient(135deg, #FFB5C5, #FFC0CB);
+  box-shadow: 0 4px 15px rgba(255, 181, 197, 0.3);
 }
 
 .spring .addButton:hover {
-  background-color: #ff9bab;
+  background: linear-gradient(135deg, #FFC0CB, #FFB5C5);
+  box-shadow: 0 6px 20px rgba(255, 181, 197, 0.4);
 }
 
 .summer .addButton {
-  background-color: #87CEEB;
+  background: linear-gradient(135deg, #87CEEB, #B0E0E6);
+  box-shadow: 0 4px 15px rgba(135, 206, 235, 0.3);
 }
 
 .summer .addButton:hover {
-  background-color: #75bcd6;
+  background: linear-gradient(135deg, #B0E0E6, #87CEEB);
+  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
 }
 
 .autumn .addButton {
-  background-color: #FFB347;
+  background: linear-gradient(135deg, #FFB347, #FFD4B2);
+  box-shadow: 0 4px 15px rgba(255, 179, 71, 0.3);
 }
 
 .autumn .addButton:hover {
-  background-color: #ff9f2e;
+  background: linear-gradient(135deg, #FFD4B2, #FFB347);
+  box-shadow: 0 6px 20px rgba(255, 179, 71, 0.4);
 }
 
 .winter .addButton {
-  background-color: #B0E0E6;
+  background: linear-gradient(135deg, #B0E0E6, #D1EAF5);
+  box-shadow: 0 4px 15px rgba(176, 224, 230, 0.3);
 }
 
 .winter .addButton:hover {
-  background-color: #9cd1d8;
+  background: linear-gradient(135deg, #D1EAF5, #B0E0E6);
+  box-shadow: 0 6px 20px rgba(176, 224, 230, 0.4);
 }
 
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
   .monthCard {
-    padding: 1rem;
+    padding: 15px;
+  }
+
+  .categoryLabels {
+    flex-wrap: wrap;
+  }
+
+  .eventItem,
+  .emptyEvent {
+    min-height: 80px;
+    padding: 12px;
   }
 
   .monthTitle {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 
   .eventTitle {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
+
+  .ageTag {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+  }
+
+  .duration {
+    font-size: 0.85rem;
+  }
+
+  .addButton {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+}
+
+.blueDecoration {
+  color: #4a90e2;
+}
+
+.pinkDecoration {
+  color: #ff9a9e;
+}
+
+.greenDecoration {
+  color: #68d391;
+}
+
+.yellowDecoration {
+  color: #f6e05e;
+}
+
+.purpleDecoration {
+  color: #9f7aea;
+}
+
+.orangeDecoration {
+  color: #ed8936;
+}
+
+.brownDecoration {
+  color: #b7791f;
+}
+
+.silverDecoration {
+  color: #a0aec0;
+}
+
+.defaultDecoration {
+  color: #718096;
 } 
