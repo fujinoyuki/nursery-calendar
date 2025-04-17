@@ -32,6 +32,9 @@
   justify-content: center;
   position: relative;
   z-index: 2;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
 }
 
 .title {
@@ -266,9 +269,15 @@
 
 .description {
   text-align: center;
-  color: #4a5568;
-  margin-bottom: 2rem;
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 40px;
   line-height: 1.8;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
 }
 
 .loginButton {
