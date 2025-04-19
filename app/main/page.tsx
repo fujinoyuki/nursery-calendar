@@ -8,10 +8,12 @@ import MonthCard from '../components/MonthCard';
 import EventOverlay from '../components/EventOverlay';
 import AddEventForm from '../components/AddEventForm';
 import EditEventForm from '../components/EditEventForm';
-import { Event } from '../types';
+import { Event, EventFormData } from '../types';
 import Link from 'next/link';
 
-type EventFormData = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
+type LocalEventFormData = Omit<EventFormData, 'media_files'> & {
+  media_files: File[];
+};
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -123,7 +125,7 @@ export default function MainPage() {
     setShowAddForm(true);
   };
 
-  const handleAddEventSubmit = async (eventData: EventFormData) => {
+  const handleAddEventSubmit = async (eventData: LocalEventFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -165,8 +167,7 @@ export default function MainPage() {
           ...normalizedEventData,
           date: date.toISOString(),
           month: selectedMonth,
-          user_id: session.user.id,
-          views: 0 // 閲覧数の初期値を設定
+          user_id: session.user.id
         })
         .select();
 
@@ -189,7 +190,7 @@ export default function MainPage() {
     }
   };
 
-  const handleEditEventSubmit = async (eventData: EventFormData) => {
+  const handleEditEventSubmit = async (eventData: LocalEventFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -261,6 +262,13 @@ export default function MainPage() {
     return monthEvents;
   };
 
+  const convertEventToFormData = (event: Event): EventFormData => {
+    return {
+      ...event,
+      media_files: []
+    };
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -299,25 +307,29 @@ export default function MainPage() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>保育アイデア管理</h1>
-        <div className={styles.headerButtons}>
-          <Link href="/events" className={styles.viewAllLink}>
-            すべてのイベントを見る
-          </Link>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className={styles.logoutButton}
-          >
-            ログアウト
-          </button>
-        </div>
-      </header>
+      <div className={styles.headerWrapper}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>保育アイデア管理</h1>
+          <div className={styles.headerButtons}>
+            <Link href="/events" className={styles.viewAllLink}>
+              すべてのイベントを見る
+            </Link>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className={styles.logoutButton}
+            >
+              ログアウト
+            </button>
+          </div>
+        </header>
+      </div>
 
-      <p className={styles.description}>
-        このアプリケーションは、保育士の方々が年間を通じて行うイベントやアクティビティのアイディアを管理するためのツールです。<br />
-        月ごとにイベントを追加・編集・削除することができ、各イベントには目的、準備物、所要時間などの詳細な情報を記録できます。
-      </p>
+      <div className={styles.descriptionContainer}>
+        <p className={styles.description}>
+          このアプリケーションは、保育士の方々が年間を通じて行うイベントやアクティビティのアイディアを管理するためのツールです。<br />
+          月ごとにイベントを追加・編集・削除することができ、各イベントには目的、準備物、所要時間などの詳細な情報を記録できます。
+        </p>
+      </div>
 
       <div className={styles.monthGrid}>
         {months.map((monthName) => {
@@ -362,7 +374,7 @@ export default function MainPage() {
         <div className={styles.overlay}>
           <div className={styles.modal}>
             <EditEventForm
-              event={selectedEvent}
+              data={convertEventToFormData(selectedEvent)}
               onSubmit={handleEditEventSubmit}
               onCancel={() => setShowEditForm(false)}
             />

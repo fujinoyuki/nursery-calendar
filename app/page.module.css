@@ -1,7 +1,7 @@
 .main {
   min-height: 100vh;
   background-color: #FFFFFF;
-  font-family: 'Courier New', monospace;
+  font-family: "M PLUS Rounded 1c", sans-serif;
   position: relative;
   overflow: hidden;
   padding: 40px;
@@ -34,7 +34,13 @@
   z-index: 2;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 20px;
+}
+
+/* 装飾的な要素を完全に削除 */
+.container::before,
+.container::after {
+  content: none;
 }
 
 .title {
@@ -232,29 +238,6 @@
   transform: rotate(0deg);
 }
 
-/* 装飾的な背景要素 */
-.container::before,
-.container::after {
-  content: '';
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  z-index: 0;
-}
-
-.container::before {
-  background: radial-gradient(circle, rgba(107, 155, 210, 0.1) 0%, rgba(107, 155, 210, 0) 70%);
-  top: -100px;
-  left: -100px;
-}
-
-.container::after {
-  background: radial-gradient(circle, rgba(157, 195, 230, 0.1) 0%, rgba(157, 195, 230, 0) 70%);
-  bottom: -100px;
-  right: -100px;
-}
-
 .loginBox {
   background: white;
   padding: 2.5rem;
@@ -268,16 +251,23 @@
 }
 
 .description {
-  text-align: center;
-  color: #666;
-  font-size: 1.1rem;
-  margin-bottom: 40px;
+  width: 100%;
+  max-width: 800px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 25px 30px;
+  border-radius: 15px;
+  font-size: 1rem;
   line-height: 1.8;
-  font-family: "M PLUS Rounded 1c", sans-serif;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 20px;
+  color: #666;
+  margin: 30px auto;
+  position: relative;
+  border: 2px dashed #FFB5C5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* グラデーション背景を削除してシンプルに */
+.description::before {
+  content: none;
 }
 
 .loginButton {
@@ -316,30 +306,7 @@
   }
 }
 
+/* 装飾要素も整理 */
 .decoration {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: #6B9BD2;
-  opacity: 0.1;
-  border-radius: 50%;
-  animation: float 3s ease-in-out infinite;
-}
-
-.decoration:nth-child(1) {
-  top: 20%;
-  left: 20%;
-  animation-delay: 0s;
-}
-
-.decoration:nth-child(2) {
-  top: 60%;
-  right: 20%;
-  animation-delay: 0.5s;
-}
-
-.decoration:nth-child(3) {
-  bottom: 20%;
-  left: 40%;
-  animation-delay: 1s;
+  display: none;
 }

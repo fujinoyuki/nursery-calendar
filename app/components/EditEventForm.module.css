@@ -271,7 +271,7 @@
 }
 
 /* カテゴリーごとの色設定 */
-.radioLabel[data-category="壁面"].selected {
+.radioLabel[data-category="壁　面"].selected {
   border-color: #FFB5C5;
   background: #FFF0F5;
   transform: translateY(-2px);

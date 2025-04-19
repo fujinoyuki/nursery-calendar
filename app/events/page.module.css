@@ -5,343 +5,426 @@
   background: linear-gradient(to bottom, #ffffff, #f8f8f8);
 }
 
+.contentWrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 80% 80%, rgba(147, 197, 253, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 50% 50%, rgba(191, 219, 254, 0.1) 0%, transparent 15%);
+  opacity: 0.3;
+  z-index: 1;
+}
+
+/* 春（3-5月） */
+.springContainer {
+  border: 1px solid #ff9a9e;
+  border-radius: 16px;
+  background-color: #fff5f5;
+}
+
+.springButton {
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 夏（6-8月） */
+.summerContainer {
+  border: 1px solid #60a5fa;
+  border-radius: 16px;
+  background-color: #f0f7ff;
+}
+
+.summerButton {
+  background: linear-gradient(135deg, #A7D2FF, #75bcd6);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 秋（9-11月） */
+.autumnContainer {
+  border: 1px solid #fb923c;
+  border-radius: 16px;
+  background-color: #fff7ed;
+}
+
+.autumnButton {
+  background: linear-gradient(135deg, #fb923c, #fdba74);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 冬（12-2月） */
+.winterContainer {
+  border: 1px solid #93c5fd;
+  border-radius: 16px;
+  background-color: #f8fafc;
+}
+
+.winterButton {
+  background: linear-gradient(135deg, #93c5fd, #bfdbfe);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
 .header {
-  margin-bottom: 2rem;
-  padding: 1rem 0;
-  border-bottom: 3px solid #87CEEB;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+  padding: 1rem 0;
+  z-index: 2;
 }
 
 .header h1 {
-  font-size: 2.5rem;
+  font-size: 38px;
   font-weight: bold;
-  color: #4FB4E2;
+  color: #4B9EFF;
+  margin: 0;
+  font-family: "M PLUS Rounded 1c", sans-serif;
   position: relative;
-  display: inline-block;
-  padding-bottom: 0.5rem;
+  padding: 0;
+  letter-spacing: 2px;
+  border-bottom: 3px solid #B5E6B5;
 }
 
-.header h1::after {
+.header::after {
   content: '';
   position: absolute;
-  bottom: -3px;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: 3px;
-  background: linear-gradient(to right, #87CEEB, #B0E0E6);
+  height: 2px;
+  background: hsl(220, 82%, 78%);
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  z-index: 2;
 }
 
 .backButton {
   padding: 0.75rem 1.5rem;
-  background-color: #87CEEB;
+  background: #93C6FF;
   color: white;
   border: none;
   border-radius: 8px;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
   font-weight: bold;
   font-size: 1rem;
-  box-shadow: 0 2px 4px rgba(135, 206, 235, 0.2);
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(147, 198, 255, 0.2);
+}
+
+.logoutButton {
+  padding: 0.75rem 1.5rem;
+  background: #FFB4C6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(255, 180, 198, 0.2);
 }
 
 .backButton:hover {
-  background-color: #4FB4E2;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(135, 206, 235, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(147, 198, 255, 0.3);
+  background: #4B9EFF;
 }
 
-.eventList {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 0.5rem;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+.logoutButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(255, 180, 198, 0.3);
+  background: #FF8BA7;
 }
 
-.eventCard {
-  background: white;
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-
-.eventCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* 季節ごとのスタイル */
-.spring {
-  border: 2px solid #FFB5C5;
-  background-color: rgba(255, 181, 197, 0.1);
-  box-shadow: 0 4px 6px rgba(255, 181, 197, 0.1);
-}
-
-.summer {
-  border: 2px solid #90EE90;
-  background-color: rgba(144, 238, 144, 0.1);
-  box-shadow: 0 4px 6px rgba(144, 238, 144, 0.1);
-}
-
-.autumn {
-  border: 2px solid #FFB347;
-  background-color: rgba(255, 179, 71, 0.1);
-  box-shadow: 0 4px 6px rgba(255, 179, 71, 0.1);
-}
-
-.winter {
-  border: 2px solid #B5C8E6;
-  background-color: rgba(181, 200, 230, 0.1);
-  box-shadow: 0 4px 6px rgba(181, 200, 230, 0.1);
-}
-
-.eventHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-/* カテゴリーのスタイル */
-.category {
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.categoryWall {
-  background-color: #E3F2FD;
-  color: #4FB4E2;
-}
-
-.categoryArt {
-  background-color: #FFE4E1;
-  color: #FF6B88;
-}
-
-.categoryOther {
-  background-color: #E8EAF6;
-  color: #3F51B5;
-}
-
-.date {
-  font-size: 1rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.title {
-  font-size: 1.25rem;
-  color: #333;
-  margin-bottom: 0.75rem;
-  font-weight: bold;
-}
-
-.description {
-  font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background-color: #f8f8f8;
-}
-
-.ageGroups {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-/* 年齢グループのスタイル */
-.ageGroup {
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.age0 {
-  background-color: #E8F5E9;
-  color: #43A047;
-}
-
-.age1 {
-  background-color: #F3E5F5;
-  color: #8E24AA;
-}
-
-.age2 {
-  background-color: #E3F2FD;
-  color: #1E88E5;
-}
-
-.age3 {
-  background-color: #FFF3E0;
-  color: #FB8C00;
-}
-
-.age4 {
-  background-color: #E1F5FE;
-  color: #039BE5;
-}
-
-.age5 {
-  background-color: #F1F8E9;
-  color: #7CB342;
-}
-
-.ageAll {
-  background-color: #EFEBE9;
-  color: #795548;
-}
-
-.duration {
-  font-size: 0.875rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.loadingContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 50vh;
-}
-
-.loadingSpinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #E3F2FD;
-  border-top: 4px solid #87CEEB;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.errorContainer {
-  text-align: center;
-  padding: 2rem;
-  color: #FF6B88;
-  background-color: #FFF5F6;
-  border-radius: 12px;
-  border: 1px solid #FFE5E8;
-}
-
-/* レスポンシブデザイン */
-@media (max-width: 1024px) {
-  .eventList {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .container {
-    padding: 1.5rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .eventList {
-    grid-template-columns: 1fr;
-  }
-  
-  .container {
-    padding: 1rem;
-  }
-  
-  .header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .header h1 {
-    font-size: 2rem;
-  }
-}
-
-/* 検索バーのスタイル */
 .searchContainer {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
   margin-bottom: 2rem;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
+  border: 2px dashed #B5B4E8;
+  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.05);
 }
 
-.searchForm {
+.searchContainer::before,
+.searchContainer::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.searchContainer::before {
+  top: -15px;
+  left: -15px;
+  background: #93C6FF;
+}
+
+.searchContainer::after {
+  bottom: -15px;
+  right: -15px;
+  background: #B5B4E8;
+}
+
+.searchBar {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .searchInput {
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
+  border: 2px solid #E5E7EB;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition: all 0.3s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #87CEEB;
-  box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.2);
+  border-color: #93C6FF;
+  box-shadow: 0 0 0 3px rgba(147, 198, 255, 0.1);
 }
 
-.searchButton {
-  background-color: #87CEEB;
+.searchButton,
+.advancedSearchButton {
+  padding: 0.75rem 1.5rem;
+  background: #93C6FF;
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 1rem;
   cursor: pointer;
-  font-size: 1.2rem;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  box-shadow: 0 2px 4px rgba(147, 198, 255, 0.2);
 }
 
-.searchButton:hover {
-  background-color: #4FB4E2;
-}
-
-.advancedSearchButton {
-  background-color: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s;
-}
-
+.searchButton:hover,
 .advancedSearchButton:hover {
-  background-color: #e0e0e0;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(147, 198, 255, 0.3);
+  background: #4B9EFF;
 }
 
-/* 詳細検索モーダルのスタイル */
+.sortContainer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sortButton {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  color: #666;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.sortButton:hover {
+  background: #F3F4F6;
+  border-color: #93C6FF;
+  color: #4B9EFF;
+}
+
+.sortButton.active {
+  background: #93C6FF;
+  color: white;
+  border-color: #93C6FF;
+}
+
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.eventCard {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid #e0f2fe;
+  cursor: pointer;
+}
+
+.eventCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);
+  border-color: #93c5fd;
+}
+
+.eventHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.category {
+  padding: 0.4rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+}
+
+.categoryWall {
+  background: #A7D2FF;
+}
+
+.categoryArt {
+  background: #FFB5C5;
+}
+
+.categoryOther {
+  background: #B5E6B5;
+}
+
+.date {
+  font-size: 1rem;
+  color: #666;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  background: rgba(96, 165, 250, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+}
+
+.title {
+  font-size: 1.2rem;
+  color: #444;
+  margin: 0.5rem 0;
+  font-weight: 600;
+  line-height: 1.4;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.ageGroups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ageGroup {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: 500;
+}
+
+/* 年齢タグの色分け */
+.age0 {
+  background-color: rgba(255, 182, 193, 0.15);
+  color: #d4788f;
+}
+
+.age1 {
+  background-color: rgba(255, 218, 185, 0.15);
+  color: #d49a6a;
+}
+
+.age2 {
+  background-color: rgba(176, 224, 230, 0.15);
+  color: #6a9da3;
+}
+
+.age3 {
+  background-color: rgba(144, 238, 144, 0.15);
+  color: #5fa55f;
+}
+
+.age4 {
+  background-color: rgba(230, 230, 250, 0.15);
+  color: #8484b4;
+}
+
+.age5 {
+  background-color: rgba(255, 239, 213, 0.15);
+  color: #d4b48c;
+}
+
+.duration {
+  font-size: 0.9rem;
+  color: #666;
+  background-color: rgba(96, 165, 250, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  white-space: nowrap;
+}
+
+/* モーダル関連のスタイル */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -356,45 +439,30 @@
 }
 
 .modalContent {
-  background-color: white;
-  border-radius: 15px;
+  background: white;
+  padding: 2rem;
+  border-radius: 25px;
   width: 90%;
-  max-width: 600px;
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  animation: modalFadeIn 0.3s ease-out;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e0f2fe;
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.modalHeader {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0f2fe;
 }
 
-.modalTitle {
-  padding: 1.5rem;
+.modalHeader h2 {
   margin: 0;
-  border-bottom: 1px solid #eee;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.modalBody {
-  padding: 1.5rem;
-}
-
-.modalFooter {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
+  color: #60a5fa;
+  font-size: 1.8rem;
+  font-weight: normal;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
 .formGroup {
@@ -405,127 +473,172 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #555;
+  color: #444;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
-.formGroup input[type="text"],
-.formGroup select {
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid #e0f2fe;
+  border-radius: 15px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition: all 0.3s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
-.formGroup input[type="text"]:focus,
-.formGroup select:focus {
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
   outline: none;
-  border-color: #87CEEB;
-  box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.2);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
 }
 
 .checkboxGroup {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #444;
   cursor: pointer;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
-.checkboxLabel input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e0f2fe;
 }
 
 .resetButton,
 .cancelButton,
 .applyButton {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 15px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: normal;
 }
 
 .resetButton {
-  background-color: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
+  background-color: #f1f5f9;
+  color: #64748b;
 }
 
 .resetButton:hover {
-  background-color: #e0e0e0;
+  background-color: #e0f2fe;
 }
 
 .cancelButton {
-  background-color: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
+  background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+  color: white;
 }
 
 .cancelButton:hover {
-  background-color: #e0e0e0;
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
 }
 
 .applyButton {
-  background-color: #87CEEB;
+  background: linear-gradient(135deg, #60a5fa, #93c5fd);
   color: white;
-  border: none;
 }
 
 .applyButton:hover {
-  background-color: #4FB4E2;
+  background: linear-gradient(135deg, #93c5fd, #60a5fa);
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 640px) {
-  .searchForm {
+/* レスポンシブデザイン */
+@media (max-width: 1440px) {
+  .contentWrapper {
+    max-width: calc(100% - 4rem);
+  }
+}
+
+@media (max-width: 1200px) {
+  .eventsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .buttonContainer {
+    width: 100%;
     flex-direction: column;
   }
-  
-  .searchInput,
+
+  .backButton,
+  .logoutButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .searchBar {
+    flex-direction: column;
+  }
+
   .searchButton,
   .advancedSearchButton {
     width: 100%;
   }
-  
+
+  .eventsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
   .modalContent {
+    padding: 1.5rem;
     width: 95%;
   }
 }
 
-.sortContainer {
-  display: flex;
-  gap: 8px;
-  margin: 1rem 0;
-  justify-content: center;
-}
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
 
-.sortButton {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  background: white;
-  color: #64748b;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+  .header h1 {
+    font-size: 1.8rem;
+  }
 
-.sortButton:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-}
+  .title {
+    font-size: 1.1rem;
+  }
 
-.sortButton.active {
-  background: #4FB4E2;
-  color: white;
-  border-color: #4FB4E2;
+  .description {
+    font-size: 0.9rem;
+  }
 } 

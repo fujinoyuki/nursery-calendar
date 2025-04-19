@@ -17,8 +17,8 @@
   background: white;
   padding: 2rem;
   border-radius: 20px;
-  width: 100%;
-  max-width: 600px;
+  width: 90%;
+  max-width: 90%;
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
@@ -82,7 +82,7 @@
   color: white;
 }
 
-.categoryLabel[data-category="壁面"] {
+.categoryLabel[data-category="壁　面"] {
   background-color: #A7D2FF;
 }
 
@@ -247,55 +247,41 @@
 
 /* 季節ごとのスタイル */
 .spring {
-  border-color: #FFB5C5;
+  border-color: #ffb6c1;
 }
 
 .spring .section {
-  background-color: rgba(255, 181, 197, 0.05);
+  background-color: rgba(255, 182, 193, 0.1);
 }
 
 .spring .section:hover {
-  background-color: rgba(255, 181, 197, 0.1);
+  background-color: rgba(255, 182, 193, 0.15);
 }
 
 .spring .sectionTitle::before {
-  background-color: #FFB5C5;
+  background-color: #ffb6c1;
 }
 
 .spring .editButton {
-  background: linear-gradient(135deg, #FFB5C5 0%, #FFD4E5 100%);
-  color: #444;
-  box-shadow: 
-    0 4px 15px rgba(255, 181, 197, 0.3),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
-    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+  background-color: #ffb6c1;
+  border: 1px solid #ffb6c1;
+  color: white;
 }
 
 .spring .editButton:hover {
-  background: linear-gradient(135deg, #FFD4E5 0%, #FFB5C5 100%);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 6px 20px rgba(255, 181, 197, 0.4),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
-    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+  background-color: white;
+  color: #ffb6c1;
 }
 
 .spring .deleteButton {
-  background: linear-gradient(135deg, #FF9B9B 0%, #FFB5B5 100%);
-  color: #444;
-  box-shadow: 
-    0 4px 15px rgba(255, 155, 155, 0.3),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
-    inset 0 3px 6px rgba(255, 255, 255, 0.5);
+  background-color: white;
+  border: 1px solid #ffb6c1;
+  color: #ffb6c1;
 }
 
 .spring .deleteButton:hover {
-  background: linear-gradient(135deg, #FF8080 0%, #FF9B9B 100%);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 6px 20px rgba(255, 155, 155, 0.4),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.3),
-    inset 0 3px 6px rgba(255, 255, 255, 0.3);
+  background-color: #ffb6c1;
+  color: white;
 }
 
 .summer {

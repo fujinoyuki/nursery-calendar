@@ -1,23 +1,23 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './AddEventForm.module.css';
-import { Event } from '../types';
+import { Event, EventFormData, AgeGroup } from '../types';
 
 type AddEventFormProps = {
-  onSubmit: (data: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
+  onSubmit: (data: EventFormData) => void;
   onCancel: () => void;
   selectedMonth: number;
 };
 
-const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+const AGE_GROUPS: AgeGroup[] = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
 const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
 type Category = typeof CATEGORIES[number];
 
 export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddEventFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [ageGroups, setAgeGroups] = useState<string[]>([]);
+  const [ageGroups, setAgeGroups] = useState<AgeGroup[]>([]);
   const [category, setCategory] = useState<Category>('壁　面');
   const [otherCategory, setOtherCategory] = useState('');
   const [hours, setHours] = useState('');
@@ -41,22 +41,22 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
       return;
     }
     const duration = `${hours || '0'}時間${minutes || '0'}分`;
-    const eventData = {
+    const eventData: EventFormData = {
       title,
       description,
       age_groups: ageGroups,
-      category: category === 'その他' ? otherCategory : category,
+      category: (category === 'その他' ? otherCategory : category) as Category,
       duration,
       materials,
       objectives,
-      date: new Date().toISOString(),
-      month: selectedMonth
+      month: selectedMonth,
+      media_files: mediaFiles
     };
     onSubmit(eventData);
   };
 
   const handleAgeGroupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const value = e.target.value as AgeGroup;
     setAgeGroups(prev => 
       e.target.checked 
         ? [...prev, value]
@@ -87,7 +87,15 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
   };
 
   const handleRemoveFile = (index: number) => {
-    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+    setMediaFiles(prev => {
+      const newFiles = [...prev];
+      const removedFile = newFiles[index];
+      if (removedFile) {
+        URL.revokeObjectURL(URL.createObjectURL(removedFile));
+      }
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
   };
 
   const renderPreview = (file: File, index: number) => {
@@ -95,10 +103,16 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
     const isVideo = file.type.startsWith('video/');
     const url = URL.createObjectURL(file);
 
+    useEffect(() => {
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    }, [url]);
+
     return (
       <div key={index} className={styles.previewItem}>
-        {isImage && <img src={url} alt="プレビュー" />}
-        {isVideo && <video src={url} />}
+        {isImage && <img src={url} alt={`プレビュー ${index + 1}`} />}
+        {isVideo && <video src={url} controls />}
         <button
           type="button"
           className={styles.removeButton}
@@ -145,6 +159,7 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                 <label
                   key={age}
                   className={`${styles.checkbox} ${ageGroups.includes(age) ? styles.selected : ''}`}
+                  data-age={age}
                 >
                   <input
                     type="checkbox"
@@ -152,7 +167,7 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                     checked={ageGroups.includes(age)}
                     onChange={handleAgeGroupChange}
                   />
-                  {age}
+                  <span>{age}</span>
                 </label>
               ))}
             </div>
@@ -165,6 +180,7 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                 <label
                   key={cat}
                   className={`${styles.radioLabel} ${category === cat ? styles.selected : ''}`}
+                  data-category={cat}
                 >
                   <input
                     type="radio"
@@ -172,23 +188,21 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                     checked={category === cat}
                     onChange={(e) => setCategory(e.target.value as Category)}
                     className={styles.radioInput}
+                    name="category"
                   />
-                  {cat}
+                  <span>{cat}</span>
                 </label>
               ))}
             </div>
             {category === 'その他' && (
-              <label>
-                その他のカテゴリー
-                <input
-                  type="text"
-                  className={`${styles.otherInput} ${styles.visible}`}
-                  value={otherCategory}
-                  onChange={(e) => setOtherCategory(e.target.value)}
-                  placeholder="カテゴリーを入力してください"
-                  required={category === 'その他'}
-                />
-              </label>
+              <input
+                type="text"
+                className={`${styles.otherInput} ${styles.visible}`}
+                value={otherCategory}
+                onChange={(e) => setOtherCategory(e.target.value)}
+                placeholder="カテゴリーを入力してください"
+                required={category === 'その他'}
+              />
             )}
           </div>
 

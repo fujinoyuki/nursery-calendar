@@ -17,13 +17,14 @@
   background-color: white;
   padding: 2.5rem;
   border-radius: 15px;
-  width: 100%; /* オーバーレイの余白を考慮して100% */
-  height: 100%; /* オーバーレイの余白を考慮して100% */
+  width: 90vw; /* 幅を90vwに設定 */
+  max-width: 1000px; /* 最大幅を1000pxに増やす */
+  height: 90vh;
   animation: slideIn 0.3s ease-out;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 2px solid #FFB5C5;
   position: relative;
-  overflow-y: auto; /* 縦方向のスクロールを有効化 */
+  overflow-y: auto;
 }
 
 /* スクロールバーのスタイリング */
@@ -88,6 +89,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  margin-bottom: 1.5rem; /* 項目間の余白を追加 */
 }
 
 .formGroup label {
@@ -100,6 +102,7 @@
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
+  width: 100%;
   padding: 0.8rem;
   border: 2px solid #E5E7EB;
   border-radius: 8px;
@@ -119,7 +122,7 @@
 }
 
 .formGroup textarea {
-  min-height: 100px;
+  min-height: 120px; /* テキストエリアの最小の高さを設定 */
   resize: vertical;
 }
 
@@ -128,6 +131,8 @@
   gap: 1rem;
   margin-top: 2rem;
   justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #E5E7EB;
 }
 
 .submitButton,
@@ -190,11 +195,16 @@
   flex-wrap: wrap;
   gap: 1rem;
   margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  width: 100%; /* 幅を100%に設定 */
 }
 
 .checkbox, .radioLabel {
+  flex: 0 0 calc(16.666% - 1rem);
+  min-width: 120px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   cursor: pointer;
   padding: 0.8rem 1.2rem;
@@ -203,6 +213,8 @@
   transition: all 0.3s ease;
   position: relative;
   background: white;
+  text-align: center;
+  user-select: none; /* テキスト選択を防ぐ */
 }
 
 .checkbox:hover, .radioLabel:hover {
@@ -215,10 +227,16 @@
 .radioInput {
   position: absolute;
   opacity: 0;
+  width: 100%;
+  height: 100%;
   cursor: pointer;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
 }
 
 /* 年齢グループごとの色設定 */
+.checkbox[data-age="0歳児"] input[type="checkbox"]:checked + span,
 .checkbox[data-age="0歳児"].selected {
   border-color: #FFB5C5;
   background: #FFF0F5;
@@ -227,6 +245,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.checkbox[data-age="1歳児"] input[type="checkbox"]:checked + span,
 .checkbox[data-age="1歳児"].selected {
   border-color: #FFD4B2;
   background: #FFF5EB;
@@ -235,6 +254,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.checkbox[data-age="2歳児"] input[type="checkbox"]:checked + span,
 .checkbox[data-age="2歳児"].selected {
   border-color: #FFF3B8;
   background: #FFFBEB;
@@ -243,6 +263,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.checkbox[data-age="3歳児"] input[type="checkbox"]:checked + span,
 .checkbox[data-age="3歳児"].selected {
   border-color: #B5E6B5;
   background: #F0FFF0;
@@ -251,6 +272,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.checkbox[data-age="4歳児"] input[type="checkbox"]:checked + span,
 .checkbox[data-age="4歳児"].selected {
   border-color: #A7D2FF;
   background: #F0F8FF;
@@ -259,6 +281,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.checkbox[data-age="5歳児"] input[type="checkbox"]:checked + span,
 .checkbox[data-age="5歳児"].selected {
   border-color: #DCC2FF;
   background: #F8F0FF;
@@ -268,7 +291,8 @@
 }
 
 /* カテゴリーごとの色設定 */
-.radioLabel[data-category="壁面"].selected {
+.radioLabel[data-category="壁　面"] input[type="radio"]:checked + span,
+.radioLabel[data-category="壁　面"].selected {
   border-color: #FFB5C5;
   background: #FFF0F5;
   transform: translateY(-2px);
@@ -276,6 +300,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.radioLabel[data-category="制作物"] input[type="radio"]:checked + span,
 .radioLabel[data-category="制作物"].selected {
   border-color: #A7D2FF;
   background: #F0F8FF;
@@ -284,6 +309,7 @@
   animation: selectPop 0.3s ease-out;
 }
 
+.radioLabel[data-category="その他"] input[type="radio"]:checked + span,
 .radioLabel[data-category="その他"].selected {
   border-color: #B5E6B5;
   background: #F0FFF0;
@@ -406,11 +432,11 @@
 .timeInputGroup {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem; /* 時間入力欄の間隔を広げる */
 }
 
 .timeInputGroup input {
-  width: 80px;
+  width: 100px; /* 時間入力欄の幅を広げる */
   text-align: center;
 }
 

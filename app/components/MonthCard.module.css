@@ -200,7 +200,7 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 60px;
 }
 
 .eventItem {
@@ -348,34 +348,45 @@
 }
 
 .addButton {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #FFB5C5, #FFD4B2);
   color: white;
   border: none;
-  border-radius: 20px;
-  padding: 12px;
+  padding: 10px 40px;
+  width: 220px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: bold;
   transition: all 0.3s ease;
-  width: 100%;
-  margin-top: auto;
-  font-size: 0.95rem;
-  letter-spacing: 0.05em;
-  font-family: "M PLUS Rounded 1c", sans-serif;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 181, 197, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 10;
+  white-space: nowrap;
 }
 
 .addButton::before {
   content: '+';
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
   font-size: 1.2rem;
+  font-weight: bold;
+  margin-right: 2px;
 }
 
 .addButton:hover {
-  opacity: 1;
-  transform: translateY(-2px);
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 181, 197, 0.4);
+  background: linear-gradient(135deg, #FFD4B2, #FFB5C5);
+}
+
+.addButton:active {
+  transform: translateX(-50%) translateY(0);
+  box-shadow: 0 2px 10px rgba(255, 181, 197, 0.3);
 }
 
 /* 季節ごとのボタンカラー */
@@ -453,8 +464,8 @@
   }
 
   .addButton {
-    padding: 12px;
-    font-size: 0.95rem;
+    width: 180px;
+    padding: 10px 30px;
   }
 }
 

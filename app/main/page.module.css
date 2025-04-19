@@ -5,6 +5,12 @@
   background: linear-gradient(to bottom, #ffffff, #f8f8f8);
 }
 
+.headerWrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .header {
   margin-bottom: 2rem;
   padding: 1rem 0;
@@ -86,7 +92,8 @@
 }
 
 .descriptionContainer {
-  margin-bottom: 3rem;
+  max-width: 1400px;
+  margin: 0 auto 3rem;
   padding: 2rem;
   background-color: white;
   border-radius: 15px;
@@ -95,6 +102,7 @@
   border: 2px dashed #B5E6B5;
 }
 
+/* 装飾的な要素を追加 */
 .descriptionContainer::before,
 .descriptionContainer::after {
   content: '';
@@ -108,13 +116,13 @@
 .descriptionContainer::before {
   top: -15px;
   left: -15px;
-  background: #FFB5C5;
+  background: #FFD700; /* 黄色 */
 }
 
 .descriptionContainer::after {
   bottom: -15px;
   right: -15px;
-  background: #A7D2FF;
+  background: #98D8BF; /* 黄緑と黄色に調和する薄い青緑 */
 }
 
 .description {
@@ -122,37 +130,17 @@
   line-height: 1.8;
   color: #666;
   text-align: center;
-  margin: 2rem 0;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 2px dashed #B5E6B5;
-  position: relative;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
-.description::before {
-  content: '';
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  opacity: 0.3;
-  top: -15px;
-  left: -15px;
-  background: #FFB5C5;
-}
-
+/* 装飾的な要素を削除 */
+.description::before,
 .description::after {
-  content: '';
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  opacity: 0.3;
-  bottom: -15px;
-  right: -15px;
-  background: #A7D2FF;
+  content: none;
 }
 
 .description:last-child {
@@ -164,10 +152,10 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 2rem;
-  margin-top: 2rem;
+  margin: 2rem auto;
   width: 100%;
   max-width: 1400px;
-  margin: 2rem auto;
+  padding: 0 2rem;
 }
 
 .monthContainer {
@@ -252,62 +240,62 @@
 
 /* 季節ごとの色分け */
 .spring {
-  border: 2px solid #FFB5C5;
-  background-color: rgba(255, 181, 197, 0.1);
-  box-shadow: 0 4px 6px rgba(255, 181, 197, 0.1);
+  border: 2px solid #ff9a9e;
+  background-color: #fff5f5;
+  box-shadow: 0 4px 6px rgba(255, 154, 158, 0.1);
 }
 
 .spring .addButton {
-  background-color: #FFB5C5;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
 }
 
 .spring .addButton:hover {
-  background-color: #ff9bab;
+  background: linear-gradient(135deg, #ff8a8e, #f9c0b4);
   transform: translateY(-2px);
 }
 
 .summer {
-  border: 2px solid #90EE90;
-  background-color: rgba(144, 238, 144, 0.1);
-  box-shadow: 0 4px 6px rgba(144, 238, 144, 0.1);
+  border: 2px solid #86efac;
+  background-color: #f0fff4;
+  box-shadow: 0 4px 6px rgba(134, 239, 172, 0.1);
 }
 
 .summer .addButton {
-  background-color: #90EE90;
+  background: linear-gradient(135deg, #86efac, #4ade80);
 }
 
 .summer .addButton:hover {
-  background-color: #7ed67e;
+  background: linear-gradient(135deg, #76df9c, #3ace70);
   transform: translateY(-2px);
 }
 
 .autumn {
-  border: 2px solid #FFB347;
-  background-color: rgba(255, 179, 71, 0.1);
-  box-shadow: 0 4px 6px rgba(255, 179, 71, 0.1);
+  border: 2px solid #fb923c;
+  background-color: #fff7ed;
+  box-shadow: 0 4px 6px rgba(251, 146, 60, 0.1);
 }
 
 .autumn .addButton {
-  background-color: #FFB347;
+  background: linear-gradient(135deg, #fb923c, #fdba74);
 }
 
 .autumn .addButton:hover {
-  background-color: #ff9f2e;
+  background: linear-gradient(135deg, #eb822c, #edb064);
   transform: translateY(-2px);
 }
 
 .winter {
-  border: 2px solid #B5C8E6;
-  background-color: rgba(181, 200, 230, 0.1);
-  box-shadow: 0 4px 6px rgba(181, 200, 230, 0.1);
+  border: 2px solid #a78bfa;
+  background-color: #f5f3ff;
+  box-shadow: 0 4px 6px rgba(167, 139, 250, 0.1);
 }
 
 .winter .addButton {
-  background-color: #B5C8E6;
+  background: linear-gradient(135deg, #a78bfa, #c4b5fd);
 }
 
 .winter .addButton:hover {
-  background-color: #9db3d8;
+  background: linear-gradient(135deg, #977bea, #b4a5ed);
   transform: translateY(-2px);
 }
 
@@ -369,48 +357,50 @@
 
 /* エラー状態のスタイル */
 .errorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #ffffff;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
   padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   text-align: center;
+  max-width: 90%;
+  width: 400px;
+  z-index: 1000;
 }
 
-.errorContainer p {
+.errorMessage {
   color: #ff6b6b;
-  margin-bottom: 1.5rem;
   font-size: 1.1rem;
-  padding: 1rem;
-  background-color: #fff0f0;
-  border-radius: 8px;
-  border: 1px solid #ffcdd2;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
 .retryButton {
-  padding: 0.75rem 1.5rem;
-  background-color: #FF8BA7;
-  color: white;
+  background: linear-gradient(135deg, #FFB5C5 0%, #FFD4E5 100%);
+  color: #444;
+  padding: 0.8rem 2.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: bold;
-  font-size: 1rem;
-  box-shadow: 0 2px 4px rgba(255, 139, 167, 0.2);
+  box-shadow: 
+    0 4px 15px rgba(255, 181, 197, 0.3),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
 }
 
 .retryButton:hover {
-  background-color: #FF6B88;
+  background: linear-gradient(135deg, #FFD4E5 0%, #FFB5C5 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 139, 167, 0.3);
-}
-
-.retryButton:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(255, 139, 167, 0.2);
+  box-shadow: 
+    0 6px 20px rgba(255, 181, 197, 0.4),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    inset 0 3px 6px rgba(255, 255, 255, 0.5);
 }
 
 /* タブレット向け */
@@ -435,6 +425,11 @@
   
   .container {
     padding: 1rem;
+  }
+  
+  .headerWrapper,
+  .descriptionContainer {
+    max-width: 100%;
   }
 }
 
@@ -666,9 +661,9 @@
   }
 }
 
-@media (max-width: 768px) {
-  .monthGrid {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(12, 1fr);
+@media (max-width: 1440px) {
+  .headerWrapper,
+  .descriptionContainer {
+    max-width: calc(100% - 4rem);
   }
 } 

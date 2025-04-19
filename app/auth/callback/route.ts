@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
@@ -7,40 +7,23 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code');
 
   if (code) {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            try {
-              cookieStore.set({ name, value, ...options });
-            } catch (error) {
-              console.error('Cookie設定エラー:', error);
-            }
-          },
-          remove(name: string, options: any) {
-            try {
-              cookieStore.delete(name);
-            } catch (error) {
-              console.error('Cookie削除エラー:', error);
-            }
-          },
-        },
+    const supabase = createRouteHandlerClient({ cookies });
+
+    try {
+      await supabase.auth.exchangeCodeForSession(code);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        const cookieStore = cookies();
+        await cookieStore.set('session', JSON.stringify(session));
+      } else {
+        const cookieStore = cookies();
+        await cookieStore.delete('session');
       }
-    );
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error) {
-      return NextResponse.redirect(requestUrl.origin);
+    } catch (error) {
+      console.error('Error:', error);
     }
   }
 
-  // エラーページにリダイレクト
-  return NextResponse.redirect(`${requestUrl.origin}/auth/auth-code-error`);
+  return NextResponse.redirect(new URL('/main', request.url));
 } 

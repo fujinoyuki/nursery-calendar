@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Event } from '../types';
+import { Event, AgeGroup, EventFormData } from '../types';
 import EventOverlay from '../components/EventOverlay';
+import EditEventForm from '../components/EditEventForm';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,9 +16,9 @@ const supabase = createBrowserClient(
 
 // 季節を判定する関数
 const getSeason = (month: number) => {
-  if (month >= 4 && month <= 6) return 'spring';
-  if (month >= 7 && month <= 9) return 'summer';
-  if (month >= 10 && month <= 12) return 'autumn';
+  if (month >= 3 && month <= 5) return 'spring';
+  if (month >= 6 && month <= 8) return 'summer';
+  if (month >= 9 && month <= 11) return 'autumn';
   return 'winter';
 };
 
@@ -27,7 +28,7 @@ const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳
 // カテゴリーのスタイルを取得する関数
 const getCategoryStyle = (category: string) => {
   switch (category) {
-    case '壁面':
+    case '壁　面':
       return styles.categoryWall;
     case '制作物':
       return styles.categoryArt;
@@ -58,7 +59,7 @@ const getAgeGroupStyle = (age: string) => {
 
 // カテゴリーの表示テキストを取得する関数
 const getCategoryDisplayText = (category: string) => {
-  if (category !== '壁面' && category !== '制作物') {
+  if (category !== '壁　面' && category !== '制作物') {
     return 'その他';
   }
   return category;
@@ -69,10 +70,11 @@ export default function EventListPage() {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'popular'>('newest');
+  const [sortType, setSortType] = useState<'date' | 'popular'>('date');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState({
     title: '',
     description: '',
@@ -109,6 +111,7 @@ export default function EventListPage() {
 
       console.log('取得したイベントデータ:', eventsData);
       setEvents(eventsData || []);
+      setFilteredEvents(eventsData || []);
     } catch (error) {
       setError('予期せぬエラーが発生しました');
     } finally {
@@ -144,6 +147,15 @@ export default function EventListPage() {
     }
   }, [selectedEvent]);
 
+  // 現在の月を取得
+  const currentMonth = new Date().getMonth() + 1; // JavaScriptの月は0から始まるため+1
+
+  // 月の比較関数（現在の月からの距離を計算）
+  const getMonthDistance = (month: number) => {
+    const diff = currentMonth - month;
+    return diff >= 0 ? diff : diff + 12;
+  };
+
   // 検索機能を実装
   useEffect(() => {
     if (events.length === 0) return;
@@ -151,11 +163,12 @@ export default function EventListPage() {
     let filtered = [...events];
 
     // 基本的な検索（タイトルと説明文）
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (searchTerm) {
+      const query = searchTerm.toLowerCase();
       filtered = filtered.filter(event => 
-        event.title.toLowerCase().includes(query) || 
-        event.description.toLowerCase().includes(query)
+        event.title?.toLowerCase().includes(query) || 
+        event.description?.toLowerCase().includes(query) ||
+        event.category?.toLowerCase().includes(query)
       );
     }
 
@@ -165,7 +178,7 @@ export default function EventListPage() {
       if (advancedFilters.title) {
         const titleQuery = advancedFilters.title.toLowerCase();
         filtered = filtered.filter(event => 
-          event.title.toLowerCase().includes(titleQuery)
+          event.title?.toLowerCase().includes(titleQuery)
         );
       }
 
@@ -173,49 +186,52 @@ export default function EventListPage() {
       if (advancedFilters.description) {
         const descQuery = advancedFilters.description.toLowerCase();
         filtered = filtered.filter(event => 
-          event.description.toLowerCase().includes(descQuery)
-        );
-      }
-
-      // カテゴリー
-      if (advancedFilters.category) {
-        filtered = filtered.filter(event => 
-          event.category === advancedFilters.category
+          event.description?.toLowerCase().includes(descQuery)
         );
       }
 
       // 年齢グループ
       if (advancedFilters.ageGroups.length > 0) {
-        filtered = filtered.filter(event => 
-          advancedFilters.ageGroups.some(age => 
-            event.age_groups.includes(age)
-          )
-        );
+        filtered = filtered.filter(event => {
+          if (!event.age_groups || !Array.isArray(event.age_groups)) return false;
+          return advancedFilters.ageGroups.some(age => event.age_groups.includes(age as AgeGroup));
+        });
+      }
+
+      // カテゴリー
+      if (advancedFilters.category) {
+        filtered = filtered.filter(event => {
+          const eventCategory = event.category || 'その他';
+          return eventCategory === advancedFilters.category;
+        });
       }
 
       // 所要時間
       if (advancedFilters.duration) {
-        filtered = filtered.filter(event => 
-          event.duration.includes(advancedFilters.duration)
-        );
+        filtered = filtered.filter(event => {
+          if (!event.duration) return false;
+          return event.duration.includes(advancedFilters.duration);
+        });
       }
 
       // 準備物
       if (advancedFilters.materials.length > 0) {
-        filtered = filtered.filter(event => 
-          advancedFilters.materials.some(material => 
-            event.materials.includes(material)
-          )
-        );
+        filtered = filtered.filter(event => {
+          if (!event.materials || !Array.isArray(event.materials)) return false;
+          return advancedFilters.materials.every(material => 
+            event.materials.some(m => m.includes(material))
+          );
+        });
       }
 
       // 目的
       if (advancedFilters.objectives.length > 0) {
-        filtered = filtered.filter(event => 
-          advancedFilters.objectives.some(objective => 
-            event.objectives.includes(objective)
-          )
-        );
+        filtered = filtered.filter(event => {
+          if (!event.objectives || !Array.isArray(event.objectives)) return false;
+          return advancedFilters.objectives.every(objective => 
+            event.objectives.some(o => o.includes(objective))
+          );
+        });
       }
 
       // 画像あり
@@ -238,31 +254,32 @@ export default function EventListPage() {
     }
 
     // 並び替え
-    filtered.sort((a, b) => {
-      switch (sortOrder) {
-        case 'newest':
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        case 'oldest':
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        case 'popular':
-          // view_countがundefinedの場合は0として扱う
-          const aCount = a.view_count || 0;
-          const bCount = b.view_count || 0;
-          return bCount - aCount;
-        default:
-          return 0;
-      }
-    });
+    let sorted = [...filtered];
+    if (sortType === 'date') {
+      sorted.sort((a, b) => {
+        // まず月の距離で比較
+        const monthDistanceA = getMonthDistance(a.month);
+        const monthDistanceB = getMonthDistance(b.month);
+        if (monthDistanceA !== monthDistanceB) {
+          return monthDistanceA - monthDistanceB;
+        }
+        // 月が同じ場合は作成日時で比較
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+    } else if (sortType === 'popular') {
+      sorted.sort((a, b) => {
+        const aViews = a.views || 0;
+        const bViews = b.views || 0;
+        return bViews - aViews;
+      });
+    }
 
-    setFilteredEvents(filtered);
-  }, [events, searchQuery, showAdvancedSearch, advancedFilters, sortOrder]);
+    setFilteredEvents(sorted);
+  }, [events, searchTerm, showAdvancedSearch, advancedFilters, sortType]);
 
   // 検索クエリの変更を処理
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  // 検索ボタンクリック時の処理
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // 検索は自動的に実行されるため、特別な処理は不要
@@ -322,7 +339,59 @@ export default function EventListPage() {
 
   const handleEventEdit = () => {
     if (selectedEvent) {
-      router.push(`/main?edit=${selectedEvent.id}`);
+      setEditingEvent(selectedEvent);
+      setSelectedEvent(null);
+    }
+  };
+
+  const handleEditSubmit = async (formData: EventFormData) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          age_groups: formData.age_groups,
+          duration: formData.duration,
+          materials: formData.materials,
+          objectives: formData.objectives,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingEvent?.id);
+
+      if (error) {
+        setError('イベントの更新に失敗しました');
+        return;
+      }
+      
+      await fetchEvents(); // 先にデータを更新
+      setEditingEvent(null); // 成功後にモーダルを閉じる
+    } catch (error: any) {
+      setError('イベントの更新に失敗しました');
+      console.error('Error updating event:', error);
+    }
+  };
+
+  const handleEditCancel = () => {
+    if (window.confirm('編集をキャンセルしてもよろしいですか？')) {
+      setEditingEvent(null);
+    }
+  };
+
+  // モーダルの外側クリック時の処理を追加
+  const handleModalOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleEditCancel();
+    }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error.message);
+    } else {
+      router.push('/');
     }
   };
 
@@ -345,82 +414,83 @@ export default function EventListPage() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>イベント一覧</h1>
-        <Link href="/main" className={styles.backButton}>
-          カレンダーに戻る
-        </Link>
-      </header>
-
-      <div className={styles.searchContainer}>
-        <form onSubmit={handleSearch} className={styles.searchForm}>
-          <input
-            type="text"
-            placeholder="イベントを検索..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className={styles.searchInput}
-          />
-          <button type="submit" className={styles.searchButton}>
-            🔍
-          </button>
-          <button 
-            type="button" 
-            className={styles.advancedSearchButton}
-            onClick={openAdvancedSearch}
-          >
-            詳細検索
-          </button>
-        </form>
-        <div className={styles.sortContainer}>
-          <button
-            className={`${styles.sortButton} ${sortOrder === 'newest' ? styles.active : ''}`}
-            onClick={() => setSortOrder('newest')}
-          >
-            新着順
-          </button>
-          <button
-            className={`${styles.sortButton} ${sortOrder === 'oldest' ? styles.active : ''}`}
-            onClick={() => setSortOrder('oldest')}
-          >
-            古い順
-          </button>
-          <button
-            className={`${styles.sortButton} ${sortOrder === 'popular' ? styles.active : ''}`}
-            onClick={() => setSortOrder('popular')}
-          >
-            人気順
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.eventList}>
-        {filteredEvents.map((event) => (
-          <div 
-            key={event.id} 
-            className={`${styles.eventCard} ${styles[getSeason(event.month)]}`}
-            onClick={() => handleEventClick(event)}
-          >
-            <div className={styles.eventHeader}>
-              <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
-                {getCategoryDisplayText(event.category)}
-              </span>
-              <span className={styles.date}>{event.month}月</span>
-            </div>
-            <h2 className={styles.title}>{event.title}</h2>
-            <p className={styles.description}>{event.description}</p>
-            <div className={styles.details}>
-              <div className={styles.ageGroups}>
-                {event.age_groups.map((age) => (
-                  <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
-                    {age}
-                  </span>
-                ))}
-              </div>
-              <span className={styles.duration}>{event.duration}</span>
-            </div>
+      <div className={styles.contentWrapper}>
+        <header className={styles.header}>
+          <h1>イベント一覧</h1>
+          <div className={styles.buttonContainer}>
+            <Link href="/main" className={styles.backButton}>
+              カレンダーに戻る
+            </Link>
+            <button onClick={handleLogout} className={styles.logoutButton}>
+              ログアウト
+            </button>
           </div>
-        ))}
+        </header>
+
+        <div className={styles.searchContainer}>
+          <form onSubmit={handleSearch} className={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="イベントを検索..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+            <button type="submit" className={styles.searchButton}>
+              検索
+            </button>
+            <button
+              type="button"
+              onClick={openAdvancedSearch}
+              className={styles.advancedSearchButton}
+            >
+              詳細検索
+            </button>
+          </form>
+          <div className={styles.sortContainer}>
+            <button
+              className={`${styles.sortButton} ${sortType === 'date' ? styles.active : ''}`}
+              onClick={() => setSortType('date')}
+            >
+              日付順
+            </button>
+            <button
+              className={`${styles.sortButton} ${sortType === 'popular' ? styles.active : ''}`}
+              onClick={() => setSortType('popular')}
+            >
+              人気順
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.eventsGrid}>
+          {filteredEvents.map((event) => (
+            <div 
+              key={event.id} 
+              className={`${styles[getSeason(event.month)]}`}
+              onClick={() => handleEventClick(event)}
+            >
+              <div className={styles.eventHeader}>
+                <span className={`${styles.category} ${getCategoryStyle(event.category || '')}`}>
+                  {getCategoryDisplayText(event.category || '')}
+                </span>
+                <span className={styles.date}>{event.month}月</span>
+              </div>
+              <h2 className={styles.title}>{event.title}</h2>
+              <p className={styles.description}>{event.description}</p>
+              <div className={styles.details}>
+                <div className={styles.ageGroups}>
+                  {event.age_groups.map((age) => (
+                    <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
+                      {age}
+                    </span>
+                  ))}
+                </div>
+                <span className={styles.duration}>{event.duration}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {selectedEvent && (
@@ -433,6 +503,26 @@ export default function EventListPage() {
         />
       )}
 
+      {editingEvent && (
+        <div className={styles.modalOverlay} onClick={handleModalOverlayClick}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>イベントの編集</h2>
+            </div>
+            <EditEventForm
+              data={{
+                ...editingEvent,
+                media_files: [],
+                materials: editingEvent.materials || [],
+                objectives: editingEvent.objectives || [],
+              }}
+              onSubmit={handleEditSubmit}
+              onCancel={handleEditCancel}
+            />
+          </div>
+        </div>
+      )}
+
       {/* 詳細検索モーダル */}
       {showAdvancedSearch && (
         <div className={styles.modalOverlay} onClick={closeAdvancedSearch}>
@@ -440,8 +530,10 @@ export default function EventListPage() {
             <h2 className={styles.modalTitle}>詳細検索</h2>
             <div className={styles.modalBody}>
               <div className={styles.formGroup}>
-                <label>タイトル</label>
+                <label htmlFor="title">タイトル</label>
                 <input
+                  id="title"
+                  name="title"
                   type="text"
                   value={advancedFilters.title}
                   onChange={e => setAdvancedFilters({...advancedFilters, title: e.target.value})}
@@ -450,8 +542,10 @@ export default function EventListPage() {
               </div>
               
               <div className={styles.formGroup}>
-                <label>説明文</label>
+                <label htmlFor="description">説明文</label>
                 <input
+                  id="description"
+                  name="description"
                   type="text"
                   value={advancedFilters.description}
                   onChange={e => setAdvancedFilters({...advancedFilters, description: e.target.value})}
@@ -466,7 +560,7 @@ export default function EventListPage() {
                   onChange={e => setAdvancedFilters({...advancedFilters, category: e.target.value})}
                 >
                   <option value="">すべて</option>
-                  <option value="壁面">壁面</option>
+                  <option value="壁　面">壁　面</option>
                   <option value="制作物">制作物</option>
                   <option value="その他">その他</option>
                 </select>
