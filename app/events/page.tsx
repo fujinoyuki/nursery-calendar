@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Event, AgeGroup, EventFormData } from '../types';
+import { Event, AgeGroup, EventFormData, LocalEventFormData } from '../types';
 import EventOverlay from '../components/EventOverlay';
 import EditEventForm from '../components/EditEventForm';
+import Image from 'next/image';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -63,6 +64,10 @@ const getCategoryDisplayText = (category: string) => {
     return 'その他';
   }
   return category;
+};
+
+const getMonthClass = (month: number) => {
+  return styles[`month${month}`];
 };
 
 export default function EventListPage() {
@@ -152,11 +157,11 @@ export default function EventListPage() {
 
   // 月の比較関数（現在の月からの距離を計算）
   const getMonthDistance = (month: number) => {
-    const diff = currentMonth - month;
+    const diff = month - currentMonth;
     return diff >= 0 ? diff : diff + 12;
   };
 
-  // 検索機能を実装
+  // 検索機能とソート機能を実装
   useEffect(() => {
     if (events.length === 0) return;
 
@@ -254,35 +259,42 @@ export default function EventListPage() {
     }
 
     // 並び替え
-    let sorted = [...filtered];
     if (sortType === 'date') {
-      sorted.sort((a, b) => {
+      filtered.sort((a, b) => {
         // まず月の距離で比較
-        const monthDistanceA = getMonthDistance(a.month);
-        const monthDistanceB = getMonthDistance(b.month);
-        if (monthDistanceA !== monthDistanceB) {
-          return monthDistanceA - monthDistanceB;
+        const distanceA = getMonthDistance(a.month);
+        const distanceB = getMonthDistance(b.month);
+        
+        if (distanceA !== distanceB) {
+          return distanceA - distanceB;
         }
+        
         // 月が同じ場合は作成日時で比較
-        const dateA = new Date(a.created_at || 0);
-        const dateB = new Date(b.created_at || 0);
-        return dateB.getTime() - dateA.getTime();
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA;
       });
     } else if (sortType === 'popular') {
-      sorted.sort((a, b) => {
-        const aViews = a.views || 0;
-        const bViews = b.views || 0;
-        return bViews - aViews;
+      filtered.sort((a, b) => {
+        const viewsA = a.views || 0;
+        const viewsB = b.views || 0;
+        if (viewsA !== viewsB) {
+          return viewsB - viewsA;
+        }
+        // 閲覧数が同じ場合は作成日時で比較
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA;
       });
     }
 
-    setFilteredEvents(sorted);
-  }, [events, searchTerm, showAdvancedSearch, advancedFilters, sortType]);
+    setFilteredEvents(filtered);
+  }, [events, searchTerm, showAdvancedSearch, advancedFilters, sortType, currentMonth]);
 
   // 検索クエリの変更を処理
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // 検索は自動的に実行されるため、特別な処理は不要
+    // 検索は自動的に実行されるため、フォームのデフォルトの送信を防ぐだけ
   };
 
   // 詳細検索モーダルを開く
@@ -344,32 +356,54 @@ export default function EventListPage() {
     }
   };
 
-  const handleEditSubmit = async (formData: EventFormData) => {
+  const handleEditEventSubmit = async (eventData: LocalEventFormData) => {
     try {
-      const { error } = await supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('認証されていません');
+      }
+
+      if (!selectedEvent) {
+        throw new Error('編集するイベントが選択されていません');
+      }
+
+      // media_filesをMediaFile型に変換
+      const mediaFiles = await Promise.all(
+        eventData.media_files.map(async (file) => {
+          // ここでファイルのアップロード処理を行う必要があります
+          // 仮の実装として、typeとurlを返します
+          return {
+            type: file.type,
+            url: URL.createObjectURL(file)
+          };
+        })
+      );
+
+      console.log('イベント更新中...', { ...eventData, id: selectedEvent.id });
+      const { data, error } = await supabase
         .from('events')
         .update({
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          age_groups: formData.age_groups,
-          duration: formData.duration,
-          materials: formData.materials,
-          objectives: formData.objectives,
+          ...eventData,
+          media_files: mediaFiles,
           updated_at: new Date().toISOString()
         })
-        .eq('id', editingEvent?.id);
+        .eq('id', selectedEvent.id)
+        .eq('user_id', session.user.id)
+        .select();
 
       if (error) {
-        setError('イベントの更新に失敗しました');
+        console.error('イベント更新エラー:', error);
         return;
       }
-      
-      await fetchEvents(); // 先にデータを更新
-      setEditingEvent(null); // 成功後にモーダルを閉じる
-    } catch (error: any) {
-      setError('イベントの更新に失敗しました');
-      console.error('Error updating event:', error);
+
+      if (data) {
+        console.log('更新されたイベント:', data);
+        await fetchEvents();
+      }
+      setEditingEvent(null);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -387,12 +421,82 @@ export default function EventListPage() {
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error logging out:', error.message);
-    } else {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error logging out:', error.message);
+        return;
+      }
       router.push('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
     }
+  };
+
+  // イベントカードのレンダリング部分を修正
+  const renderEventCard = (event: Event) => (
+    <div
+      key={event.id}
+      className={`${styles.eventCard} ${getMonthClass(event.month)}`}
+      onClick={() => handleEventClick(event)}
+    >
+      <div className={styles.eventHeader}>
+        <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
+          {getCategoryDisplayText(event.category)}
+        </span>
+        <div className={styles.ageGroups}>
+          {event.age_groups?.map((age) => (
+            <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
+              {age}
+            </span>
+          ))}
+        </div>
+      </div>
+      <h3 className={styles.eventTitle}>{event.title}</h3>
+      <p className={styles.eventDescription}>{event.description}</p>
+      <div className={styles.eventImageContainer}>
+        {event.media_files?.some(file => file.type.startsWith('image/')) && 
+         event.media_files.find(file => file.type.startsWith('image/'))?.url ? (
+          <Image
+            src={event.media_files.find(file => file.type.startsWith('image/'))!.url}
+            alt={event.title}
+            width={200}
+            height={200}
+            className={styles.eventImage}
+          />
+        ) : (
+          <div className={styles.noImage}>No Image</div>
+        )}
+      </div>
+    </div>
+  );
+
+  // 並び替え処理を行う関数
+  const handleSort = (type: 'date' | 'popular') => {
+    setSortType(type);
+    let sorted = [...filteredEvents];
+
+    if (type === 'date') {
+      sorted.sort((a, b) => {
+        const monthA = a.month || 1;
+        const monthB = b.month || 1;
+        if (monthA !== monthB) {
+          return monthA - monthB;
+        }
+        // 月が同じ場合は作成日時で比較
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA;
+      });
+    } else {
+      sorted.sort((a, b) => {
+        const viewsA = a.views || 0;
+        const viewsB = b.views || 0;
+        return viewsB - viewsA;
+      });
+    }
+
+    setFilteredEvents(sorted);
   };
 
   if (loading) {
@@ -416,18 +520,26 @@ export default function EventListPage() {
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
         <header className={styles.header}>
-          <h1>イベント一覧</h1>
-          <div className={styles.buttonContainer}>
-            <Link href="/main" className={styles.backButton}>
-              カレンダーに戻る
-            </Link>
-            <button onClick={handleLogout} className={styles.logoutButton}>
+          <h1 className={styles.pageTitle}>イベント一覧</h1>
+          <div className={styles.headerButtons}>
+            <button 
+              type="button"
+              onClick={handleLogout} 
+              className={styles.logoutButton}
+            >
               ログアウト
             </button>
+            <Link 
+              href="/main" 
+              className={styles.backButton}
+              prefetch={false}
+            >
+              カレンダーに戻る
+            </Link>
           </div>
         </header>
 
-        <div className={styles.searchContainer}>
+        <div className={styles.searchSection}>
           <form onSubmit={handleSearch} className={styles.searchBar}>
             <input
               type="text"
@@ -435,28 +547,36 @@ export default function EventListPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
+              autoComplete="off"
             />
-            <button type="submit" className={styles.searchButton}>
-              検索
-            </button>
-            <button
-              type="button"
-              onClick={openAdvancedSearch}
-              className={styles.advancedSearchButton}
-            >
-              詳細検索
-            </button>
+            <div className={styles.searchButtons}>
+              <button 
+                type="submit" 
+                className={styles.searchButton}
+              >
+                検索
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAdvancedSearch(true)}
+                className={styles.advancedSearchButton}
+              >
+                詳細検索
+              </button>
+            </div>
           </form>
           <div className={styles.sortContainer}>
             <button
+              type="button"
               className={`${styles.sortButton} ${sortType === 'date' ? styles.active : ''}`}
-              onClick={() => setSortType('date')}
+              onClick={() => handleSort('date')}
             >
               日付順
             </button>
             <button
+              type="button"
               className={`${styles.sortButton} ${sortType === 'popular' ? styles.active : ''}`}
-              onClick={() => setSortType('popular')}
+              onClick={() => handleSort('popular')}
             >
               人気順
             </button>
@@ -464,32 +584,7 @@ export default function EventListPage() {
         </div>
 
         <div className={styles.eventsGrid}>
-          {filteredEvents.map((event) => (
-            <div 
-              key={event.id} 
-              className={`${styles[getSeason(event.month)]}`}
-              onClick={() => handleEventClick(event)}
-            >
-              <div className={styles.eventHeader}>
-                <span className={`${styles.category} ${getCategoryStyle(event.category || '')}`}>
-                  {getCategoryDisplayText(event.category || '')}
-                </span>
-                <span className={styles.date}>{event.month}月</span>
-              </div>
-              <h2 className={styles.title}>{event.title}</h2>
-              <p className={styles.description}>{event.description}</p>
-              <div className={styles.details}>
-                <div className={styles.ageGroups}>
-                  {event.age_groups.map((age) => (
-                    <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
-                      {age}
-                    </span>
-                  ))}
-                </div>
-                <span className={styles.duration}>{event.duration}</span>
-              </div>
-            </div>
-          ))}
+          {filteredEvents.map(renderEventCard)}
         </div>
       </div>
 
@@ -516,7 +611,7 @@ export default function EventListPage() {
                 materials: editingEvent.materials || [],
                 objectives: editingEvent.objectives || [],
               }}
-              onSubmit={handleEditSubmit}
+              onSubmit={handleEditEventSubmit}
               onCancel={handleEditCancel}
             />
           </div>

@@ -337,12 +337,12 @@ export default function MainPage() {
           const monthEvents = getEventsForMonth(month);
           return (
             <MonthCard
-              key={monthName}
+              key={`month-${month}`}
               month={month}
               monthName={monthName}
               events={monthEvents}
               onEventClick={handleEventClick}
-              onAddEvent={() => handleAddEvent(month)}
+              onAddClick={() => setShowAddForm(true)}
               season={getSeason(monthName)}
             />
           );

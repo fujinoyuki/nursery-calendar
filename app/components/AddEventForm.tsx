@@ -2,13 +2,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './AddEventForm.module.css';
-import { Event, EventFormData, AgeGroup } from '../types';
+import { Event, EventFormData, LocalEventFormData } from '../types';
 
-type AddEventFormProps = {
-  onSubmit: (data: EventFormData) => void;
+interface AddEventFormProps {
+  onSubmit: (data: LocalEventFormData) => void;
   onCancel: () => void;
   selectedMonth: number;
-};
+}
 
 const AGE_GROUPS: AgeGroup[] = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
 const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
@@ -34,25 +34,25 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
     return hoursNum > 0 || minutesNum > 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isDurationValid()) {
       alert('所要時間は時間か分のどちらかを1以上に設定してください。');
       return;
     }
     const duration = `${hours || '0'}時間${minutes || '0'}分`;
-    const eventData: EventFormData = {
+    const formData: LocalEventFormData = {
       title,
       description,
-      age_groups: ageGroups,
+      month: selectedMonth,
       category: (category === 'その他' ? otherCategory : category) as Category,
+      age_groups: ageGroups,
       duration,
       materials,
       objectives,
-      month: selectedMonth,
       media_files: mediaFiles
     };
-    onSubmit(eventData);
+    onSubmit(formData);
   };
 
   const handleAgeGroupChange = (e: React.ChangeEvent<HTMLInputElement>) => {

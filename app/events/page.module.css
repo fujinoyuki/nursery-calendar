@@ -99,240 +99,306 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  position: relative;
   padding: 1rem 0;
-  z-index: 2;
-}
-
-.header h1 {
-  font-size: 38px;
-  font-weight: bold;
-  color: #4B9EFF;
-  margin: 0;
-  font-family: "M PLUS Rounded 1c", sans-serif;
+  border-bottom: 3px solid #60a5fa;
   position: relative;
-  padding: 0;
-  letter-spacing: 2px;
-  border-bottom: 3px solid #B5E6B5;
 }
 
 .header::after {
+  content: none;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #60a5fa;
+  margin: 0;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.pageTitle::before,
+.pageTitle::after {
+  content: none;
+}
+
+.pageTitle::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: hsl(220, 82%, 78%);
+  height: 3px;
+  background: #B5E6B5;
 }
 
-.buttonContainer {
+.headerButtons {
   display: flex;
   gap: 1rem;
   align-items: center;
-  z-index: 2;
+  flex-direction: row-reverse;
 }
 
 .backButton {
   padding: 0.75rem 1.5rem;
-  background: #93C6FF;
+  background: #A7D2FF;
   color: white;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: bold;
-  font-size: 1rem;
-  font-family: "M PLUS Rounded 1c", sans-serif;
   text-decoration: none;
-  white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(147, 198, 255, 0.2);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  position: relative;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
 }
 
 .logoutButton {
   padding: 0.75rem 1.5rem;
-  background: #FFB4C6;
+  background-color: #FF8BA7;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: bold;
+  transition: all 0.3s ease;
+  font-weight: 500;
   font-size: 1rem;
-  font-family: "M PLUS Rounded 1c", sans-serif;
-  text-decoration: none;
-  white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(255, 180, 198, 0.2);
-}
-
-.backButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(147, 198, 255, 0.3);
-  background: #4B9EFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  position: relative;
 }
 
 .logoutButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(255, 180, 198, 0.3);
-  background: #FF8BA7;
+  opacity: 0.8;
+  transform: translateY(-1px);
 }
 
-.searchContainer {
-  background: white;
+.searchSection {
+  background: #ffffff;
   padding: 2rem;
   border-radius: 15px;
-  margin-bottom: 2rem;
+  margin: 2rem 0;
+  border: 2px dotted #B5B0E2;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   position: relative;
-  z-index: 2;
-  border: 2px dashed #B5B4E8;
-  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.05);
 }
 
-.searchContainer::before,
-.searchContainer::after {
+.searchSection::before {
   content: '';
   position: absolute;
+  top: -12px;
+  left: -12px;
   width: 30px;
   height: 30px;
+  background: #FFB88C;
   border-radius: 50%;
   opacity: 0.3;
 }
 
-.searchContainer::before {
-  top: -15px;
-  left: -15px;
-  background: #93C6FF;
-}
-
-.searchContainer::after {
-  bottom: -15px;
-  right: -15px;
-  background: #B5B4E8;
+.searchSection::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  right: -12px;
+  width: 30px;
+  height: 30px;
+  background: #B5B0E2;
+  border-radius: 50%;
+  opacity: 0.3;
 }
 
 .searchBar {
   display: flex;
   gap: 1rem;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
 .searchInput {
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 2px solid #E5E7EB;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  color: #666;
+  transition: all 0.2s ease;
   font-family: "M PLUS Rounded 1c", sans-serif;
+  background: white;
+  z-index: 10;
+  position: relative;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #93C6FF;
-  box-shadow: 0 0 0 3px rgba(147, 198, 255, 0.1);
+  border-color: #A7D2FF;
+  box-shadow: 0 0 0 3px rgba(167, 210, 255, 0.2);
 }
 
-.searchButton,
-.advancedSearchButton {
-  padding: 0.75rem 1.5rem;
-  background: #93C6FF;
+.searchButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.searchButton {
+  background: #A7D2FF;
   color: white;
+  min-width: 80px;
   border: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: bold;
   font-size: 1rem;
+  transition: all 0.2s ease;
   font-family: "M PLUS Rounded 1c", sans-serif;
-  box-shadow: 0 2px 4px rgba(147, 198, 255, 0.2);
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 10;
+  position: relative;
 }
 
-.searchButton:hover,
+.searchButton:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.advancedSearchButton {
+  background: white;
+  color: #666;
+  border: 1px solid #E2E8F0;
+  min-width: 100px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 10;
+  position: relative;
+}
+
 .advancedSearchButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(147, 198, 255, 0.3);
-  background: #4B9EFF;
+  background: #F8FAFC;
+  transform: translateY(-1px);
 }
 
 .sortContainer {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px dotted #E2E8F0;
+  position: relative;
+  z-index: 10;
 }
 
 .sortButton {
   padding: 0.5rem 1rem;
   background: white;
-  border: 2px solid #E5E7EB;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-size: 0.9rem;
   color: #666;
   font-family: "M PLUS Rounded 1c", sans-serif;
+  position: relative;
+  z-index: 10;
 }
 
 .sortButton:hover {
-  background: #F3F4F6;
-  border-color: #93C6FF;
-  color: #4B9EFF;
+  background: #F8FAFC;
+  transform: translateY(-1px);
 }
 
 .sortButton.active {
-  background: #93C6FF;
+  background: #A7D2FF;
   color: white;
-  border-color: #93C6FF;
+  border-color: #A7D2FF;
 }
 
 .eventsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+  margin-top: 2rem;
   position: relative;
   z-index: 2;
 }
 
 .eventCard {
   background: white;
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.1);
+  border-radius: 25px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border: 2px solid #e0f2fe;
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
 }
 
 .eventCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);
-  border-color: #93c5fd;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
+
+/* 月ごとのカラー設定 */
+.month1 .eventCard { border-color: #FF6B6B; background: linear-gradient(135deg, #fff, #fff5f5); }
+.month2 .eventCard { border-color: #4A90E2; background: linear-gradient(135deg, #fff, #f5f8ff); }
+.month3 .eventCard { border-color: #FF9FB2; background: linear-gradient(135deg, #fff, #fff5f7); }
+.month4 .eventCard { border-color: #7ED321; background: linear-gradient(135deg, #fff, #f7fff0); }
+.month5 .eventCard { border-color: #4FD1C5; background: linear-gradient(135deg, #fff, #f0fffd); }
+.month6 .eventCard { border-color: #9B6DFF; background: linear-gradient(135deg, #fff, #f8f5ff); }
+.month7 .eventCard { border-color: #54C7FC; background: linear-gradient(135deg, #fff, #f0faff); }
+.month8 .eventCard { border-color: #FFB347; background: linear-gradient(135deg, #fff, #fff7f0); }
+.month9 .eventCard { border-color: #4CAF50; background: linear-gradient(135deg, #fff, #f0fff1); }
+.month10 .eventCard { border-color: #FFB74D; background: linear-gradient(135deg, #fff, #fff8f0); }
+.month11 .eventCard { border-color: #FF7043; background: linear-gradient(135deg, #fff, #fff5f0); }
+.month12 .eventCard { border-color: #5C6BC0; background: linear-gradient(135deg, #fff, #f5f6ff); }
 
 .eventHeader {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .category {
-  padding: 0.4rem 1rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 20px;
   color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .categoryWall {
-  background: #A7D2FF;
+  background-color: #A7D2FF;
 }
 
 .categoryArt {
-  background: #FFB5C5;
+  background-color: #FFB5C5;
 }
 
 .categoryOther {
-  background: #B5E6B5;
+  background-color: #B5E6B5;
 }
 
 .date {
@@ -573,28 +639,21 @@
 @media (max-width: 1200px) {
   .eventsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
-    max-width: 100%;
   }
 
   .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-    margin-bottom: 2rem;
   }
 
-  .header h1 {
-    font-size: 2rem;
-  }
-
-  .buttonContainer {
+  .headerButtons {
     width: 100%;
     flex-direction: column;
   }
@@ -614,6 +673,10 @@
     width: 100%;
   }
 
+  .sortContainer {
+    flex-direction: column;
+  }
+
   .eventsGrid {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -630,10 +693,6 @@
     padding: 0.75rem;
   }
 
-  .header h1 {
-    font-size: 1.8rem;
-  }
-
   .title {
     font-size: 1.1rem;
   }
@@ -641,4 +700,113 @@
   .description {
     font-size: 0.9rem;
   }
+}
+
+/* 月ごとのスタイル */
+.month1 {
+  border: 2px solid #FF6B6B;
+  background: linear-gradient(135deg, #fff, #fff5f5);
+}
+
+.month2 {
+  border: 2px solid #4A90E2;
+  background: linear-gradient(135deg, #fff, #f5f8ff);
+}
+
+.month3 {
+  border: 2px solid #FF9FB2;
+  background: linear-gradient(135deg, #fff, #fff5f7);
+}
+
+.month4 {
+  border: 2px solid #7ED321;
+  background: linear-gradient(135deg, #fff, #f7fff0);
+}
+
+.month5 {
+  border: 2px solid #4FD1C5;
+  background: linear-gradient(135deg, #fff, #f0fffd);
+}
+
+.month6 {
+  border: 2px solid #9B6DFF;
+  background: linear-gradient(135deg, #fff, #f8f5ff);
+}
+
+.month7 {
+  border: 2px solid #54C7FC;
+  background: linear-gradient(135deg, #fff, #f0faff);
+}
+
+.month8 {
+  border: 2px solid #FFB347;
+  background: linear-gradient(135deg, #fff, #fff7f0);
+}
+
+.month9 {
+  border: 2px solid #4CAF50;
+  background: linear-gradient(135deg, #fff, #f0fff1);
+}
+
+.month10 {
+  border: 2px solid #FFB74D;
+  background: linear-gradient(135deg, #fff, #fff8f0);
+}
+
+.month11 {
+  border: 2px solid #FF7043;
+  background: linear-gradient(135deg, #fff, #fff5f0);
+}
+
+.month12 {
+  border: 2px solid #5C6BC0;
+  background: linear-gradient(135deg, #fff, #f5f6ff);
+}
+
+.eventCard {
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.eventCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.eventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.eventTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.eventDescription {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.eventImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 } 

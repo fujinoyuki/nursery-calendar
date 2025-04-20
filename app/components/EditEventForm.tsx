@@ -2,14 +2,14 @@
 
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styles from './EditEventForm.module.css';
-import type { Event, EventFormData, MediaFile, Category, AgeGroup } from '../types';
+import type { EventFormData, LocalEventFormData, MediaFile, Category, AgeGroup } from '../types';
 
 const CATEGORIES: Category[] = ['壁　面', '制作物', 'その他'];
 const AGE_GROUPS: AgeGroup[] = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
 
 interface Props {
   data: EventFormData;
-  onSubmit: (data: EventFormData) => void;
+  onSubmit: (data: LocalEventFormData) => void;
   onCancel: () => void;
 }
 
@@ -30,17 +30,17 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     return hoursNum > 0 || minutesNum > 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const submitData: EventFormData = {
+    const submitData: LocalEventFormData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
+      month: data.month,
       category: formData.category === 'その他' ? otherCategory.trim() as Category : formData.category,
       age_groups: formData.age_groups,
       duration: `${hours}時間${minutes}分`,
       materials: formData.materials.filter(m => m.trim()),
       objectives: formData.objectives.filter(o => o.trim()),
-      month: formData.month,
       media_files: mediaFiles
     };
     onSubmit(submitData);

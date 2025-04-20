@@ -18,13 +18,18 @@ type EventOverlayProps = {
   season?: 'spring' | 'summer' | 'autumn' | 'winter';
 };
 
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return '日付なし';
+  return new Date(dateString).toLocaleDateString('ja-JP');
+};
+
 export default function EventOverlay({ event, onClose, onDelete, onEdit, season = 'spring' }: EventOverlayProps) {
   useEffect(() => {
     const updateViewCount = async () => {
       try {
         const { error } = await supabase
           .from('events')
-          .update({ view_count: (event.view_count || 0) + 1 })
+          .update({ views: (event.views || 0) + 1 })
           .eq('id', event.id);
         
         if (error) {
@@ -36,7 +41,7 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
     };
 
     updateViewCount();
-  }, [event.id]);
+  }, [event.id, event.views]);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -85,6 +90,15 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
               <li key={index}>{objective}</li>
             ))}
           </ul>
+        </div>
+
+        <div className={styles.eventStats}>
+          <span className={styles.viewCount}>
+            閲覧数: {event.views || 0}
+          </span>
+          <span className={styles.dateInfo}>
+            作成日: {formatDate(event.created_at)}
+          </span>
         </div>
 
         <div className={styles.actions}>

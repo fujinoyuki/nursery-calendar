@@ -29,61 +29,173 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
-/* 季節ごとの色分け */
-.spring {
-  border-color: #FFB5C5;
-  background: linear-gradient(135deg, #fff, #fff9fa);
+/* 月ごとのカラー設定 */
+.january {
+  border-color: #FF6B6B;  /* 明るい赤（お正月） */
+  background: linear-gradient(135deg, #fff, #fff5f5);
 }
 
-.spring .monthHeader {
-  border-bottom-color: #FFB5C5;
+.january .monthHeader {
+  border-bottom-color: #FF6B6B;
 }
 
-.spring .eventItem {
+.january .eventItem {
+  background: linear-gradient(135deg, #fff, #fff5f5);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.february {
+  border-color: #4A90E2;  /* 明るい青（寒空） */
+  background: linear-gradient(135deg, #fff, #f5f8ff);
+}
+
+.february .monthHeader {
+  border-bottom-color: #4A90E2;
+}
+
+.february .eventItem {
+  background: linear-gradient(135deg, #fff, #f5f8ff);
+  border-color: rgba(74, 144, 226, 0.3);
+}
+
+.march {
+  border-color: #FF9FB2;  /* 優しい桜色 */
   background: linear-gradient(135deg, #fff, #fff5f7);
-  border-color: rgba(255, 181, 197, 0.3);
 }
 
-.summer {
-  border-color: #87CEEB;
-  background: linear-gradient(135deg, #fff, #f5fafd);
+.march .monthHeader {
+  border-bottom-color: #FF9FB2;
 }
 
-.summer .monthHeader {
-  border-bottom-color: #87CEEB;
+.march .eventItem {
+  background: linear-gradient(135deg, #fff, #fff5f7);
+  border-color: rgba(255, 159, 178, 0.3);
 }
 
-.summer .eventItem {
-  background: linear-gradient(135deg, #fff, #f0f8ff);
-  border-color: rgba(135, 206, 235, 0.3);
+.april {
+  border-color: #7ED321;  /* 明るい若草色 */
+  background: linear-gradient(135deg, #fff, #f7fff0);
 }
 
-.autumn {
-  border-color: #FFB347;
-  background: linear-gradient(135deg, #fff, #fff9f0);
+.april .monthHeader {
+  border-bottom-color: #7ED321;
 }
 
-.autumn .monthHeader {
+.april .eventItem {
+  background: linear-gradient(135deg, #fff, #f7fff0);
+  border-color: rgba(126, 211, 33, 0.3);
+}
+
+.may {
+  border-color: #4FD1C5;  /* 明るいターコイズ */
+  background: linear-gradient(135deg, #fff, #f0fffd);
+}
+
+.may .monthHeader {
+  border-bottom-color: #4FD1C5;
+}
+
+.may .eventItem {
+  background: linear-gradient(135deg, #fff, #f0fffd);
+  border-color: rgba(79, 209, 197, 0.3);
+}
+
+.june {
+  border-color: #9B6DFF;  /* 明るい紫（あじさい） */
+  background: linear-gradient(135deg, #fff, #f8f5ff);
+}
+
+.june .monthHeader {
+  border-bottom-color: #9B6DFF;
+}
+
+.june .eventItem {
+  background: linear-gradient(135deg, #fff, #f8f5ff);
+  border-color: rgba(155, 109, 255, 0.3);
+}
+
+.july {
+  border-color: #54C7FC;  /* 爽やかな空色 */
+  background: linear-gradient(135deg, #fff, #f0faff);
+}
+
+.july .monthHeader {
+  border-bottom-color: #54C7FC;
+}
+
+.july .eventItem {
+  background: linear-gradient(135deg, #fff, #f0faff);
+  border-color: rgba(84, 199, 252, 0.3);
+}
+
+.august {
+  border-color: #FFB347;  /* 明るいオレンジ（太陽） */
+  background: linear-gradient(135deg, #fff, #fff7f0);
+}
+
+.august .monthHeader {
   border-bottom-color: #FFB347;
 }
 
-.autumn .eventItem {
-  background: linear-gradient(135deg, #fff, #fff5e6);
+.august .eventItem {
+  background: linear-gradient(135deg, #fff, #fff7f0);
   border-color: rgba(255, 179, 71, 0.3);
 }
 
-.winter {
-  border-color: #B0E0E6;
-  background: linear-gradient(135deg, #fff, #f5fafb);
+.september {
+  border-color: #4CAF50;  /* 明るい緑 */
+  background: linear-gradient(135deg, #fff, #f0fff1);
 }
 
-.winter .monthHeader {
-  border-bottom-color: #B0E0E6;
+.september .monthHeader {
+  border-bottom-color: #4CAF50;
 }
 
-.winter .eventItem {
-  background: linear-gradient(135deg, #fff, #f0f8fa);
-  border-color: rgba(176, 224, 230, 0.3);
+.september .eventItem {
+  background: linear-gradient(135deg, #fff, #f0fff1);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.october {
+  border-color: #FFB74D;  /* 明るい金茶色 */
+  background: linear-gradient(135deg, #fff, #fff8f0);
+}
+
+.october .monthHeader {
+  border-bottom-color: #FFB74D;
+}
+
+.october .eventItem {
+  background: linear-gradient(135deg, #fff, #fff8f0);
+  border-color: rgba(255, 183, 77, 0.3);
+}
+
+.november {
+  border-color: #FF7043;  /* 明るい茶色（紅葉） */
+  background: linear-gradient(135deg, #fff, #fff5f0);
+}
+
+.november .monthHeader {
+  border-bottom-color: #FF7043;
+}
+
+.november .eventItem {
+  background: linear-gradient(135deg, #fff, #fff5f0);
+  border-color: rgba(255, 112, 67, 0.3);
+}
+
+.december {
+  border-color: #5C6BC0;  /* 明るい紺色 */
+  background: linear-gradient(135deg, #fff, #f5f6ff);
+}
+
+.december .monthHeader {
+  border-bottom-color: #5C6BC0;
+}
+
+.december .eventItem {
+  background: linear-gradient(135deg, #fff, #f5f6ff);
+  border-color: rgba(92, 107, 192, 0.3);
 }
 
 .monthHeader {
@@ -347,87 +459,37 @@
   flex: 1;
 }
 
+/* イベント追加ボタンのスタイル（単色） */
+.january .addButton { background-color: #FF6B6B; }
+.february .addButton { background-color: #4A90E2; }
+.march .addButton { background-color: #FF9FB2; }
+.april .addButton { background-color: #7ED321; }
+.may .addButton { background-color: #4FD1C5; }
+.june .addButton { background-color: #9B6DFF; }
+.july .addButton { background-color: #54C7FC; }
+.august .addButton { background-color: #FFB347; }
+.september .addButton { background-color: #4CAF50; }
+.october .addButton { background-color: #FFB74D; }
+.november .addButton { background-color: #FF7043; }
+.december .addButton { background-color: #5C6BC0; }
+
 .addButton {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #FFB5C5, #FFD4B2);
+  width: auto;
+  padding: 12px 40px;
   color: white;
   border: none;
-  padding: 10px 40px;
-  width: 220px;
-  border-radius: 30px;
+  border-radius: 25px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 181, 197, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  z-index: 10;
-  white-space: nowrap;
-}
-
-.addButton::before {
-  content: '+';
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-right: 2px;
+  margin: auto auto 0;
+  display: block;
 }
 
 .addButton:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 181, 197, 0.4);
-  background: linear-gradient(135deg, #FFD4B2, #FFB5C5);
-}
-
-.addButton:active {
-  transform: translateX(-50%) translateY(0);
-  box-shadow: 0 2px 10px rgba(255, 181, 197, 0.3);
-}
-
-/* 季節ごとのボタンカラー */
-.spring .addButton {
-  background: linear-gradient(135deg, #FFB5C5, #FFC0CB);
-  box-shadow: 0 4px 15px rgba(255, 181, 197, 0.3);
-}
-
-.spring .addButton:hover {
-  background: linear-gradient(135deg, #FFC0CB, #FFB5C5);
-  box-shadow: 0 6px 20px rgba(255, 181, 197, 0.4);
-}
-
-.summer .addButton {
-  background: linear-gradient(135deg, #87CEEB, #B0E0E6);
-  box-shadow: 0 4px 15px rgba(135, 206, 235, 0.3);
-}
-
-.summer .addButton:hover {
-  background: linear-gradient(135deg, #B0E0E6, #87CEEB);
-  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
-}
-
-.autumn .addButton {
-  background: linear-gradient(135deg, #FFB347, #FFD4B2);
-  box-shadow: 0 4px 15px rgba(255, 179, 71, 0.3);
-}
-
-.autumn .addButton:hover {
-  background: linear-gradient(135deg, #FFD4B2, #FFB347);
-  box-shadow: 0 6px 20px rgba(255, 179, 71, 0.4);
-}
-
-.winter .addButton {
-  background: linear-gradient(135deg, #B0E0E6, #D1EAF5);
-  box-shadow: 0 4px 15px rgba(176, 224, 230, 0.3);
-}
-
-.winter .addButton:hover {
-  background: linear-gradient(135deg, #D1EAF5, #B0E0E6);
-  box-shadow: 0 6px 20px rgba(176, 224, 230, 0.4);
+  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
 /* レスポンシブデザイン */
