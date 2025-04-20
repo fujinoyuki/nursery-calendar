@@ -23,17 +23,55 @@ const formatDate = (dateString: string | undefined) => {
   return new Date(dateString).toLocaleDateString('ja-JP');
 };
 
+// 年齢グループをソートする関数を追加
+const sortAgeGroups = (ages: string[]) => {
+  const ageOrder = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+  return [...ages].sort((a, b) => ageOrder.indexOf(a) - ageOrder.indexOf(b));
+};
+
 export default function EventOverlay({ event, onClose, onDelete, onEdit, season = 'spring' }: EventOverlayProps) {
   useEffect(() => {
     const updateViewCount = async () => {
       try {
-        const { error } = await supabase
+        // セッションの確認
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // 閲覧数を更新（user_idチェックを削除）
+        const { data, error } = await supabase
           .from('events')
-          .update({ views: (event.views || 0) + 1 })
-          .eq('id', event.id);
+          .update({ 
+            views: (event.views || 0) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', event.id)
+          .select();
         
         if (error) {
           console.error('閲覧回数の更新に失敗しました:', error);
+          return;
+        }
+
+        // イベントの更新をトリガー
+        if (data) {
+          const channel = supabase
+            .channel('events_changes')
+            .on('postgres_changes', 
+              { 
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'events',
+                filter: `id=eq.${event.id}`
+              },
+              (payload) => {
+                console.log('イベント更新:', payload);
+              }
+            )
+            .subscribe();
+
+          return () => {
+            supabase.removeChannel(channel);
+          };
         }
       } catch (error) {
         console.error('Error updating view count:', error);
@@ -41,7 +79,7 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
     };
 
     updateViewCount();
-  }, [event.id, event.views]);
+  }, [event.id]);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -60,7 +98,7 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
 
         <div className={styles.meta}>
           <div className={styles.ageTags}>
-            {event.age_groups.map((age: string, index: number) => (
+            {sortAgeGroups(event.age_groups).map((age: string, index: number) => (
               <span key={index} className={styles.ageTag} data-age={age}>
                 {age}
               </span>

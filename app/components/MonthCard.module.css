@@ -316,16 +316,12 @@
 }
 
 .eventItem {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 15px;
   cursor: pointer;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: white;
   transition: all 0.3s ease;
-  background: white;
-  min-height: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .eventItem::after {
@@ -565,4 +561,23 @@
 
 .defaultDecoration {
   color: #718096;
+}
+
+.newEvent {
+  animation: highlight 2s ease-in-out;
+}
+
+@keyframes highlight {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
 } 

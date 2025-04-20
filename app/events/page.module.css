@@ -339,45 +339,59 @@
   z-index: 2;
 }
 
+/* 月ごとのカラー設定 */
+.month1 .eventCard { border-color: #FF6B6B; }
+.month2 .eventCard { border-color: #4A90E2; }
+.month3 .eventCard { border-color: #FF9FB2; }
+.month4 .eventCard { border-color: #7ED321; }
+.month5 .eventCard { border-color: #4FD1C5; }
+.month6 .eventCard { border-color: #9B6DFF; }
+.month7 .eventCard { border-color: #54C7FC; }
+.month8 .eventCard { border-color: #FFB347; }
+.month9 .eventCard { border-color: #4CAF50; }
+.month10 .eventCard { border-color: #FFB74D; }
+.month11 .eventCard { border-color: #FF7043; }
+.month12 .eventCard { border-color: #5C6BC0; }
+
 .eventCard {
   background: white;
-  border-radius: 25px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  border: 2px solid transparent;
+  border: 2px solid;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
+
+/* 月ごとの背景グラデーション */
+.month1 .eventCard { background: linear-gradient(135deg, #fff, #fff5f5); }
+.month2 .eventCard { background: linear-gradient(135deg, #fff, #f5f8ff); }
+.month3 .eventCard { background: linear-gradient(135deg, #fff, #fff5f7); }
+.month4 .eventCard { background: linear-gradient(135deg, #fff, #f7fff0); }
+.month5 .eventCard { background: linear-gradient(135deg, #fff, #f0fffd); }
+.month6 .eventCard { background: linear-gradient(135deg, #fff, #f8f5ff); }
+.month7 .eventCard { background: linear-gradient(135deg, #fff, #f0faff); }
+.month8 .eventCard { background: linear-gradient(135deg, #fff, #fff7f0); }
+.month9 .eventCard { background: linear-gradient(135deg, #fff, #f0fff1); }
+.month10 .eventCard { background: linear-gradient(135deg, #fff, #fff8f0); }
+.month11 .eventCard { background: linear-gradient(135deg, #fff, #fff5f0); }
+.month12 .eventCard { background: linear-gradient(135deg, #fff, #f5f6ff); }
 
 .eventCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
-/* 月ごとのカラー設定 */
-.month1 .eventCard { border-color: #FF6B6B; background: linear-gradient(135deg, #fff, #fff5f5); }
-.month2 .eventCard { border-color: #4A90E2; background: linear-gradient(135deg, #fff, #f5f8ff); }
-.month3 .eventCard { border-color: #FF9FB2; background: linear-gradient(135deg, #fff, #fff5f7); }
-.month4 .eventCard { border-color: #7ED321; background: linear-gradient(135deg, #fff, #f7fff0); }
-.month5 .eventCard { border-color: #4FD1C5; background: linear-gradient(135deg, #fff, #f0fffd); }
-.month6 .eventCard { border-color: #9B6DFF; background: linear-gradient(135deg, #fff, #f8f5ff); }
-.month7 .eventCard { border-color: #54C7FC; background: linear-gradient(135deg, #fff, #f0faff); }
-.month8 .eventCard { border-color: #FFB347; background: linear-gradient(135deg, #fff, #fff7f0); }
-.month9 .eventCard { border-color: #4CAF50; background: linear-gradient(135deg, #fff, #f0fff1); }
-.month10 .eventCard { border-color: #FFB74D; background: linear-gradient(135deg, #fff, #fff8f0); }
-.month11 .eventCard { border-color: #FF7043; background: linear-gradient(135deg, #fff, #fff5f0); }
-.month12 .eventCard { border-color: #5C6BC0; background: linear-gradient(135deg, #fff, #f5f6ff); }
 
 .eventHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .category {
@@ -700,75 +714,6 @@
   .description {
     font-size: 0.9rem;
   }
-}
-
-/* 月ごとのスタイル */
-.month1 {
-  border: 2px solid #FF6B6B;
-  background: linear-gradient(135deg, #fff, #fff5f5);
-}
-
-.month2 {
-  border: 2px solid #4A90E2;
-  background: linear-gradient(135deg, #fff, #f5f8ff);
-}
-
-.month3 {
-  border: 2px solid #FF9FB2;
-  background: linear-gradient(135deg, #fff, #fff5f7);
-}
-
-.month4 {
-  border: 2px solid #7ED321;
-  background: linear-gradient(135deg, #fff, #f7fff0);
-}
-
-.month5 {
-  border: 2px solid #4FD1C5;
-  background: linear-gradient(135deg, #fff, #f0fffd);
-}
-
-.month6 {
-  border: 2px solid #9B6DFF;
-  background: linear-gradient(135deg, #fff, #f8f5ff);
-}
-
-.month7 {
-  border: 2px solid #54C7FC;
-  background: linear-gradient(135deg, #fff, #f0faff);
-}
-
-.month8 {
-  border: 2px solid #FFB347;
-  background: linear-gradient(135deg, #fff, #fff7f0);
-}
-
-.month9 {
-  border: 2px solid #4CAF50;
-  background: linear-gradient(135deg, #fff, #f0fff1);
-}
-
-.month10 {
-  border: 2px solid #FFB74D;
-  background: linear-gradient(135deg, #fff, #fff8f0);
-}
-
-.month11 {
-  border: 2px solid #FF7043;
-  background: linear-gradient(135deg, #fff, #fff5f0);
-}
-
-.month12 {
-  border: 2px solid #5C6BC0;
-  background: linear-gradient(135deg, #fff, #f5f6ff);
-}
-
-.eventCard {
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid;
-  transition: all 0.3s ease;
-  cursor: pointer;
 }
 
 .eventCard:hover {

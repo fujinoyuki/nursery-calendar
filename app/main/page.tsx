@@ -28,6 +28,11 @@ export default function MainPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'warning';
+  } | null>(null);
+  const [newEventId, setNewEventId] = useState<string | null>(null);
   const router = useRouter();
 
   const getMonthNumber = (monthName: string): number => {
@@ -125,17 +130,44 @@ export default function MainPage() {
     setShowAddForm(true);
   };
 
+  // フィードバックメッセージを表示する関数
+  const showFeedback = (message: string, type: 'success' | 'error' | 'warning') => {
+    setFeedback({ message, type });
+    setTimeout(() => setFeedback(null), 3000); // 3秒後に消える
+  };
+
+  // イベントの重複をチェックする関数
+  const checkDuplicateEvent = (eventData: LocalEventFormData, month: number): boolean => {
+    const monthEvents = getEventsForMonth(month);
+    return monthEvents.some(existingEvent => 
+      existingEvent.title === eventData.title ||
+      (existingEvent.description === eventData.description && 
+       existingEvent.category === eventData.category)
+    );
+  };
+
   const handleAddEventSubmit = async (eventData: LocalEventFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setError('認証されていません');
+        showFeedback('認証されていません', 'error');
         return;
       }
 
       if (selectedMonth === null) {
-        setError('月が選択されていません');
+        showFeedback('月が選択されていません', 'error');
         return;
+      }
+
+      // 重複チェック
+      if (checkDuplicateEvent(eventData, selectedMonth)) {
+        const confirmAdd = window.confirm(
+          '似たイベントが既に存在します。それでも追加しますか？'
+        );
+        if (!confirmAdd) {
+          showFeedback('イベントの追加をキャンセルしました', 'warning');
+          return;
+        }
       }
 
       // 日付を選択された月の1日に設定
@@ -152,14 +184,8 @@ export default function MainPage() {
       // カテゴリーの正規化（全角スペースを保持）
       const normalizedEventData = {
         ...eventData,
-        category: eventData.category.trim() // 前後の空白のみ削除
+        category: eventData.category.trim()
       };
-
-      console.log('イベント追加中...', {
-        selectedMonth,
-        date: date.toISOString(),
-        normalizedEventData
-      });
 
       const { data, error } = await supabase
         .from('events')
@@ -173,20 +199,24 @@ export default function MainPage() {
 
       if (error) {
         console.error('イベント追加エラー:', error);
-        setError('イベントの追加に失敗しました');
+        showFeedback('イベントの追加に失敗しました', 'error');
         return;
       }
 
       if (data) {
         console.log('追加されたイベント:', data);
+        setNewEventId(data[0].id); // アニメーション用にIDを保存
+        showFeedback('イベントを追加しました', 'success');
         await fetchEvents();
         setShowAddForm(false);
         setSelectedMonth(null);
-        setError(null);
+
+        // 3秒後にアニメーション状態をリセット
+        setTimeout(() => setNewEventId(null), 3000);
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('予期せぬエラーが発生しました');
+      showFeedback('予期せぬエラーが発生しました', 'error');
     }
   };
 
@@ -307,6 +337,12 @@ export default function MainPage() {
 
   return (
     <div className={styles.container}>
+      {feedback && (
+        <div className={`${styles.feedbackMessage} ${styles[feedback.type]}`}>
+          {feedback.message}
+        </div>
+      )}
+      
       <div className={styles.headerWrapper}>
         <header className={styles.header}>
           <h1 className={styles.title}>保育アイデア管理</h1>
@@ -342,8 +378,9 @@ export default function MainPage() {
               monthName={monthName}
               events={monthEvents}
               onEventClick={handleEventClick}
-              onAddClick={() => setShowAddForm(true)}
+              onAddClick={() => handleAddEvent(month)}
               season={getSeason(monthName)}
+              newEventId={newEventId}
             />
           );
         })}

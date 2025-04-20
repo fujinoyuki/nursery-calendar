@@ -356,7 +356,7 @@ export default function EventListPage() {
     }
   };
 
-  const handleEditEventSubmit = async (eventData: LocalEventFormData) => {
+  const handleEditEventSubmit = async (formData: LocalEventFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -367,23 +367,74 @@ export default function EventListPage() {
         throw new Error('編集するイベントが選択されていません');
       }
 
+      // ファイルサイズの制限（5MB）
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
       // media_filesをMediaFile型に変換
       const mediaFiles = await Promise.all(
-        eventData.media_files.map(async (file) => {
-          // ここでファイルのアップロード処理を行う必要があります
-          // 仮の実装として、typeとurlを返します
-          return {
-            type: file.type,
-            url: URL.createObjectURL(file)
-          };
+        formData.media_files.map(async (file) => {
+          try {
+            // ファイルサイズのチェック
+            if (file.size > MAX_FILE_SIZE) {
+              throw new Error(`ファイル ${file.name} が大きすぎます。5MB以下のファイルを選択してください。`);
+            }
+
+            // 許可されるファイルタイプ
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'];
+            if (!allowedTypes.includes(file.type)) {
+              throw new Error(`ファイル ${file.name} の形式がサポートされていません。`);
+            }
+
+            // ファイル名を一意にする
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            
+            // 古いファイルの削除（同じユーザーの同じイベントの場合）
+            if (selectedEvent.media_files) {
+              const oldFiles = selectedEvent.media_files.filter(f => f.type === file.type);
+              for (const oldFile of oldFiles) {
+                const oldFileName = oldFile.url.split('/').pop();
+                if (oldFileName) {
+                  await supabase.storage
+                    .from('event-media')
+                    .remove([`${session.user.id}/${oldFileName}`]);
+                }
+              }
+            }
+
+            // ファイルをストレージにアップロード
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('event-media')
+              .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error('ファイルアップロードエラー:', uploadError);
+              throw uploadError;
+            }
+
+            // アップロードしたファイルのURLを取得
+            const { data: { publicUrl } } = supabase.storage
+              .from('event-media')
+              .getPublicUrl(fileName);
+
+            return {
+              type: file.type,
+              url: publicUrl
+            };
+          } catch (error) {
+            console.error('ファイル処理エラー:', error);
+            throw error;
+          }
         })
       );
 
-      console.log('イベント更新中...', { ...eventData, id: selectedEvent.id });
       const { data, error } = await supabase
         .from('events')
         .update({
-          ...eventData,
+          ...formData,
           media_files: mediaFiles,
           updated_at: new Date().toISOString()
         })
@@ -404,6 +455,8 @@ export default function EventListPage() {
       setSelectedEvent(null);
     } catch (error) {
       console.error('Error:', error);
+      // エラーメッセージを表示（実際のUIに合わせて実装）
+      alert(error instanceof Error ? error.message : 'ファイルのアップロード中にエラーが発生しました');
     }
   };
 
@@ -435,38 +488,39 @@ export default function EventListPage() {
 
   // イベントカードのレンダリング部分を修正
   const renderEventCard = (event: Event) => (
-    <div
-      key={event.id}
-      className={`${styles.eventCard} ${getMonthClass(event.month)}`}
-      onClick={() => handleEventClick(event)}
-    >
-      <div className={styles.eventHeader}>
-        <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
-          {getCategoryDisplayText(event.category)}
-        </span>
-        <div className={styles.ageGroups}>
-          {event.age_groups?.map((age) => (
-            <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
-              {age}
-            </span>
-          ))}
+    <div key={event.id} className={getMonthClass(event.month)}>
+      <div
+        className={styles.eventCard}
+        onClick={() => handleEventClick(event)}
+      >
+        <div className={styles.eventHeader}>
+          <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
+            {getCategoryDisplayText(event.category)}
+          </span>
+          <div className={styles.ageGroups}>
+            {event.age_groups?.map((age) => (
+              <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
+                {age}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
-      <h3 className={styles.eventTitle}>{event.title}</h3>
-      <p className={styles.eventDescription}>{event.description}</p>
-      <div className={styles.eventImageContainer}>
-        {event.media_files?.some(file => file.type.startsWith('image/')) && 
-         event.media_files.find(file => file.type.startsWith('image/'))?.url ? (
-          <Image
-            src={event.media_files.find(file => file.type.startsWith('image/'))!.url}
-            alt={event.title}
-            width={200}
-            height={200}
-            className={styles.eventImage}
-          />
-        ) : (
-          <div className={styles.noImage}>No Image</div>
-        )}
+        <h3 className={styles.eventTitle}>{event.title}</h3>
+        <p className={styles.eventDescription}>{event.description}</p>
+        <div className={styles.eventImageContainer}>
+          {event.media_files?.some(file => file.type.startsWith('image/')) && 
+           event.media_files.find(file => file.type.startsWith('image/'))?.url ? (
+            <Image
+              src={event.media_files.find(file => file.type.startsWith('image/'))!.url}
+              alt={event.title}
+              width={200}
+              height={200}
+              className={styles.eventImage}
+            />
+          ) : (
+            <div className={styles.noImage}>No Image</div>
+          )}
+        </div>
       </div>
     </div>
   );

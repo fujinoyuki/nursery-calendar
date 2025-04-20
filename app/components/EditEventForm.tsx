@@ -21,7 +21,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   const initialDuration = data.duration.match(/(\d+)時間(\d+)分/);
   const [hours, setHours] = useState(initialDuration ? initialDuration[1] : '0');
   const [minutes, setMinutes] = useState(initialDuration ? initialDuration[2] : '0');
-  const [mediaFiles, setMediaFiles] = useState<File[]>(data.media_files || []);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isDurationValid = () => {
@@ -32,18 +32,11 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const submitData: LocalEventFormData = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      month: data.month,
-      category: formData.category === 'その他' ? otherCategory.trim() as Category : formData.category,
-      age_groups: formData.age_groups,
-      duration: `${hours}時間${minutes}分`,
-      materials: formData.materials.filter(m => m.trim()),
-      objectives: formData.objectives.filter(o => o.trim()),
+    const localFormData: LocalEventFormData = {
+      ...formData,
       media_files: mediaFiles
     };
-    onSubmit(submitData);
+    onSubmit(localFormData);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

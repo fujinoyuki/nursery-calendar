@@ -12,9 +12,16 @@ interface MonthCardProps {
   onEventClick: (event: Event) => void;
   onAddClick: () => void;
   season?: 'spring' | 'summer' | 'autumn' | 'winter';
+  newEventId?: string;
 }
 
 const CATEGORIES: Category[] = ['壁　面', '制作物', 'その他'];
+
+// 年齢グループをソートする関数
+const sortAgeGroups = (ages: string[] = []) => {
+  const ageOrder = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+  return [...ages].sort((a, b) => ageOrder.indexOf(a) - ageOrder.indexOf(b));
+};
 
 const getMonthClass = (month: number): string => {
   switch (month) {
@@ -52,17 +59,38 @@ export const MonthCard: React.FC<MonthCardProps> = ({
   monthName,
   events,
   onEventClick,
-  onAddClick
+  onAddClick,
+  newEventId
 }) => {
   const monthClass = getMonthClass(month);
 
   const getLatestEventByCategory = (events: Event[], category: Category) => {
-    return events.filter(event => event.category === category)
-      .sort((a, b) => {
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return dateB - dateA;
-      })[0];
+    // カテゴリーの正規化（全角スペースと空白を考慮）
+    const normalizedCategory = category.replace(/\s+/g, '　').trim();
+    
+    return events.filter(event => {
+      // カテゴリー判定ロジック
+      const eventCategory = event.category?.replace(/\s+/g, '　').trim() || '';
+      
+      // デバッグログ
+      console.log('カテゴリー判定:', {
+        期待: normalizedCategory,
+        実際: eventCategory,
+        元の値: event.category
+      });
+
+      // 「その他」カテゴリーの場合
+      if (normalizedCategory === 'その他') {
+        return eventCategory !== '壁　面' && eventCategory !== '制作物';
+      }
+
+      return eventCategory === normalizedCategory;
+    })
+    .sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    })[0];
   };
 
   return (
@@ -73,15 +101,20 @@ export const MonthCard: React.FC<MonthCardProps> = ({
         </h3>
       </div>
       <div className={styles.eventsContainer}>
-        {CATEGORIES.map((category) => {
+        {CATEGORIES.map(category => {
           const event = getLatestEventByCategory(events, category);
           const columnStyle = category === '壁　面' ? 'wallColumn' : 
                             category === '制作物' ? 'craftColumn' : 'otherColumn';
           
+          console.log(`${monthName}の${category}:`, event);
+          
           return (
             <div key={category} className={styles.categorySection}>
               {event ? (
-                <div className={styles.eventItem} onClick={() => onEventClick(event)}>
+                <div 
+                  className={`${styles.eventItem} ${event.id === newEventId ? styles.newEvent : ''}`} 
+                  onClick={() => onEventClick(event)}
+                >
                   <div className={styles.eventHeader}>
                     <div className={`${styles.categoryLabel} ${styles[columnStyle]}`}>
                       {category}
@@ -90,7 +123,7 @@ export const MonthCard: React.FC<MonthCardProps> = ({
                   </div>
                   <div className={styles.eventMeta}>
                     <div className={styles.ageTags}>
-                      {event.age_groups?.map((age, index) => (
+                      {sortAgeGroups(event.age_groups).map((age, index) => (
                         <span key={`${age}-${index}`} className={styles.ageTag} data-age={age}>{age}</span>
                       ))}
                     </div>
@@ -113,7 +146,7 @@ export const MonthCard: React.FC<MonthCardProps> = ({
         className={`${styles.addButton} ${styles.defaultButton}`}
         onClick={onAddClick}
       >
-        イベントを追加
+        ＋ イベントを追加
       </button>
     </div>
   );
