@@ -12,7 +12,7 @@ interface MonthCardProps {
   onEventClick: (event: Event) => void;
   onAddClick: () => void;
   season?: 'spring' | 'summer' | 'autumn' | 'winter';
-  newEventId?: string;
+  newEventId?: string | null;
 }
 
 const CATEGORIES: Category[] = ['壁　面', '制作物', 'その他'];

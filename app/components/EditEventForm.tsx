@@ -2,14 +2,14 @@
 
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styles from './EditEventForm.module.css';
-import type { Event, LocalEventFormData, MediaFile, Category, AgeGroup } from '../types';
+import type { Event, LocalEventFormData, MediaFile, Category, AgeGroup, EventFormData } from '../types';
 
 export const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
 export const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'] as const;
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
 interface Props {
-  data: Event;
+  data: EventFormData;
   onSubmit: (data: LocalEventFormData) => void;
   onCancel: () => void;
 }

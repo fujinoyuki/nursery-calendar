@@ -1,105 +1,248 @@
-.main {
-  min-height: 100vh;
-  background-color: #FFFFFF;
-  font-family: "M PLUS Rounded 1c", sans-serif;
-  position: relative;
-  overflow: hidden;
-  padding: 40px;
-}
-
-.main::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 20%, var(--primary-pink) 0%, transparent 20%),
-    radial-gradient(circle at 80% 80%, var(--primary-yellow) 0%, transparent 20%),
-    radial-gradient(circle at 50% 50%, var(--primary-blue) 0%, transparent 15%),
-    radial-gradient(circle at 10% 90%, var(--primary-green) 0%, transparent 25%),
-    radial-gradient(circle at 90% 10%, var(--accent-orange) 0%, transparent 20%);
-  opacity: 0.2;
-  z-index: 1;
-}
-
 .container {
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  background: #FFFFFF;
   position: relative;
-  z-index: 2;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* 装飾的な要素を完全に削除 */
-.container::before,
-.container::after {
-  content: none;
+.container::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    /* ピンクのドット */
+    radial-gradient(#FFB5C5 105px, transparent 105px),
+    radial-gradient(#FFB5C5 95px, transparent 95px),
+    radial-gradient(#FFB5C5 85px, transparent 85px),
+    /* 水色のドット */
+    radial-gradient(#B5E6FF 90px, transparent 90px),
+    radial-gradient(#B5E6FF 85px, transparent 85px),
+    radial-gradient(#B5E6FF 80px, transparent 80px),
+    radial-gradient(#B5E6FF 75px, transparent 75px),
+    /* 緑のドット */
+    radial-gradient(#98FB98 85px, transparent 85px),
+    radial-gradient(#98FB98 80px, transparent 80px),
+    radial-gradient(#98FB98 75px, transparent 75px),
+    /* 黄色のドット */
+    radial-gradient(#FFD700 80px, transparent 80px),
+    radial-gradient(#FFD700 75px, transparent 75px),
+    radial-gradient(#FFD700 70px, transparent 70px);
+  background-position: 
+    /* ピンクの位置 */
+    5% 5%,
+    85% 45%,
+    45% 85%,
+    /* 水色の位置 */
+    95% 5%,
+    25% 35%,
+    75% 15%,
+    5% 95%,
+    /* 緑の位置 */
+    65% 65%,
+    35% 15%,
+    95% 45%,
+    /* 黄色の位置 */
+    15% 35%,
+    45% 65%,
+    75% 75%;
+  background-size: 
+    /* ピンク */
+    30% 30%,
+    25% 25%,
+    20% 20%,
+    /* 水色 */
+    30% 30%,
+    25% 25%,
+    20% 20%,
+    25% 25%,
+    /* 緑 */
+    25% 25%,
+    20% 20%,
+    25% 25%,
+    /* 黄色 */
+    25% 25%,
+    20% 20%,
+    25% 25%;
+  background-repeat: no-repeat;
+  opacity: 0.12;
 }
 
 .title {
-  font-size: 42px;
-  font-weight: bold;
-  margin-bottom: 40px;
-  position: relative;
-  display: inline-block;
-  letter-spacing: 2px;
-  padding: 0 15px 15px;
-  color: #6B9BD2;  /* 優しい青色 */
+  margin: 15vh auto 0;
+  font-size: 2.8rem;
+  color: #FF8C42;
+  text-align: center;
   font-family: "M PLUS Rounded 1c", sans-serif;
-  text-shadow: 
-    2px 2px 0 #FFB5C5,  /* ピンクの影 */
-    4px 4px 0 #87CEEB;  /* 水色の影 */
-  transform: rotate(-2deg);
-  transition: transform 0.3s ease;
-}
-
-.title:hover {
-  transform: rotate(0deg);
-}
-
-.title::before {
-  content: '✿';  /* 花のアイコン */
-  position: absolute;
-  left: -20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #FFB5C5;
-  text-shadow: none;
-  font-size: 24px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 1rem 1rem;
+  position: relative;
+  width: fit-content;
+  box-sizing: border-box;
 }
 
 .title::after {
-  content: '✿';  /* 花のアイコン */
-  position: absolute;
-  right: -20px;
-  top: 50%;
-  transform: translateY(-50%) scaleX(-1);  /* 左右反転 */
-  color: #FFB5C5;
-  text-shadow: none;
-  font-size: 24px;
-}
-
-/* 下線のスタイル */
-.title > span {
-  position: relative;
-}
-
-.title > span::after {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(to right, #FFB5C5, #87CEEB, #FFB5C5);
+  background: #FFB800;
   border-radius: 2px;
+}
+
+.loginContainer {
+  margin: 5vh auto 0;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  border: 2px dashed #FFB5C5;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.loginContainer::before,
+.loginContainer::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.loginContainer::before {
+  top: -15px;
+  left: -15px;
+  background: #FFB5C5;
+  border: 2px solid #FFB5C5;
+}
+
+.loginContainer::after {
+  bottom: -15px;
+  right: -15px;
+  background: #B5E6FF;
+  border: 2px solid #B5E6FF;
+}
+
+.formWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+}
+
+.input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #FFE5D4;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: transparent;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FFB5C5;
+  box-shadow: 0 0 0 3px rgba(255, 181, 197, 0.2);
+}
+
+.loginButton {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #B5E6FF, #6B9BD2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(107, 155, 210, 0.3);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
+
+.signupLink {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.signupLink a {
+  color: #FFB5C5;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.signupLink a:hover {
+  color: #FF8C42;
+  text-decoration: underline;
+}
+
+.error {
+  color: #FF4B4B;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: rgba(255, 75, 75, 0.1);
+}
+
+@media (max-width: 768px) {
+  .loginContainer {
+    margin: 0 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
 }
 
 .authContainer {
@@ -124,37 +267,6 @@
   position: relative;
   display: inline-block;
   width: 100%;
-}
-
-.formGroup {
-  margin-bottom: 25px;
-}
-
-.label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-  font-size: 16px;
-}
-
-.input {
-  width: 100%;
-  padding: 12px;
-  border: 3px solid var(--primary-blue);
-  border-radius: 8px;
-  font-family: 'Courier New', monospace;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  background-color: #FFFFFF;
-  color: var(--text-primary);
-}
-
-.input:focus {
-  outline: none;
-  border-color: var(--accent-salmon);
-  transform: translateX(5px);
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
 }
 
 .button {
@@ -268,29 +380,6 @@
 /* グラデーション背景を削除してシンプルに */
 .description::before {
   content: none;
-}
-
-.loginButton {
-  width: 100%;
-  padding: 0.8rem;
-  background: linear-gradient(135deg, #6B9BD2 0%, #9DC3E6 100%);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(107, 155, 210, 0.2);
-}
-
-.loginButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(107, 155, 210, 0.3);
-}
-
-.loginButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(107, 155, 210, 0.2);
 }
 
 /* アニメーション */
