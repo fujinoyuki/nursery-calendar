@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import EditEventForm from '../../../components/EditEventForm';
 import type { Event, EventFormData, LocalEventFormData } from '../../../types';
+import { Metadata } from 'next';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,13 +26,14 @@ const convertEventToFormData = (event: Event): EventFormData => {
   };
 };
 
-type Props = {
+interface PageProps {
   params: {
     id: string;
   };
-};
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export default function EditEventPage({ params }: Props) {
+export default function EditEventPage({ params, searchParams }: PageProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,8 +72,9 @@ export default function EditEventPage({ params }: Props) {
         }
 
         setEvent(eventData);
-      } catch (error: any) {
-        setError(`予期せぬエラーが発生しました: ${error.message}`);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : '予期せぬエラーが発生しました';
+        setError(`予期せぬエラーが発生しました: ${errorMessage}`);
       } finally {
         setLoading(false);
       }
@@ -106,8 +109,9 @@ export default function EditEventPage({ params }: Props) {
 
       if (error) throw error;
       router.push('/events');
-    } catch (error: any) {
-      setError(`更新中にエラーが発生しました: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '予期せぬエラーが発生しました';
+      setError(`更新中にエラーが発生しました: ${errorMessage}`);
     }
   };
 
