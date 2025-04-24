@@ -35,51 +35,33 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
       try {
         // セッションの確認
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+        if (!session) {
+          console.log('セッションが存在しません');
+          return;
+        }
 
-        // 閲覧数を更新（user_idチェックを削除）
-        const { data, error } = await supabase
+        // 閲覧数を更新（現在のイベントデータから直接更新）
+        const { error: updateError } = await supabase
           .from('events')
           .update({ 
             views: (event.views || 0) + 1,
             updated_at: new Date().toISOString()
           })
           .eq('id', event.id)
-          .select();
+          .eq('user_id', session.user.id);
         
-        if (error) {
-          console.error('閲覧回数の更新に失敗しました:', error);
+        if (updateError) {
+          console.error('閲覧回数の更新に失敗しました:', updateError.message);
           return;
         }
 
-        // イベントの更新をトリガー
-        if (data) {
-          const channel = supabase
-            .channel('events_changes')
-            .on('postgres_changes', 
-              { 
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'events',
-                filter: `id=eq.${event.id}`
-              },
-              (payload) => {
-                console.log('イベント更新:', payload);
-              }
-            )
-            .subscribe();
-
-          return () => {
-            supabase.removeChannel(channel);
-          };
-        }
       } catch (error) {
-        console.error('Error updating view count:', error);
+        console.error('閲覧回数の更新中にエラーが発生しました:', error);
       }
     };
 
     updateViewCount();
-  }, [event.id]);
+  }, [event.id, event.views]);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -104,7 +86,7 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
               </span>
             ))}
           </div>
-          <span className={styles.duration}>{event.duration}</span>
+          <span className={styles.duration}>所要時間：{event.duration}</span>
         </div>
 
         <div className={styles.section}>

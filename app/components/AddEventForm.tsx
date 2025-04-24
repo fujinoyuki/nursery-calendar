@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './AddEventForm.module.css';
-import { Event, EventFormData, LocalEventFormData } from '../types';
+import { Event, EventFormData, LocalEventFormData, AgeGroup } from '../types';
 
 interface AddEventFormProps {
   onSubmit: (data: LocalEventFormData) => void;

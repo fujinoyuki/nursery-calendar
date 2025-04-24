@@ -2,26 +2,35 @@
 
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styles from './EditEventForm.module.css';
-import type { EventFormData, LocalEventFormData, MediaFile, Category, AgeGroup } from '../types';
+import type { Event, LocalEventFormData, MediaFile, Category, AgeGroup } from '../types';
 
-const CATEGORIES: Category[] = ['壁　面', '制作物', 'その他'];
-const AGE_GROUPS: AgeGroup[] = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+export const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
+export const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'] as const;
+const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
 interface Props {
-  data: EventFormData;
+  data: Event;
   onSubmit: (data: LocalEventFormData) => void;
   onCancel: () => void;
 }
 
 export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
-  const [formData, setFormData] = useState<EventFormData>(data);
-  const [otherCategory, setOtherCategory] = useState<string>(
-    CATEGORIES.includes(data.category as Category) ? '' : data.category
-  );
-  const initialDuration = data.duration.match(/(\d+)時間(\d+)分/);
-  const [hours, setHours] = useState(initialDuration ? initialDuration[1] : '0');
-  const [minutes, setMinutes] = useState(initialDuration ? initialDuration[2] : '0');
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [formData, setFormData] = useState<LocalEventFormData>({
+    title: data.title,
+    description: data.description,
+    month: data.month,
+    duration: data.duration,
+    age_groups: data.age_groups,
+    category: data.category,
+    materials: data.materials,
+    objectives: data.objectives,
+    media_files: []
+  });
+  
+  const [otherCategory, setOtherCategory] = useState('');
+  const initialDuration = formData.duration.match(/(\d+)時間(\d+)分/);
+  const [hours, setHours] = useState<string>(initialDuration ? initialDuration[1] : '0');
+  const [minutes, setMinutes] = useState<string>(initialDuration ? initialDuration[2] : '0');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isDurationValid = () => {
@@ -32,23 +41,31 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const localFormData: LocalEventFormData = {
+    if (!isDurationValid()) {
+      alert('所要時間を入力してください');
+      return;
+    }
+    const duration = `${hours}時間${minutes}分`;
+    const finalCategory = formData.category === 'その他' ? otherCategory : formData.category;
+    const formDataToSubmit: LocalEventFormData = {
       ...formData,
-      media_files: mediaFiles
+      duration,
+      category: finalCategory,
+      media_files: [...formData.media_files]
     };
-    onSubmit(localFormData);
+    onSubmit(formDataToSubmit);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: EventFormData) => ({
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       [name]: value
     }));
   };
 
   const handleAgeGroupChange = (group: AgeGroup) => {
-    setFormData((prev: EventFormData) => {
+    setFormData((prev: LocalEventFormData) => {
       const newAgeGroups = prev.age_groups.includes(group)
         ? prev.age_groups.filter(g => g !== group)
         : [...prev.age_groups, group];
@@ -60,7 +77,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const handleCategoryChange = (category: Category) => {
-    setFormData((prev: EventFormData) => ({
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       category
     }));
@@ -68,31 +85,26 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      const newFiles = Array.from(e.target.files).filter(file => {
-        if (!allowedTypes.includes(file.type)) {
-          alert(`${file.name}は対応していないファイル形式です。JPG、PNG、GIF形式のみ対応しています。`);
-          return false;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          alert(`${file.name}のファイルサイズが大きすぎます。5MB以下のファイルを選択してください。`);
-          return false;
-        }
-        return true;
-      });
-      setMediaFiles((prev: File[]) => [...prev, ...newFiles]);
+      const newFiles = Array.from(e.target.files);
+      setFormData(prev => ({
+        ...prev,
+        media_files: [...prev.media_files, ...newFiles]
+      }));
     }
   };
 
   const handleRemoveFile = (index: number) => {
-    setMediaFiles(prev => {
-      const newFiles = [...prev];
+    setFormData((prev: LocalEventFormData) => {
+      const newFiles = [...prev.media_files];
       const removedFile = newFiles[index];
       if (removedFile) {
         URL.revokeObjectURL(URL.createObjectURL(removedFile));
       }
       newFiles.splice(index, 1);
-      return newFiles;
+      return {
+        ...prev,
+        media_files: newFiles
+      };
     });
   };
 
@@ -122,12 +134,12 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     );
   };
 
-  const handleArrayFieldChange = (e: React.KeyboardEvent<HTMLInputElement>, field: keyof Pick<EventFormData, 'materials' | 'objectives'>) => {
+  const handleArrayFieldChange = (e: React.KeyboardEvent<HTMLInputElement>, field: keyof Pick<Event, 'materials' | 'objectives'>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const value = e.currentTarget.value.trim();
       if (value) {
-        setFormData((prev: EventFormData) => ({
+        setFormData((prev: LocalEventFormData) => ({
           ...prev,
           [field]: [...prev[field], value],
         }));
@@ -136,8 +148,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     }
   };
 
-  const removeArrayItem = (field: keyof Pick<EventFormData, 'materials' | 'objectives'>, index: number) => {
-    setFormData((prev: EventFormData) => ({
+  const removeArrayItem = (field: keyof Pick<Event, 'materials' | 'objectives'>, index: number) => {
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
@@ -166,28 +178,28 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const addMaterial = () => {
-    setFormData((prev: EventFormData) => ({
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       materials: [...prev.materials, '']
     }));
   };
 
   const addObjective = () => {
-    setFormData((prev: EventFormData) => ({
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       objectives: [...prev.objectives, '']
     }));
   };
 
   const removeMaterial = (index: number) => {
-    setFormData((prev: EventFormData) => ({
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       materials: prev.materials.filter((_, i) => i !== index)
     }));
   };
 
   const removeObjective = (index: number) => {
-    setFormData((prev: EventFormData) => ({
+    setFormData((prev: LocalEventFormData) => ({
       ...prev,
       objectives: prev.objectives.filter((_, i) => i !== index)
     }));
@@ -199,25 +211,92 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
         <h2 className={styles.title}>イベントを編集</h2>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="title">タイトル</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
+            <label>
+              月
+              <select
+                name="month"
+                value={formData.month}
+                onChange={handleChange}
+                required
+                className={styles.select}
+              >
+                {MONTHS.map((month) => (
+                  <option key={month} value={month}>
+                    {month}月
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              タイトル
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                className={`${styles.input} ${styles.fullWidth}`}
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              説明
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+                className={`${styles.textarea} ${styles.fullWidth}`}
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="materials">準備物（・ や 、 で区切って入力）</label>
+            <textarea
+              id="materials"
+              name="materials"
+              value={formData.materials.join('、')}
+              onChange={(e) => {
+                const items = e.target.value
+                  .split(/[、・]/)
+                  .map(item => item.trim())
+                  .filter(item => item !== '');
+                setFormData(prev => ({
+                  ...prev,
+                  materials: items
+                }));
+              }}
+              placeholder="例：&#13;&#10;画用紙、クレヨン、はさみ"
+              className={`${styles.textarea} ${styles.fullWidth}`}
+              rows={5}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="description">説明</label>
+            <label htmlFor="objectives">目的（・ や 、 で区切って入力）</label>
             <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
+              id="objectives"
+              name="objectives"
+              value={formData.objectives.join('、')}
+              onChange={(e) => {
+                const items = e.target.value
+                  .split(/[、・]/)
+                  .map(item => item.trim())
+                  .filter(item => item !== '');
+                setFormData(prev => ({
+                  ...prev,
+                  objectives: items
+                }));
+              }}
+              placeholder="例：&#13;&#10;創造性を育む、手先の器用さを養う、集中力を高める"
+              className={`${styles.textarea} ${styles.fullWidth}`}
+              rows={5}
             />
           </div>
 
@@ -227,14 +306,13 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
               {AGE_GROUPS.map((age) => (
                 <label
                   key={age}
-                  className={`${styles.checkbox} ${formData.age_groups.includes(age as AgeGroup) ? styles.selected : ''}`}
+                  className={`${styles.checkbox} ${formData.age_groups.includes(age) ? styles.selected : ''}`}
                   data-age={age}
                 >
                   <input
                     type="checkbox"
-                    value={age}
-                    checked={formData.age_groups.includes(age as AgeGroup)}
-                    onChange={(e) => handleAgeGroupChange(e.target.value as AgeGroup)}
+                    checked={formData.age_groups.includes(age)}
+                    onChange={() => handleAgeGroupChange(age)}
                   />
                   {age}
                 </label>
@@ -253,10 +331,10 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 >
                   <input
                     type="radio"
+                    name="category"
                     value={cat}
                     checked={formData.category === cat}
                     onChange={(e) => handleCategoryChange(e.target.value as Category)}
-                    className={styles.radioInput}
                   />
                   {cat}
                 </label>
@@ -284,6 +362,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 value={hours}
                 onChange={(e) => setHours(e.target.value)}
                 placeholder="0"
+                className={styles.timeInput}
               />
               <span>時間</span>
               <input
@@ -293,33 +372,10 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 value={minutes}
                 onChange={(e) => setMinutes(e.target.value)}
                 placeholder="0"
+                className={styles.timeInput}
               />
               <span>分</span>
             </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="materials">準備物（1行に1つ）</label>
-            <textarea
-              id="materials"
-              name="materials"
-              value={formData.materials.join('\n')}
-              onChange={handleMaterialChange}
-              placeholder="例：&#13;&#10;画用紙&#13;&#10;クレヨン&#13;&#10;はさみ"
-              rows={5}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="objectives">目的（1行に1つ）</label>
-            <textarea
-              id="objectives"
-              name="objectives"
-              value={formData.objectives.join('\n')}
-              onChange={handleObjectiveChange}
-              placeholder="例：&#13;&#10;創造性を育む&#13;&#10;手先の器用さを養う&#13;&#10;集中力を高める"
-              rows={5}
-            />
           </div>
 
           <div className={styles.optionalSection}>
@@ -341,9 +397,9 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
               <p>ファイルをドラッグ＆ドロップ</p>
             </div>
 
-            {mediaFiles.length > 0 && (
+            {formData.media_files.length > 0 && (
               <div className={styles.previewArea}>
-                {mediaFiles.map((file, index) => renderPreview(file, index))}
+                {formData.media_files.map((file, index) => renderPreview(file, index))}
               </div>
             )}
           </div>

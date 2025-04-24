@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Event, AgeGroup, EventFormData, LocalEventFormData } from '../types';
+import { Event, AgeGroup, EventFormData, LocalEventFormData, Category, MediaFile } from '../types';
 import EventOverlay from '../components/EventOverlay';
 import EditEventForm from '../components/EditEventForm';
 import Image from 'next/image';
@@ -30,11 +30,11 @@ const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳
 const getCategoryStyle = (category: string) => {
   switch (category) {
     case '壁　面':
-      return styles.categoryWall;
+    return styles.categoryWall;
     case '制作物':
-      return styles.categoryArt;
+    return styles.categoryArt;
     default:
-      return styles.categoryOther;
+  return styles.categoryOther;
   }
 };
 
@@ -61,7 +61,7 @@ const getAgeGroupStyle = (age: string) => {
 // カテゴリーの表示テキストを取得する関数
 const getCategoryDisplayText = (category: string) => {
   if (category !== '壁　面' && category !== '制作物') {
-    return 'その他';
+  return 'その他';
   }
   return category;
 };
@@ -95,7 +95,7 @@ export default function EventListPage() {
 
   const fetchEvents = async () => {
     try {
-      setLoading(true);
+    setLoading(true);
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
@@ -113,7 +113,7 @@ export default function EventListPage() {
         setError('イベントの取得に失敗しました');
         return;
       }
-
+      
       console.log('取得したイベントデータ:', eventsData);
       setEvents(eventsData || []);
       setFilteredEvents(eventsData || []);
@@ -131,24 +131,24 @@ export default function EventListPage() {
   // イベントが更新されたときにイベント一覧を再取得する
   useEffect(() => {
     if (selectedEvent) {
-      const channel = supabase
+    const channel = supabase
         .channel('events_changes')
-        .on('postgres_changes', 
-          { 
+      .on('postgres_changes', 
+        { 
             event: 'UPDATE', 
-            schema: 'public', 
+          schema: 'public', 
             table: 'events',
             filter: `id=eq.${selectedEvent.id}`
-          }, 
+        }, 
           () => {
-            fetchEvents();
-          }
-        )
+          fetchEvents();
+        }
+      )
         .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    return () => {
+      supabase.removeChannel(channel);
+    };
     }
   }, [selectedEvent]);
 
@@ -250,7 +250,7 @@ export default function EventListPage() {
 
       // 動画あり
       if (advancedFilters.hasVideo) {
-        filtered = filtered.filter(event => 
+      filtered = filtered.filter(event => 
           event.media_files && event.media_files.some(file => 
             file.type.startsWith('video/')
           )
@@ -261,12 +261,12 @@ export default function EventListPage() {
     // 並び替え
     if (sortType === 'date') {
       filtered.sort((a, b) => {
-        // まず月の距離で比較
-        const distanceA = getMonthDistance(a.month);
-        const distanceB = getMonthDistance(b.month);
+        // 月を数値として比較
+        const monthA = Number(a.month);
+        const monthB = Number(b.month);
         
-        if (distanceA !== distanceB) {
-          return distanceA - distanceB;
+        if (monthA !== monthB) {
+          return monthA - monthB;
         }
         
         // 月が同じ場合は作成日時で比較
@@ -352,7 +352,6 @@ export default function EventListPage() {
   const handleEventEdit = () => {
     if (selectedEvent) {
       setEditingEvent(selectedEvent);
-      setSelectedEvent(null);
     }
   };
 
@@ -363,7 +362,7 @@ export default function EventListPage() {
         throw new Error('認証されていません');
       }
 
-      if (!selectedEvent) {
+      if (!editingEvent) {
         throw new Error('編集するイベントが選択されていません');
       }
 
@@ -390,8 +389,8 @@ export default function EventListPage() {
             const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
             
             // 古いファイルの削除（同じユーザーの同じイベントの場合）
-            if (selectedEvent.media_files) {
-              const oldFiles = selectedEvent.media_files.filter(f => f.type === file.type);
+            if (editingEvent.media_files) {
+              const oldFiles = editingEvent.media_files.filter(f => f.type === file.type);
               for (const oldFile of oldFiles) {
                 const oldFileName = oldFile.url.split('/').pop();
                 if (oldFileName) {
@@ -421,6 +420,7 @@ export default function EventListPage() {
               .getPublicUrl(fileName);
 
             return {
+              id: crypto.randomUUID(),
               type: file.type,
               url: publicUrl
             };
@@ -438,12 +438,12 @@ export default function EventListPage() {
           media_files: mediaFiles,
           updated_at: new Date().toISOString()
         })
-        .eq('id', selectedEvent.id)
-        .eq('user_id', session.user.id)
+        .eq('id', editingEvent.id)
         .select();
 
       if (error) {
         console.error('イベント更新エラー:', error);
+        alert('イベントの更新に失敗しました: ' + error.message);
         return;
       }
 
@@ -455,7 +455,6 @@ export default function EventListPage() {
       setSelectedEvent(null);
     } catch (error) {
       console.error('Error:', error);
-      // エラーメッセージを表示（実際のUIに合わせて実装）
       alert(error instanceof Error ? error.message : 'ファイルのアップロード中にエラーが発生しました');
     }
   };
@@ -493,20 +492,6 @@ export default function EventListPage() {
         className={styles.eventCard}
         onClick={() => handleEventClick(event)}
       >
-        <div className={styles.eventHeader}>
-          <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
-            {getCategoryDisplayText(event.category)}
-          </span>
-          <div className={styles.ageGroups}>
-            {event.age_groups?.map((age) => (
-              <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
-                {age}
-              </span>
-            ))}
-          </div>
-        </div>
-        <h3 className={styles.eventTitle}>{event.title}</h3>
-        <p className={styles.eventDescription}>{event.description}</p>
         <div className={styles.eventImageContainer}>
           {event.media_files?.some(file => file.type.startsWith('image/')) && 
            event.media_files.find(file => file.type.startsWith('image/'))?.url ? (
@@ -521,6 +506,28 @@ export default function EventListPage() {
             <div className={styles.noImage}>No Image</div>
           )}
         </div>
+        <div className={styles.eventContent}>
+          <div className={styles.eventHeader}>
+            <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
+              {getCategoryDisplayText(event.category)}
+            </span>
+            <h3 className={styles.eventTitle}>{event.title}</h3>
+          </div>
+          <p className={styles.eventDescription}>{event.description}</p>
+          <div className={styles.ageGroups}>
+            {[...event.age_groups]
+              .sort((a, b) => parseInt(a) - parseInt(b))
+              .map((age) => (
+                <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
+                  {age}
+                </span>
+            ))}
+          </div>
+          <div className={styles.eventFooter}>
+            <span className={styles.month}>{event.month}月</span>
+            <span className={styles.duration}>所要時間：{event.duration}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -528,28 +535,24 @@ export default function EventListPage() {
   // 並び替え処理を行う関数
   const handleSort = (type: 'date' | 'popular') => {
     setSortType(type);
-    let sorted = [...filteredEvents];
-
+    const sorted = [...events].sort((a, b) => {
     if (type === 'date') {
-      sorted.sort((a, b) => {
-        const monthA = a.month || 1;
-        const monthB = b.month || 1;
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
+        return dateB - dateA;
+      } else {
+        // 人気順（月別）
+        const monthA = Number(a.month);
+        const monthB = Number(b.month);
         if (monthA !== monthB) {
           return monthA - monthB;
         }
-        // 月が同じ場合は作成日時で比較
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
+        // 同じ月の場合は作成日時で降順
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
         return dateB - dateA;
-      });
-    } else {
-      sorted.sort((a, b) => {
-        const viewsA = a.views || 0;
-        const viewsB = b.views || 0;
-        return viewsB - viewsA;
-      });
-    }
-
+      }
+    });
     setFilteredEvents(sorted);
   };
 
@@ -648,7 +651,7 @@ export default function EventListPage() {
           onClose={() => setSelectedEvent(null)}
           onDelete={handleEventDelete}
           onEdit={handleEventEdit}
-          season={getSeason(selectedEvent.month)}
+          season={getSeason(Number(selectedEvent.month))}
         />
       )}
 

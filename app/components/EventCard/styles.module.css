@@ -1,0 +1,155 @@
+.eventCard {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  width: 300px;
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+}
+
+.eventCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.imageContainer {
+  width: 100%;
+  height: 250px;
+  position: relative;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eventImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noImage {
+  color: #999;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.contentContainer {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.categoryLabel {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.title {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+  font-size: 1.1rem;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wallColumn {
+  background: #A7D2FF;
+}
+
+.craftColumn {
+  background: #FFB5C5;
+}
+
+.otherColumn {
+  background: #B5E6B5;
+}
+
+.ageTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ageTag {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.ageTag[data-age="0歳児"] {
+  background-color: rgba(255, 182, 193, 0.2);
+  color: #d4788f;
+}
+
+.ageTag[data-age="1歳児"] {
+  background-color: rgba(255, 218, 185, 0.2);
+  color: #d49a6a;
+}
+
+.ageTag[data-age="2歳児"] {
+  background-color: rgba(176, 224, 230, 0.2);
+  color: #6a9da3;
+}
+
+.ageTag[data-age="3歳児"] {
+  background-color: rgba(144, 238, 144, 0.2);
+  color: #5fa55f;
+}
+
+.ageTag[data-age="4歳児"] {
+  background-color: rgba(230, 230, 250, 0.2);
+  color: #8484b4;
+}
+
+.ageTag[data-age="5歳児"] {
+  background-color: rgba(255, 239, 213, 0.2);
+  color: #d4b48c;
+}
+
+.footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month {
+  font-size: 0.9rem;
+  color: #666;
+  padding: 4px 8px;
+  background-color: rgba(96, 165, 250, 0.1);
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.duration {
+  font-size: 0.9rem;
+  color: #666;
+  padding: 4px 8px;
+  background-color: rgba(96, 165, 250, 0.1);
+  border-radius: 12px;
+  white-space: nowrap;
+  margin-left: auto;
+} 
