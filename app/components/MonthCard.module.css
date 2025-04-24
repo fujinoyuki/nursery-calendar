@@ -367,6 +367,7 @@
   flex-direction: column;
   gap: 8px;
   align-items: flex-start;
+  width: 100%;
 }
 
 .ageTags {
@@ -422,6 +423,7 @@
   padding: 4px 12px;
   border-radius: 15px;
   font-family: "M PLUS Rounded 1c", sans-serif;
+  margin-left: auto;
 }
 
 .emptyEvent {

@@ -1,3 +1,15 @@
+export type { 
+  Event,
+  EventFormData,
+  LocalEventFormData,
+  MediaFile,
+  Category,
+  AgeGroup,
+  Duration,
+  EventCategory,
+  Media
+} from './event';
+
 export * from './event'; 
 
 export interface LocalEventFormData {

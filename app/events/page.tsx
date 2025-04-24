@@ -70,6 +70,63 @@ const getMonthClass = (month: number) => {
   return styles[`month${month}`];
 };
 
+const EventCard = ({ event, onEventClick }: { event: Event; onEventClick: (event: Event) => void }) => {
+  return (
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => onEventClick(event)}
+    >
+      {/* 画像を上部に表示 */}
+      <div className="relative w-full h-48">
+        {event.media_files && event.media_files.length > 0 ? (
+          event.media_files[0].type === 'video' ? (
+            <video
+              src={event.media_files[0].url}
+              className="w-full h-full object-cover"
+              controls
+            />
+          ) : (
+            <Image
+              src={event.media_files[0].url}
+              alt={event.title}
+              className="w-full h-full object-cover"
+              width={400}
+              height={300}
+            />
+          )
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400">No image</span>
+          </div>
+        )}
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
+        <p className="text-gray-600 mb-2">{event.description}</p>
+        
+        <div className="flex flex-wrap gap-2 mb-2">
+          {[...event.age_groups].sort().map((age) => (
+            <span
+              key={age}
+              className={`px-2 py-1 rounded-full text-sm ${getAgeGroupStyle(age)}`}
+            >
+              {age}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className={`px-2 py-1 rounded-full text-sm ${getCategoryStyle(event.category)}`}>
+            {event.category}
+          </span>
+          <span className="text-gray-500 text-sm">{event.month}月</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function EventListPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
@@ -328,8 +385,27 @@ export default function EventListPage() {
     setShowAdvancedSearch(false);
   };
 
-  const handleEventClick = (event: Event) => {
-    setSelectedEvent(event);
+  const handleEventClick = async (event: Event) => {
+    try {
+      // 閲覧数をインクリメント
+      const { data, error } = await supabase
+        .from('events')
+        .update({ views: (event.views || 0) + 1 })
+        .eq('id', event.id)
+        .select();
+
+      if (error) {
+        console.error('閲覧数の更新に失敗しました:', error);
+      }
+
+      // イベントの状態を更新
+      setSelectedEvent(event);
+      
+      // イベント一覧を再取得
+      fetchEvents();
+    } catch (error) {
+      console.error('イベントクリック処理でエラーが発生しました:', error);
+    }
   };
 
   const handleEventDelete = async (id: string) => {
@@ -485,6 +561,30 @@ export default function EventListPage() {
     }
   };
 
+  // 並び替え処理を行う関数
+  const handleSort = (type: 'date' | 'popular') => {
+    setSortType(type);
+    const sorted = [...events].sort((a, b) => {
+      if (type === 'date') {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
+        return dateB - dateA;
+      } else {
+        // 人気順（閲覧数で降順）
+        const viewsA = a.views || 0;
+        const viewsB = b.views || 0;
+        if (viewsA !== viewsB) {
+          return viewsB - viewsA;
+        }
+        // 閲覧数が同じ場合は月で昇順
+        const monthA = Number(a.month);
+        const monthB = Number(b.month);
+        return monthA - monthB;
+      }
+    });
+    setFilteredEvents(sorted);
+  };
+
   // イベントカードのレンダリング部分を修正
   const renderEventCard = (event: Event) => (
     <div key={event.id} className={getMonthClass(event.month)}>
@@ -531,30 +631,6 @@ export default function EventListPage() {
       </div>
     </div>
   );
-
-  // 並び替え処理を行う関数
-  const handleSort = (type: 'date' | 'popular') => {
-    setSortType(type);
-    const sorted = [...events].sort((a, b) => {
-    if (type === 'date') {
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
-        return dateB - dateA;
-      } else {
-        // 人気順（月別）
-        const monthA = Number(a.month);
-        const monthB = Number(b.month);
-        if (monthA !== monthB) {
-          return monthA - monthB;
-        }
-        // 同じ月の場合は作成日時で降順
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
-        return dateB - dateA;
-      }
-    });
-    setFilteredEvents(sorted);
-  };
 
   if (loading) {
     return (

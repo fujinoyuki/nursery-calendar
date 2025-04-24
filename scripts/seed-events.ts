@@ -34,22 +34,49 @@ function convertMaterials(materials: string): string[] {
 // カテゴリーを判定する関数
 function determineCategory(title: string, description: string): string {
   const keywords = {
-    wall: ['壁面', '製作', 'アート', '作り', '工作'],
-    event: ['会', 'まつり', '祭り', '遠足', '運動会'],
-    nature: ['観察', '探し', '自然', '植物', '虫'],
-    cooking: ['クッキング', '作り', '調理', 'おやつ'],
-    exercise: ['運動', '遊び', 'ダンス', '体操'],
+    wall: ['壁面', '壁', '装飾'],
+    craft: ['製作', '作り', '工作', 'アート', 'カード', 'プレゼント'],
     other: []
   };
 
   const text = `${title} ${description}`;
   
-  if (keywords.wall.some(k => text.includes(k))) return '壁面';
-  if (keywords.event.some(k => text.includes(k))) return '行事';
-  if (keywords.nature.some(k => text.includes(k))) return '自然';
-  if (keywords.cooking.some(k => text.includes(k))) return '製作';
-  if (keywords.exercise.some(k => text.includes(k))) return '運動';
+  if (keywords.wall.some(k => text.includes(k))) return '壁　面';
+  if (keywords.craft.some(k => text.includes(k))) return '制作物';
   return 'その他';
+}
+
+// 目的を生成する関数
+function generateObjectives(title: string, description: string, ageGroup: string): string[] {
+  const objectives = [];
+  
+  // 年齢に応じた基本的な目的
+  if (ageGroup.includes('0')) {
+    objectives.push('感覚遊びを楽しむ', '手先の感覚を養う');
+  }
+  if (ageGroup.includes('1') || ageGroup.includes('2')) {
+    objectives.push('創造性を育む', '手先の器用さを養う');
+  }
+  if (ageGroup.includes('3') || ageGroup.includes('4') || ageGroup.includes('5')) {
+    objectives.push('表現力を育む', '創造性を伸ばす', '協調性を養う');
+  }
+
+  // 活動内容に応じた目的
+  if (title.includes('観察') || description.includes('観察')) {
+    objectives.push('観察力を養う', '自然への興味を育む');
+  }
+  if (title.includes('運動') || description.includes('運動')) {
+    objectives.push('体力づくり', '運動能力の向上');
+  }
+  if (title.includes('製作') || description.includes('製作')) {
+    objectives.push('創造性を育む', '集中力を養う');
+  }
+  if (title.includes('伝統') || description.includes('伝統')) {
+    objectives.push('日本の伝統文化に親しむ', '季節の行事への理解を深める');
+  }
+
+  // 重複を削除して返す
+  return [...new Set(objectives)];
 }
 
 // イベントデータ
@@ -70,7 +97,7 @@ const eventData = [
         title: '冬の野鳥観察',
         description: '園庭や近くの公園で冬に見られる野鳥の観察。双眼鏡や図鑑を使って、子どもたちに野鳥の種類や特徴を教える。',
         materials: '双眼鏡、野鳥図鑑、スケッチブック、色鉛筆',
-        ageGroup: '4-6歳',
+        ageGroup: '4-5歳',
       },
       {
         id: '1-3',
@@ -97,7 +124,7 @@ const eventData = [
         title: 'バレンタインカード作り',
         description: '家族や友達への感謝の気持ちを込めて、オリジナルのバレンタインカードを作る。様々な素材を使って飾り付けを楽しむ。',
         materials: '色画用紙、シール、リボン、クレヨン、のり、はさみ',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
       {
         id: '2-3',
@@ -124,14 +151,14 @@ const eventData = [
         title: '卒園製作',
         description: '卒園する子どもたちの思い出を形に残す製作活動。手形アート、思い出アルバム、メッセージツリーなど。',
         materials: '画用紙、絵の具、写真、色ペン、装飾材料',
-        ageGroup: '5-6歳',
+        ageGroup: '5歳',
       },
       {
         id: '3-3',
         title: '春の自然観察ウォーク',
         description: '春の訪れを感じる自然観察散歩。芽吹き始めた植物や春の虫、花などを観察し、季節の変化に気づく機会を作る。',
         materials: '虫眼鏡、観察ノート、色鉛筆、カメラ',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
     ],
   },
@@ -158,7 +185,7 @@ const eventData = [
         title: 'こいのぼり製作',
         description: '5月の端午の節句に向けて、オリジナルのこいのぼりを作る。様々な材料を使って、個性豊かなこいのぼりを製作する。',
         materials: '色画用紙、クレープ紙、はさみ、のり、絵の具、筆',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
     ],
   },
@@ -259,14 +286,14 @@ const eventData = [
         title: '夏の虫探し',
         description: '園庭や近くの公園で夏の虫を探す活動。セミやトンボ、バッタなどを観察し、虫の特徴や生態について学ぶ。',
         materials: '虫かご、虫網、図鑑、虫眼鏡、スケッチブック',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
       {
         id: '8-3',
         title: '打ち水体験',
         description: '日本の伝統的な暑さ対策「打ち水」を体験。水を撒いて地面の温度が下がる様子を体感し、涼を取る知恵を学ぶ。',
         materials: 'じょうろ、バケツ、温度計、画用紙（記録用）',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
     ],
   },
@@ -279,7 +306,7 @@ const eventData = [
         title: 'お月見団子作り',
         description: '中秋の名月にちなんだお月見団子作り。団子を丸めて茹で、月見団子を作る体験を通して、日本の伝統行事に親しむ。',
         materials: '白玉粉、砂糖、水、茹で用の鍋、盛り付け皿',
-        ageGroup: '4-6歳',
+        ageGroup: '4-5歳',
       },
       {
         id: '9-2',
@@ -320,7 +347,7 @@ const eventData = [
         title: '秋の味覚クッキング',
         description: 'さつまいもやりんごなど、秋の食材を使った調理体験。スイートポテト、りんごのコンポートなど、季節の味を楽しむ。',
         materials: 'さつまいも、りんご、調理器具、エプロン、三角巾',
-        ageGroup: '4-6歳',
+        ageGroup: '4-5歳',
       },
     ],
   },
@@ -347,7 +374,7 @@ const eventData = [
         title: '勤労感謝の日・お仕事体験',
         description: '様々な職業について学び、役割遊びを通してお仕事体験をする。保育園内の様々な仕事に感謝する気持ちも育む。',
         materials: '職業に関する衣装や道具、役割カード、感謝カード',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
     ],
   },
@@ -367,14 +394,14 @@ const eventData = [
         title: '年賀状製作',
         description: '新年の挨拶を込めた年賀状作り。指スタンプや手形を使った干支の動物、家族への感謝メッセージなどを盛り込む。',
         materials: '年賀はがき、絵の具、スタンプ台、マーカー、シール',
-        ageGroup: '3-6歳',
+        ageGroup: '3-5歳',
       },
       {
         id: '12-3',
         title: '大掃除と門松製作',
         description: '年末の大掃除を体験し、新年を迎える準備をする。簡単な門松や正月飾りを作り、日本の伝統行事に親しむ。',
         materials: '掃除道具、竹、松、折り紙、のり、はさみ',
-        ageGroup: '4-6歳',
+        ageGroup: '4-5歳',
       },
     ],
   },
@@ -423,9 +450,10 @@ async function seedEvents() {
             materials: materials,
             age_groups: ageGroups,
             category: category,
-            month: monthData.month,
+            month: monthData.month.toString(),
             media_files: [], // 後でメディアファイルを追加
             duration: '60分', // デフォルトで60分を設定
+            objectives: generateObjectives(event.title, event.description, event.ageGroup),
             date: date.toISOString().split('T')[0], // YYYY-MM-DD形式
             user_id: userId // 固定ユーザーIDを使用
           }

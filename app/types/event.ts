@@ -6,7 +6,7 @@ export type MediaFile = {
 
 export type Duration = string;
 
-export type Category = '壁　面' | '制作物' | 'その他';
+export type Category = '壁面' | '制作物' | 'その他';
 
 export type AgeGroup = '0歳児' | '1歳児' | '2歳児' | '3歳児' | '4歳児' | '5歳児';
 

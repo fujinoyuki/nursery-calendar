@@ -127,7 +127,7 @@ export const MonthCard: React.FC<MonthCardProps> = ({
                         <span key={`${age}-${index}`} className={styles.ageTag} data-age={age}>{age}</span>
                       ))}
                     </div>
-                    <span className={styles.duration}>{event.duration}</span>
+                    <span className={styles.duration}>所要時間：{event.duration}</span>
                   </div>
                 </div>
               ) : (
