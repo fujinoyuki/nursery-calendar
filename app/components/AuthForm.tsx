@@ -33,8 +33,9 @@ export default function AuthForm() {
       } else {
         router.push('/main');
       }
-    } catch (err: any) {
-      setFormError(err.message || '予期せぬエラーが発生しました');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '予期せぬエラーが発生しました';
+      setFormError(errorMessage);
     } finally {
       setLoading(false);
     }

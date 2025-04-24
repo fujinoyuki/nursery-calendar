@@ -20,6 +20,7 @@ export type Event = {
   objectives: string[];
   media_files: MediaFile[];
   views: number;
+  image_url?: string;
   created_at?: string;
   updated_at?: string;
   user_id: string;

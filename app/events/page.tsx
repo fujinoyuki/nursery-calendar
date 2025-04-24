@@ -399,7 +399,7 @@ export default function EventListPage() {
       }
 
       // イベントの状態を更新
-      setSelectedEvent(event);
+    setSelectedEvent(event);
       
       // イベント一覧を再取得
       fetchEvents();
@@ -569,7 +569,7 @@ export default function EventListPage() {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
         const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
         return dateB - dateA;
-      } else {
+    } else {
         // 人気順（閲覧数で降順）
         const viewsA = a.views || 0;
         const viewsB = b.views || 0;
@@ -619,18 +619,18 @@ export default function EventListPage() {
               .sort((a, b) => parseInt(a) - parseInt(b))
               .map((age) => (
                 <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
-                  {age}
-                </span>
+                {age}
+              </span>
             ))}
           </div>
           <div className={styles.eventFooter}>
             <span className={styles.month}>{event.month}月</span>
             <span className={styles.duration}>所要時間：{event.duration}</span>
           </div>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 
   if (loading) {
     return (

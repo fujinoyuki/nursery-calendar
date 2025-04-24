@@ -26,14 +26,12 @@ const convertEventToFormData = (event: Event): EventFormData => {
   };
 };
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+type Props = {
+  params: { id: string };
+  searchParams: Record<string, string | string[] | undefined>;
+};
 
-export default function EditEventPage({ params, searchParams }: PageProps) {
+export default function EditEventPage({ params }: Props) {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

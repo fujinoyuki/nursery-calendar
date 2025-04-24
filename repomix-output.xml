@@ -3378,14 +3378,14 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      router.push('/main');
+        router.push('/main');
     } catch (error: any) {
       setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
-    }
-  };
+      }
+    };
 
   return (
-    <div className={styles.container}>
+      <div className={styles.container}>
       <h1 className={styles.title}>保育士イベントアイディア</h1>
       <div className={styles.loginContainer}>
         <form onSubmit={handleSubmit}>
@@ -3399,7 +3399,7 @@ export default function LoginPage() {
               className={styles.input}
               placeholder="example@email.com"
             />
-          </div>
+      </div>
           <div className={styles.formGroup}>
             <label className={styles.label}>パスワード</label>
             <input
@@ -7558,11 +7558,11 @@ const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳
 const getCategoryStyle = (category: string) => {
   switch (category) {
     case '壁　面':
-    return styles.categoryWall;
+      return styles.categoryWall;
     case '制作物':
-    return styles.categoryArt;
+      return styles.categoryArt;
     default:
-  return styles.categoryOther;
+      return styles.categoryOther;
   }
 };
 
@@ -7589,7 +7589,7 @@ const getAgeGroupStyle = (age: string) => {
 // カテゴリーの表示テキストを取得する関数
 const getCategoryDisplayText = (category: string) => {
   if (category !== '壁　面' && category !== '制作物') {
-  return 'その他';
+    return 'その他';
   }
   return category;
 };
@@ -7680,7 +7680,7 @@ export default function EventListPage() {
 
   const fetchEvents = async () => {
     try {
-    setLoading(true);
+      setLoading(true);
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
@@ -7698,7 +7698,7 @@ export default function EventListPage() {
         setError('イベントの取得に失敗しました');
         return;
       }
-      
+
       console.log('取得したイベントデータ:', eventsData);
       setEvents(eventsData || []);
       setFilteredEvents(eventsData || []);
@@ -7716,24 +7716,24 @@ export default function EventListPage() {
   // イベントが更新されたときにイベント一覧を再取得する
   useEffect(() => {
     if (selectedEvent) {
-    const channel = supabase
+      const channel = supabase
         .channel('events_changes')
-      .on('postgres_changes', 
-        { 
+        .on('postgres_changes', 
+          { 
             event: 'UPDATE', 
-          schema: 'public', 
+            schema: 'public', 
             table: 'events',
             filter: `id=eq.${selectedEvent.id}`
-        }, 
+          }, 
           () => {
-          fetchEvents();
-        }
-      )
+            fetchEvents();
+          }
+        )
         .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [selectedEvent]);
 
@@ -7835,7 +7835,7 @@ export default function EventListPage() {
 
       // 動画あり
       if (advancedFilters.hasVideo) {
-      filtered = filtered.filter(event => 
+        filtered = filtered.filter(event => 
           event.media_files && event.media_files.some(file => 
             file.type.startsWith('video/')
           )
@@ -7927,7 +7927,7 @@ export default function EventListPage() {
       }
 
       // イベントの状態を更新
-      setSelectedEvent(event);
+    setSelectedEvent(event);
       
       // イベント一覧を再取得
       fetchEvents();
@@ -8727,25 +8727,25 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
           <div className={styles.formGroup}>
             <label>
               タイトル
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
                 className={`${styles.input} ${styles.fullWidth}`}
-              />
+            />
             </label>
           </div>
 
           <div className={styles.formGroup}>
             <label>
               説明
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              required
                 className={`${styles.textarea} ${styles.fullWidth}`}
               />
             </label>
