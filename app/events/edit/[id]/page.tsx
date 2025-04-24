@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import EditEventForm from '../../../components/EditEventForm';
-import type { Event, EventFormData } from '../../../types';
+import type { Event, EventFormData, LocalEventFormData } from '../../../types';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,7 +25,13 @@ const convertEventToFormData = (event: Event): EventFormData => {
   };
 };
 
-export default function EditEventPage({ params }: { params: { id: string } }) {
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
+export default function EditEventPage({ params }: Props) {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +80,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     fetchEvent();
   }, [params.id, router]);
 
-  const handleSubmit = async (formData: EventFormData) => {
+  const handleSubmit = async (formData: LocalEventFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
