@@ -40,7 +40,11 @@ export default function LoginPage() {
         });
 
         if (error) throw error;
-        setError('確認メールを送信しました。メールをご確認ください。');
+        setIsLogin(true);
+        setEmail('');
+        setPassword('');
+        setName('');
+        setError('新規登録が完了しました。ログインしてください。');
         return;
       }
     } catch (error: any) {
@@ -88,7 +92,7 @@ export default function LoginPage() {
               placeholder="••••••••"
             />
           </div>
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={`${styles.error} ${error.includes('完了') ? styles.success : ''}`}>{error}</div>}
           <button type="submit" className={styles.loginButton}>
             {isLogin ? 'ログイン' : '新規登録'}
           </button>

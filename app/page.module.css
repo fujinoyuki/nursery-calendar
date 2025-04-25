@@ -235,6 +235,11 @@
   background: rgba(255, 75, 75, 0.1);
 }
 
+.success {
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
 @media (max-width: 768px) {
   .loginContainer {
     margin: 0 1rem;
