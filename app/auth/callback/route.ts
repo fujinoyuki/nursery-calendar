@@ -8,20 +8,11 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createRouteHandlerClient({ cookies });
-
     try {
       await supabase.auth.exchangeCodeForSession(code);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        const cookieStore = cookies();
-        await cookieStore.set('session', JSON.stringify(session));
-      } else {
-        const cookieStore = cookies();
-        await cookieStore.delete('session');
-      }
     } catch (error) {
       console.error('Error:', error);
+      return NextResponse.redirect(new URL('/auth/error', request.url));
     }
   }
 

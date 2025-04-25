@@ -449,6 +449,8 @@ export default function EventListPage() {
       const mediaFiles = await Promise.all(
         formData.media_files.map(async (file) => {
           try {
+            console.log('処理中のファイル:', file.name, file.type, file.size);
+
             // ファイルサイズのチェック
             if (file.size > MAX_FILE_SIZE) {
               throw new Error(`ファイル ${file.name} が大きすぎます。5MB以下のファイルを選択してください。`);
@@ -464,18 +466,7 @@ export default function EventListPage() {
             const fileExt = file.name.split('.').pop();
             const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
             
-            // 古いファイルの削除（同じユーザーの同じイベントの場合）
-            if (editingEvent.media_files) {
-              const oldFiles = editingEvent.media_files.filter(f => f.type === file.type);
-              for (const oldFile of oldFiles) {
-                const oldFileName = oldFile.url.split('/').pop();
-                if (oldFileName) {
-                  await supabase.storage
-                    .from('event-media')
-                    .remove([`${session.user.id}/${oldFileName}`]);
-                }
-              }
-            }
+            console.log('アップロード前のファイル名:', fileName);
 
             // ファイルをストレージにアップロード
             const { data: uploadData, error: uploadError } = await supabase.storage
@@ -490,10 +481,14 @@ export default function EventListPage() {
               throw uploadError;
             }
 
+            console.log('アップロード成功:', uploadData);
+
             // アップロードしたファイルのURLを取得
             const { data: { publicUrl } } = supabase.storage
               .from('event-media')
               .getPublicUrl(fileName);
+
+            console.log('取得したパブリックURL:', publicUrl);
 
             return {
               id: crypto.randomUUID(),
