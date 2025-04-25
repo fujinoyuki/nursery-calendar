@@ -8,7 +8,9 @@ import styles from './page.module.css';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isLogin, setIsLogin] = useState(true);
   const router = useRouter();
 
   const supabase = createBrowserClient(
@@ -19,16 +21,30 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+        router.push('/main');
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name },
+            emailRedirectTo: `${window.location.origin}/auth/callback`
+          }
+        });
 
-      router.push('/main');
+        if (error) throw error;
+        setError('確認メールを送信しました。メールをご確認ください。');
+        return;
+      }
     } catch (error: any) {
-      setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
+      setError(isLogin ? 'ログインに失敗しました。メールアドレスとパスワードを確認してください。' : '新規登録に失敗しました。入力内容を確認してください。');
     }
   };
 
@@ -37,6 +53,19 @@ export default function LoginPage() {
       <h1 className={styles.title}>保育士イベントアイディア</h1>
       <div className={styles.loginContainer}>
         <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>名前</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required={!isLogin}
+                className={styles.input}
+                placeholder="山田 花子"
+              />
+            </div>
+          )}
           <div className={styles.formGroup}>
             <label className={styles.label}>メールアドレス</label>
             <input
@@ -61,11 +90,15 @@ export default function LoginPage() {
           </div>
           {error && <div className={styles.error}>{error}</div>}
           <button type="submit" className={styles.loginButton}>
-            ログイン
+            {isLogin ? 'ログイン' : '新規登録'}
           </button>
         </form>
         <div className={styles.signupLink}>
-          アカウントをお持ちでない方は<a href="/signup">新規登録</a>
+          {isLogin ? (
+            <>アカウントをお持ちでない方は<button onClick={() => setIsLogin(false)} className={styles.switchButton}>新規登録</button></>
+          ) : (
+            <>アカウントをお持ちの方は<button onClick={() => setIsLogin(true)} className={styles.switchButton}>ログイン</button></>
+          )}
         </div>
       </div>
     </div>

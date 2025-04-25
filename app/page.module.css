@@ -399,3 +399,21 @@
 .decoration {
   display: none;
 }
+
+.switchButton {
+  background: none;
+  border: none;
+  color: #FFB5C5;
+  text-decoration: none;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  transition: all 0.3s ease;
+}
+
+.switchButton:hover {
+  color: #FF8C42;
+  text-decoration: underline;
+}
