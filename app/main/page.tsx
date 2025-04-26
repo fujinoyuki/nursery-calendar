@@ -65,8 +65,12 @@ export default function MainPage() {
       console.log('イベントを取得中...');
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
-        .select('*')
-        .eq('user_id', session.user.id)
+        .select(`
+          *,
+          profiles (
+            name
+          )
+        `)
         .order('views', { ascending: false });
 
       if (eventsError) {
