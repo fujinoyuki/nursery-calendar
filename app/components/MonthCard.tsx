@@ -2,7 +2,7 @@
 
 import React from 'react';
 import styles from './MonthCard.module.css';
-import { Event, Category } from '../types';
+import { Event, Category } from '../types/event';
 import { useRouter } from 'next/navigation';
 
 interface MonthCardProps {
@@ -52,6 +52,61 @@ const sortEventsByDate = (events: Event[]) => {
     const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
     return dateB - dateA;
   });
+};
+
+// 所要時間をフォーマットする関数
+const formatDuration = (duration: { start?: string, end?: string } | string | null | undefined) => {
+  // 値が存在しない場合
+  if (!duration) return '不明';
+  
+  // 文字列の場合はJSONとしてパース
+  if (typeof duration === 'string') {
+    try {
+      const parsedDuration = JSON.parse(duration);
+      return formatDuration(parsedDuration);
+    } catch (e) {
+      // 時間と分を抽出（例: "2時間30分"）
+      const durationStr = duration as string;
+      const hoursMatch = durationStr.match(/(\d+)時間/);
+      const minutesMatch = durationStr.match(/(\d+)分/);
+      
+      if (hoursMatch || minutesMatch) {
+        const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        
+        if (hours > 0 && minutes > 0) {
+          return `${hours}時間${minutes}分`;
+        } else if (hours > 0) {
+          return `${hours}時間`;
+        } else if (minutes > 0) {
+          return `${minutes}分`;
+        }
+      }
+      return durationStr;
+    }
+  }
+  
+  // オブジェクトの場合はend値を使う
+  const durationObj = duration as { start?: string, end?: string };
+  const end = durationObj.end;
+  if (!end) return '不明';
+  
+  // HH:MM形式の場合
+  const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    
+    if (hours > 0 && minutes > 0) {
+      return `${hours}時間${minutes}分`;
+    } else if (hours > 0) {
+      return `${hours}時間`;
+    } else if (minutes > 0) {
+      return `${minutes}分`;
+    }
+  }
+  
+  return end;
 };
 
 export const MonthCard: React.FC<MonthCardProps> = ({
@@ -127,7 +182,7 @@ export const MonthCard: React.FC<MonthCardProps> = ({
                         <span key={`${age}-${index}`} className={styles.ageTag} data-age={age}>{age}</span>
                       ))}
                     </div>
-                    <span className={styles.duration}>所要時間：{event.duration}</span>
+                    <span className={styles.duration}>所要時間：{formatDuration(event.duration)}</span>
                   </div>
                 </div>
               ) : (

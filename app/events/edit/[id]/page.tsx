@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
-import EditEventForm from '../../../components/EditEventForm';
-import type { Event, EventFormData, LocalEventFormData } from '../../../types';
+import EditEventForm, { FormDataWithFiles } from '../../../components/EditEventForm';
+import type { Event, EventFormData } from '../../../types/event';
 import { Metadata } from 'next';
 
 const supabase = createBrowserClient(
@@ -14,15 +14,17 @@ const supabase = createBrowserClient(
 
 const convertEventToFormData = (event: Event): EventFormData => {
   return {
-    title: event.title || '',
-    description: event.description || '',
-    age_groups: event.age_groups || [],
-    category: event.category || 'その他',
-    materials: event.materials || [],
-    objectives: event.objectives || [],
-    month: event.month || new Date().getMonth() + 1,
-    duration: event.duration || '',
-    media_files: []
+    title: event.title,
+    description: event.description,
+    category: event.category,
+    month: event.month,
+    date: event.date,
+    duration: event.duration,
+    materials: event.materials,
+    objectives: event.objectives,
+    age_groups: event.age_groups,
+    media_files: event.media_files,
+    ...(event.id ? { id: event.id } : {})
   };
 };
 
@@ -81,7 +83,7 @@ export default function EditEventPage({ params }: Props) {
     fetchEvent();
   }, [params.id, router]);
 
-  const handleSubmit = async (formData: LocalEventFormData) => {
+  const handleSubmit = async (formData: FormDataWithFiles) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -96,6 +98,8 @@ export default function EditEventPage({ params }: Props) {
           title: formData.title,
           description: formData.description,
           category: formData.category,
+          month: formData.month,
+          date: formData.date,
           age_groups: formData.age_groups,
           duration: formData.duration,
           materials: formData.materials,

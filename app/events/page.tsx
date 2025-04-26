@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Event, AgeGroup, EventFormData, LocalEventFormData, Category, MediaFile } from '../types';
+import { Event, AgeGroup, EventFormData, LocalEventFormData, Category, MediaFile, Duration } from '../types/event';
 import EventOverlay from '../components/EventOverlay';
-import EditEventForm from '../components/EditEventForm';
+import EditEventForm, { FormDataWithFiles } from '../components/EditEventForm';
 import Image from 'next/image';
 
 const supabase = createBrowserClient(
@@ -68,6 +68,61 @@ const getCategoryDisplayText = (category: string) => {
 
 const getMonthClass = (month: number) => {
   return styles[`month${month}`];
+};
+
+// 所要時間をフォーマットする関数
+const formatDuration = (duration: { start?: string, end?: string } | string | null | undefined) => {
+  // 値が存在しない場合
+  if (!duration) return '不明';
+  
+  // 文字列の場合はJSONとしてパース
+  if (typeof duration === 'string') {
+    try {
+      const parsedDuration = JSON.parse(duration);
+      return formatDuration(parsedDuration);
+    } catch (e) {
+      // 時間と分を抽出（例: "2時間30分"）
+      const durationStr = duration as string;
+      const hoursMatch = durationStr.match(/(\d+)時間/);
+      const minutesMatch = durationStr.match(/(\d+)分/);
+      
+      if (hoursMatch || minutesMatch) {
+        const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        
+        if (hours > 0 && minutes > 0) {
+          return `${hours}時間${minutes}分`;
+        } else if (hours > 0) {
+          return `${hours}時間`;
+        } else if (minutes > 0) {
+          return `${minutes}分`;
+        }
+      }
+      return durationStr;
+    }
+  }
+  
+  // オブジェクトの場合はend値を使う
+  const durationObj = duration as { start?: string, end?: string };
+  const end = durationObj.end;
+  if (!end) return '不明';
+  
+  // HH:MM形式の場合
+  const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    
+    if (hours > 0 && minutes > 0) {
+      return `${hours}時間${minutes}分`;
+    } else if (hours > 0) {
+      return `${hours}時間`;
+    } else if (minutes > 0) {
+      return `${minutes}分`;
+    }
+  }
+  
+  return end;
 };
 
 const EventCard = ({ event, onEventClick }: { event: Event; onEventClick: (event: Event) => void }) => {
@@ -136,6 +191,7 @@ export default function EventListPage() {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [sortType, setSortType] = useState<'date' | 'popular'>('date');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState({
     title: '',
@@ -177,10 +233,60 @@ export default function EventListPage() {
       }
       
       // イベントデータにisOwnerフィールドを追加
-      const eventsWithOwnership = eventsData?.map(event => ({
+      const eventsWithOwnership = eventsData?.map(event => {
+        // durationの処理を改善
+        let eventDuration = event.duration;
+        if (typeof eventDuration === 'string') {
+          try {
+            eventDuration = JSON.parse(eventDuration);
+          } catch (e) {
+            console.error('Duration解析エラー:', e);
+            
+            // 文字列形式の処理（例: "2時間30分"）
+            const durationStr = eventDuration as string;
+            const hoursMatch = durationStr.match(/(\d+)時間/);
+            const minutesMatch = durationStr.match(/(\d+)分/);
+            
+            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+            
+            // formatDuration関数に渡せる形式に変換
+            if (hours > 0 && minutes > 0) {
+              eventDuration = `${hours}時間${minutes}分`;
+            } else if (hours > 0) {
+              eventDuration = `${hours}時間`;
+            } else if (minutes > 0) {
+              eventDuration = `${minutes}分`;
+            } else {
+              eventDuration = { start: '00:00', end: '00:00' };
+            }
+          }
+        }
+        
+        // 空のオブジェクトかnullの場合（古いデータ互換性のため）
+        if (!eventDuration) {
+          eventDuration = { start: '00:00', end: '00:00' };
+        }
+        
+        // オブジェクトだが必要なフィールドがない場合
+        if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
+          eventDuration = { start: '00:00', end: '00:00' };
+        }
+        
+        return {
         ...event,
-        isOwner: event.user_id === session.user.id
-      })) || [];
+          category: (event.category || 'その他') as Category,
+          age_groups: (event.age_groups || []) as AgeGroup[],
+          media_files: (event.media_files || []).map((file: { type: string; url: string }) => ({
+            type: file.type,
+            url: file.url
+          })) as MediaFile[],
+          views: event.views || 0,
+          isOwner: event.user_id === session.user.id,
+          profiles: event.profiles || null,
+          duration: eventDuration
+        };
+      }) as Event[];
       
       console.log('取得したイベントデータ:', eventsWithOwnership);
       setEvents(eventsWithOwnership);
@@ -283,7 +389,8 @@ export default function EventListPage() {
       if (advancedFilters.duration) {
         filtered = filtered.filter(event => {
           if (!event.duration) return false;
-          return event.duration.includes(advancedFilters.duration);
+          const durationStr = `${event.duration.start}～${event.duration.end}`;
+          return durationStr.includes(advancedFilters.duration);
         });
       }
 
@@ -398,24 +505,91 @@ export default function EventListPage() {
 
   const handleEventClick = async (event: Event) => {
     try {
-      // 閲覧数をインクリメント
-      const { data, error } = await supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('認証されていません');
+      }
+
+      // イベントの閲覧数を更新
+      const { error, data } = await supabase
         .from('events')
         .update({ views: (event.views || 0) + 1 })
         .eq('id', event.id)
-        .select();
+        .select(`
+          *,
+          profiles (
+            name
+          )
+        `);
 
-      if (error) {
-        console.error('閲覧数の更新に失敗しました:', error);
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // durationの処理
+        let eventDuration = data[0].duration;
+        if (typeof eventDuration === 'string') {
+          try {
+            eventDuration = JSON.parse(eventDuration);
+          } catch (e) {
+            // 文字列形式の処理（例: "2時間30分"）
+            const durationStr = eventDuration as string;
+            const hoursMatch = durationStr.match(/(\d+)時間/);
+            const minutesMatch = durationStr.match(/(\d+)分/);
+            
+            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+            
+            // 直接表示用の形式に変換
+            if (hours > 0 && minutes > 0) {
+              eventDuration = `${hours}時間${minutes}分`;
+            } else if (hours > 0) {
+              eventDuration = `${hours}時間`;
+            } else if (minutes > 0) {
+              eventDuration = `${minutes}分`;
+            } else {
+              eventDuration = { start: '00:00', end: '00:00' };
+            }
+          }
+        }
+        
+        // 空のオブジェクトかnullの場合
+        if (!eventDuration) {
+          eventDuration = { start: '00:00', end: '00:00' };
+        }
+        
+        // オブジェクトだが必要なフィールドがない場合
+        if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
+          eventDuration = { start: '00:00', end: '00:00' };
+        }
+        
+        // データを加工
+        const updatedEvent = {
+          ...data[0],
+          category: (data[0].category || 'その他') as Category,
+          age_groups: (data[0].age_groups || []) as AgeGroup[],
+          media_files: (data[0].media_files || []).map((file: { type: string; url: string }) => ({
+            type: file.type,
+            url: file.url
+          })) as MediaFile[],
+          views: data[0].views || 0,
+          isOwner: data[0].user_id === session.user.id,
+          profiles: data[0].profiles || null,
+          duration: eventDuration
+        };
+        
+        // 更新されたイベントをステートに設定
+        setSelectedEvent(updatedEvent);
+        setIsOverlayOpen(true);
+      } else {
+        // データがない場合は既存のイベントを使用
+        setSelectedEvent(event);
+        setIsOverlayOpen(true);
       }
-
-      // イベントの状態を更新
-    setSelectedEvent(event);
-      
-      // イベント一覧を再取得
-      fetchEvents();
     } catch (error) {
-      console.error('イベントクリック処理でエラーが発生しました:', error);
+      console.error('イベントの更新中にエラーが発生しました:', error);
+      // エラーが発生しても表示はする
+      setSelectedEvent(event);
+      setIsOverlayOpen(true);
     }
   };
 
@@ -442,7 +616,7 @@ export default function EventListPage() {
     }
   };
 
-  const handleEditEventSubmit = async (formData: LocalEventFormData) => {
+  const handleEditEventSubmit = async (formData: FormDataWithFiles) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -453,12 +627,16 @@ export default function EventListPage() {
         throw new Error('編集するイベントが選択されていません');
       }
 
+      // media_filesの中からFileオブジェクトだけを抽出
+      const files = formData.media_files.filter(file => file instanceof File) as File[];
+      const existingMediaFiles = formData.media_files.filter(file => !(file instanceof File)) as MediaFile[];
+      
       // ファイルサイズの制限（5MB）
       const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-      // media_filesをMediaFile型に変換
-      const mediaFiles = await Promise.all(
-        formData.media_files.map(async (file) => {
+      // 新しいファイルをアップロード
+      const newMediaFiles = await Promise.all(
+        files.map(async (file: File) => {
           try {
             console.log('処理中のファイル:', file.name, file.type, file.size);
 
@@ -501,11 +679,13 @@ export default function EventListPage() {
 
             console.log('取得したパブリックURL:', publicUrl);
 
+            // ファイルタイプを判断
+            const type = file.type.startsWith('image/') ? 'image' : 'video';
+            
             return {
-              id: crypto.randomUUID(),
-              type: file.type,
+              type,
               url: publicUrl
-            };
+            } as MediaFile;
           } catch (error) {
             console.error('ファイル処理エラー:', error);
             throw error;
@@ -513,11 +693,14 @@ export default function EventListPage() {
         })
       );
 
+      // 既存のメディアファイルと新しくアップロードしたファイルを結合
+      const allMediaFiles = [...existingMediaFiles, ...newMediaFiles];
+
       const { data, error } = await supabase
         .from('events')
         .update({
           ...formData,
-          media_files: mediaFiles,
+          media_files: allMediaFiles,
           updated_at: new Date().toISOString()
         })
         .eq('id', editingEvent.id)
@@ -582,10 +765,10 @@ export default function EventListPage() {
         if (viewsA !== viewsB) {
           return viewsB - viewsA;
         }
-        // 閲覧数が同じ場合は月で昇順
-        const monthA = Number(a.month);
-        const monthB = Number(b.month);
-        return monthA - monthB;
+        // 閲覧数が同じ場合は作成日時で比較
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA;
       }
     });
     setFilteredEvents(sorted);
@@ -593,7 +776,7 @@ export default function EventListPage() {
 
   // イベントカードのレンダリング部分を修正
   const renderEventCard = (event: Event) => (
-    <div key={event.id} className={getMonthClass(event.month)}>
+    <div key={event.id} className={getMonthClass(Number(event.month))}>
       <div
         className={styles.eventCard}
         onClick={() => handleEventClick(event)}
@@ -622,7 +805,7 @@ export default function EventListPage() {
           <p className={styles.eventDescription}>{event.description}</p>
           <div className={styles.ageGroups}>
             {[...event.age_groups]
-              .sort((a, b) => parseInt(a) - parseInt(b))
+              .sort((a, b) => Number(a) - Number(b))
               .map((age) => (
                 <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
                 {age}
@@ -632,7 +815,7 @@ export default function EventListPage() {
           <div className={styles.eventFooter}>
             <span className={styles.month}>{event.month}月</span>
             <div className={styles.rightFooter}>
-              <span className={styles.duration}>所要時間：{event.duration}</span>
+              <span className={styles.duration}>所要時間：{formatDuration(event.duration)}</span>
             </div>
           </div>
           </div>
@@ -726,13 +909,16 @@ export default function EventListPage() {
 
         <div className={styles.eventsGrid}>
           {filteredEvents.map(renderEventCard)}
+            </div>
         </div>
-      </div>
-
-      {selectedEvent && (
+        
+      {selectedEvent && isOverlayOpen && (
         <EventOverlay
           event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
+          onClose={() => {
+            setSelectedEvent(null);
+            setIsOverlayOpen(false);
+          }}
           onDelete={handleEventDelete}
           onEdit={handleEventEdit}
           season={getSeason(Number(selectedEvent.month))}
@@ -747,10 +933,16 @@ export default function EventListPage() {
             </div>
             <EditEventForm
               data={{
-                ...editingEvent,
-                media_files: [],
+                title: editingEvent.title,
+                description: editingEvent.description,
+                category: editingEvent.category,
+                month: editingEvent.month,
+                date: editingEvent.date,
+                duration: editingEvent.duration,
                 materials: editingEvent.materials || [],
                 objectives: editingEvent.objectives || [],
+                age_groups: editingEvent.age_groups,
+                media_files: []
               }}
               onSubmit={handleEditEventSubmit}
               onCancel={handleEditCancel}

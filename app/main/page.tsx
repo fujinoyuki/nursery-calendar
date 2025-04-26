@@ -1,19 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import styles from './page.module.css';
 import MonthCard from '../components/MonthCard';
 import EventOverlay from '../components/EventOverlay';
 import AddEventForm from '../components/AddEventForm';
-import EditEventForm from '../components/EditEventForm';
-import { Event, EventFormData } from '../types';
+import EditEventForm, { FormDataWithFiles } from '../components/EditEventForm';
+import { Event, EventFormData, Category, AgeGroup, MediaFile, Duration, LocalEventFormData } from '../types/event';
 import Link from 'next/link';
-
-type LocalEventFormData = Omit<EventFormData, 'media_files'> & {
-  media_files: File[];
-};
+import { months } from '../utils/constants';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -80,14 +77,62 @@ export default function MainPage() {
       }
 
       console.log('取得したイベントデータ:', eventsData);
+      
+      // durationフィールドの内容をデバッグ出力
+      if (eventsData && eventsData.length > 0) {
+        console.log('最初のイベントのduration:', eventsData[0].duration);
+        
+        // 全イベントのdurationをチェック
+        eventsData.forEach((event, index) => {
+          console.log(`イベント[${index}] ${event.title}のduration:`, event.duration);
+        });
+      }
 
       if (eventsData) {
         // イベントデータにisOwnerフィールドを追加し、月を数値型に変換
-        const processedEvents = eventsData.map(event => ({
-          ...event,
-          month: Number(event.month),
-          isOwner: event.user_id === session.user.id
-        }));
+        const processedEvents = eventsData.map(event => {
+          // durationフィールドの処理
+          let eventDuration = event.duration;
+          
+          // 文字列として保存されている場合
+          if (typeof eventDuration === 'string') {
+            try {
+              eventDuration = JSON.parse(eventDuration);
+              console.log('パース後のduration:', eventDuration);
+            } catch (e) {
+              console.error('Duration解析エラー:', e);
+              // "2時間30分"形式かもしれない
+              const durationStr = eventDuration as string;
+              const hoursMatch = durationStr.match(/(\d+)時間/);
+              const minutesMatch = durationStr.match(/(\d+)分/);
+              
+              const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+              const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+              
+              // Durationオブジェクトに変換
+              eventDuration = {
+                start: "00:00",
+                end: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+              };
+              console.log('時間文字列からのduration:', eventDuration);
+            }
+          }
+          
+          // nullやundefinedの場合や、不正な形式の場合
+          if (!eventDuration || typeof eventDuration !== 'object' || 
+              !('start' in eventDuration) || !('end' in eventDuration) ||
+              !eventDuration.start || !eventDuration.end) {
+            eventDuration = { start: "00:00", end: "00:00" };
+            console.log('デフォルトdurationを使用:', eventDuration);
+          }
+          
+          return {
+            ...event,
+            month: String(event.month), // 文字列型として扱う
+            isOwner: event.user_id === session.user.id,
+            duration: eventDuration as Duration
+          };
+        });
         
         console.log('処理後のイベントデータ:', processedEvents);
         console.log('イベントデータをセット:', processedEvents.length, '件');
@@ -187,9 +232,29 @@ export default function MainPage() {
         date.setFullYear(year + 1);
       }
 
+      // stringからDuration型に変換（例: "2時間30分" -> { start: "00:00", end: "02:30" }）
+      const durationString = eventData.duration;
+      const durationObj: Duration = {
+        start: "00:00",
+        end: "00:00"
+      };
+      
+      // 時間と分を抽出
+      const hoursMatch = durationString.match(/(\d+)時間/);
+      const minutesMatch = durationString.match(/(\d+)分/);
+      
+      const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+      const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+      
+      // 終了時間を計算
+      durationObj.end = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+      console.log('設定する所要時間:', durationString, '->', durationObj);
+
       // カテゴリーの正規化（全角スペースを保持）
       const normalizedEventData = {
         ...eventData,
+        duration: durationObj,
         category: eventData.category.trim()
       };
 
@@ -197,8 +262,8 @@ export default function MainPage() {
         .from('events')
         .insert({
           ...normalizedEventData,
-          date: new Date(date).toISOString(),
-          month: selectedMonth.toString(),
+          date: eventData.date || new Date(date).toISOString(),
+          month: selectedMonth.toString(), // 文字列として保存
           user_id: session.user.id,
           views: 0
         })
@@ -227,41 +292,118 @@ export default function MainPage() {
     }
   };
 
-  const handleEditEventSubmit = async (eventData: LocalEventFormData) => {
+  const handleEditEventSubmit = async (eventData: FormDataWithFiles) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error('認証されていません');
+        showFeedback('認証されていません', 'error');
+        return;
       }
 
       if (!selectedEvent) {
-        throw new Error('編集するイベントが選択されていません');
+        showFeedback('編集するイベントが選択されていません', 'error');
+        return;
       }
 
-      console.log('イベント更新中...', { ...eventData, id: selectedEvent.id });
+      // media_filesの中からFileオブジェクトだけを抽出
+      const files = eventData.media_files.filter(file => file instanceof File) as File[];
+      const existingMediaFiles = eventData.media_files.filter(file => !(file instanceof File)) as MediaFile[];
+      
+      // ファイルサイズの制限（5MB）
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+      // 新しいファイルをアップロード
+      const newMediaFiles = await Promise.all(
+        files.map(async (file: File) => {
+          try {
+            console.log('処理中のファイル:', file.name, file.type, file.size);
+
+            // ファイルサイズのチェック
+            if (file.size > MAX_FILE_SIZE) {
+              throw new Error(`ファイル ${file.name} が大きすぎます。5MB以下のファイルを選択してください。`);
+            }
+
+            // 許可されるファイルタイプ
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'];
+            if (!allowedTypes.includes(file.type)) {
+              throw new Error(`ファイル ${file.name} の形式がサポートされていません。`);
+            }
+
+            // ファイル名を一意にする
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            
+            console.log('アップロード前のファイル名:', fileName);
+
+            // ファイルをストレージにアップロード
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('event-media')
+              .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error('ファイルアップロードエラー:', uploadError);
+              throw uploadError;
+            }
+
+            console.log('アップロード成功:', uploadData);
+
+            // アップロードしたファイルのURLを取得
+            const { data: { publicUrl } } = supabase.storage
+              .from('event-media')
+              .getPublicUrl(fileName);
+
+            console.log('取得したパブリックURL:', publicUrl);
+
+            // ファイルタイプを判断
+            const type = file.type.startsWith('image/') ? 'image' : 'video';
+            
+            return {
+              type,
+              url: publicUrl
+            } as MediaFile;
+          } catch (error) {
+            console.error('ファイル処理エラー:', error);
+            throw error;
+          }
+        })
+      );
+
+      // 既存のメディアファイルと新しくアップロードしたファイルを結合
+      const allMediaFiles = [...existingMediaFiles, ...newMediaFiles];
+
+      // eventDataがLocalEventFormDataの場合もFormDataWithFilesに変換して扱う
+      const updateData = {
+        ...eventData,
+        media_files: allMediaFiles,
+        // 必ず文字列型の月を使用
+        month: String(eventData.month)
+      };
+
       const { data, error } = await supabase
         .from('events')
         .update({
-          ...eventData,
+          ...updateData,
           updated_at: new Date().toISOString()
         })
         .eq('id', selectedEvent.id)
-        .eq('user_id', session.user.id)
         .select();
 
       if (error) {
         console.error('イベント更新エラー:', error);
+        showFeedback('イベントの更新に失敗しました', 'error');
         return;
       }
 
-      if (data) {
-        console.log('更新されたイベント:', data);
-        await fetchEvents();
-      }
-      setShowEditForm(false);
+      await fetchEvents();
       setSelectedEvent(null);
+      setShowEditForm(false);
+      showFeedback('イベントを更新しました', 'success');
     } catch (error) {
       console.error('Error:', error);
+      showFeedback(error instanceof Error ? error.message : 'ファイルのアップロード中にエラーが発生しました', 'error');
     }
   };
 
@@ -287,7 +429,7 @@ export default function MainPage() {
     console.log('全イベント:', events);
     
     const monthEvents = events.filter(event => {
-      // 数値型に変換して比較
+      // 文字列型の月を数値に変換して比較（互換性のため）
       const eventMonth = Number(event.month);
       const isMatch = eventMonth === month;
       console.log(`イベントの月を比較 - イベント月: ${eventMonth} (${typeof eventMonth}), 現在の月: ${month} (${typeof month}), 一致: ${isMatch}`);
@@ -301,8 +443,17 @@ export default function MainPage() {
 
   const convertEventToFormData = (event: Event): EventFormData => {
     return {
-      ...event,
-      media_files: []
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      category: event.category,
+      month: event.month,
+      date: event.date,
+      duration: event.duration,
+      materials: event.materials,
+      objectives: event.objectives,
+      age_groups: event.age_groups,
+      media_files: event.media_files
     };
   };
 
@@ -325,13 +476,6 @@ export default function MainPage() {
       </div>
     );
   }
-
-  const months = [
-    '4月', '5月', '6月',        // 1行目
-    '7月', '8月', '9月',        // 2行目
-    '10月', '11月', '12月',     // 3行目
-    '1月', '2月', '3月'         // 4行目
-  ];
 
   const getSeason = (monthStr: string) => {
     const monthNumber = monthStr.replace('月', '');
@@ -399,7 +543,7 @@ export default function MainPage() {
           onClose={handleCloseOverlay}
           onEdit={() => setShowEditForm(true)}
           onDelete={() => handleDeleteEvent(selectedEvent.id)}
-          season={getSeason(months[selectedEvent.month - 1])}
+          season={getSeason(months[parseInt(selectedEvent.month) - 1])}
         />
       )}
 

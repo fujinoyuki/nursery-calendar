@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './EventOverlay.module.css';
-import { Event } from '../types';
+import type { Event } from '../types/event';
 import { createBrowserClient } from '@supabase/ssr';
 
 const supabase = createBrowserClient(
@@ -27,6 +27,61 @@ const formatDate = (dateString: string | undefined) => {
 const sortAgeGroups = (ages: string[]) => {
   const ageOrder = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
   return [...ages].sort((a, b) => ageOrder.indexOf(a) - ageOrder.indexOf(b));
+};
+
+// 所要時間をフォーマットする関数
+const formatDuration = (duration: { start?: string, end?: string } | string | null | undefined) => {
+  // 値が存在しない場合
+  if (!duration) return '不明';
+  
+  // 文字列の場合はJSONとしてパース
+  if (typeof duration === 'string') {
+    try {
+      const parsedDuration = JSON.parse(duration);
+      return formatDuration(parsedDuration);
+    } catch (e) {
+      // 時間と分を抽出（例: "2時間30分"）
+      const durationStr = duration as string;
+      const hoursMatch = durationStr.match(/(\d+)時間/);
+      const minutesMatch = durationStr.match(/(\d+)分/);
+      
+      if (hoursMatch || minutesMatch) {
+        const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        
+        if (hours > 0 && minutes > 0) {
+          return `${hours}時間${minutes}分`;
+        } else if (hours > 0) {
+          return `${hours}時間`;
+        } else if (minutes > 0) {
+          return `${minutes}分`;
+        }
+      }
+      return durationStr;
+    }
+  }
+  
+  // オブジェクトの場合はend値を使う
+  const durationObj = duration as { start?: string, end?: string };
+  const end = durationObj.end;
+  if (!end) return '不明';
+  
+  // HH:MM形式の場合
+  const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    
+    if (hours > 0 && minutes > 0) {
+      return `${hours}時間${minutes}分`;
+    } else if (hours > 0) {
+      return `${hours}時間`;
+    } else if (minutes > 0) {
+      return `${minutes}分`;
+    }
+  }
+  
+  return end;
 };
 
 export default function EventOverlay({ event, onClose, onDelete, onEdit, season = 'spring' }: EventOverlayProps) {
@@ -96,7 +151,7 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
               </span>
             ))}
           </div>
-          <span className={styles.duration}>所要時間：{event.duration}</span>
+          <span className={styles.duration}>所要時間：{formatDuration(event.duration)}</span>
         </div>
 
         <div className={styles.section}>

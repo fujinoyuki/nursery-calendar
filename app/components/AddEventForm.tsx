@@ -2,30 +2,32 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './AddEventForm.module.css';
-import { Event, EventFormData, LocalEventFormData, AgeGroup } from '../types';
+import { Event, EventFormData, AgeGroup, Category, LocalEventFormData } from '../types/event';
 
 interface AddEventFormProps {
-  onSubmit: (data: LocalEventFormData) => void;
+  onSubmit: (data: LocalEventFormData) => void | Promise<void>;
   onCancel: () => void;
   selectedMonth: number;
 }
 
 const AGE_GROUPS: AgeGroup[] = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
 const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
-type Category = typeof CATEGORIES[number];
+
+const defaultCategory: Category = '壁　面';
 
 export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddEventFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [ageGroups, setAgeGroups] = useState<AgeGroup[]>([]);
-  const [category, setCategory] = useState<Category>('壁　面');
+  const [category, setCategory] = useState<Category>(defaultCategory);
   const [otherCategory, setOtherCategory] = useState('');
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [materials, setMaterials] = useState<string[]>([]);
   const [objectives, setObjectives] = useState<string[]>([]);
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
 
   // 所要時間が有効かどうかをチェックする関数
   const isDurationValid = () => {
@@ -34,24 +36,36 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
     return hoursNum > 0 || minutesNum > 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isDurationValid()) {
-      alert('所要時間は時間か分のどちらかを1以上に設定してください。');
+    
+    // データの検証
+    if (!title.trim()) {
+      alert('タイトルを入力してください');
       return;
     }
-    const duration = `${hours || '0'}時間${minutes || '0'}分`;
+    
+    // 所要時間のバリデーション
+    if (!isDurationValid()) {
+      alert('所要時間は時間か分のどちらかを1以上に設定してください');
+      return;
+    }
+    
+    // フォームデータの作成
     const formData: LocalEventFormData = {
       title,
       description,
-      month: selectedMonth,
+      month: selectedMonth.toString(),
       category: (category === 'その他' ? otherCategory : category) as Category,
       age_groups: ageGroups,
-      duration,
-      materials,
-      objectives,
-      media_files: mediaFiles
+      duration: `${hours}時間${minutes}分`,
+      materials: materials,
+      objectives: objectives,
+      media_files: files,
+      date: dateRef.current?.value
     };
+    
+    console.log('送信する所要時間:', formData.duration);
     onSubmit(formData);
   };
 
@@ -82,12 +96,12 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setMediaFiles(prev => [...prev, ...newFiles]);
+      setFiles(prev => [...prev, ...newFiles]);
     }
   };
 
   const handleRemoveFile = (index: number) => {
-    setMediaFiles(prev => {
+    setFiles(prev => {
       const newFiles = [...prev];
       const removedFile = newFiles[index];
       if (removedFile) {
@@ -207,6 +221,17 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
           </div>
 
           <div className={styles.formGroup}>
+            <label>
+              日付
+              <input
+                type="date"
+                ref={dateRef}
+                className={styles.dateInput}
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
             <p>所要時間</p>
             <div className={styles.timeInputGroup}>
               <label>
@@ -262,25 +287,22 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
 
           <div className={styles.optionalSection}>
             <h3 className={styles.optionalTitle}>画像・動画（任意）</h3>
-            <div
-              className={styles.uploadArea}
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <div className={styles.uploadArea}>
               <p>クリックして画像・動画をアップロード</p>
               <p>または</p>
               <p>ファイルをドラッグ＆ドロップ</p>
               <input
-                ref={fileInputRef}
                 type="file"
-                className={styles.uploadInput}
-                onChange={handleFileChange}
-                accept="image/*,video/*"
                 multiple
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className={styles.fileInput}
+                accept="image/*,video/*"
               />
             </div>
-            {mediaFiles.length > 0 && (
+            {files.length > 0 && (
               <div className={styles.previewArea}>
-                {mediaFiles.map((file, index) => renderPreview(file, index))}
+                {files.map((file, index) => renderPreview(file, index))}
               </div>
             )}
           </div>

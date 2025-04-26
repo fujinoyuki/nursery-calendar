@@ -2,23 +2,28 @@
 
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styles from './EditEventForm.module.css';
-import type { Event, LocalEventFormData, MediaFile, Category, AgeGroup, EventFormData } from '../types';
+import type { Event, LocalEventFormData, MediaFile, Category, AgeGroup, EventFormData, Duration } from '../types/event';
 
 export const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
 export const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'] as const;
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
+export interface FormDataWithFiles extends Omit<EventFormData, 'media_files'> {
+  media_files: MediaFile[];
+}
+
 interface Props {
-  data: EventFormData;
-  onSubmit: (data: LocalEventFormData) => void;
+  data: Omit<Event, 'id' | 'views' | 'created_at' | 'updated_at' | 'user_id' | 'isOwner' | 'profiles'>;
+  onSubmit: (data: FormDataWithFiles) => Promise<void>;
   onCancel: () => void;
 }
 
 export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
-  const [formData, setFormData] = useState<LocalEventFormData>({
+  const [formData, setFormData] = useState<FormDataWithFiles>({
     title: data.title,
     description: data.description,
     month: data.month,
+    date: data.date,
     duration: data.duration,
     age_groups: data.age_groups,
     category: data.category,
@@ -28,15 +33,12 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   });
   
   const [otherCategory, setOtherCategory] = useState('');
-  const initialDuration = formData.duration.match(/(\d+)時間(\d+)分/);
-  const [hours, setHours] = useState<string>(initialDuration ? initialDuration[1] : '0');
-  const [minutes, setMinutes] = useState<string>(initialDuration ? initialDuration[2] : '0');
+  const [startTime, setStartTime] = useState(data.duration.start);
+  const [endTime, setEndTime] = useState(data.duration.end);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isDurationValid = () => {
-    const hoursNum = parseInt(hours) || 0;
-    const minutesNum = parseInt(minutes) || 0;
-    return hoursNum > 0 || minutesNum > 0;
+    return startTime && endTime;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,27 +47,30 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
       alert('所要時間を入力してください');
       return;
     }
-    const duration = `${hours}時間${minutes}分`;
+    const duration: Duration = {
+      start: startTime,
+      end: endTime
+    };
     const finalCategory = formData.category === 'その他' ? otherCategory : formData.category;
-    const formDataToSubmit: LocalEventFormData = {
+    const formDataToSubmit: FormDataWithFiles = {
       ...formData,
       duration,
-      category: finalCategory,
-      media_files: [...formData.media_files]
+      category: finalCategory as Category,
+      media_files: formData.media_files
     };
-    onSubmit(formDataToSubmit);
+    await onSubmit(formDataToSubmit);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       [name]: value
     }));
   };
 
   const handleAgeGroupChange = (group: AgeGroup) => {
-    setFormData((prev: LocalEventFormData) => {
+    setFormData((prev: FormDataWithFiles) => {
       const newAgeGroups = prev.age_groups.includes(group)
         ? prev.age_groups.filter(g => g !== group)
         : [...prev.age_groups, group];
@@ -77,7 +82,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const handleCategoryChange = (category: Category) => {
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       category
     }));
@@ -86,43 +91,37 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
+      const newMediaFiles = newFiles.map(file => {
+        const type = file.type.startsWith('image/') ? 'image' : 'video';
+        return {
+          type: type as 'image' | 'video',
+          url: URL.createObjectURL(file)
+        };
+      });
+      
       setFormData(prev => ({
         ...prev,
-        media_files: [...prev.media_files, ...newFiles]
+        media_files: [...prev.media_files, ...newMediaFiles]
       }));
     }
   };
 
   const handleRemoveFile = (index: number) => {
-    setFormData((prev: LocalEventFormData) => {
-      const newFiles = [...prev.media_files];
-      const removedFile = newFiles[index];
-      if (removedFile) {
-        URL.revokeObjectURL(URL.createObjectURL(removedFile));
-      }
-      newFiles.splice(index, 1);
+    setFormData(prev => {
+      const newMediaFiles = [...prev.media_files];
+      newMediaFiles.splice(index, 1);
       return {
         ...prev,
-        media_files: newFiles
+        media_files: newMediaFiles
       };
     });
   };
 
-  const renderPreview = (file: File, index: number) => {
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
-    const url = URL.createObjectURL(file);
-
-    useEffect(() => {
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    }, [url]);
-
+  const renderPreview = (file: MediaFile, index: number) => {
     return (
       <div key={index} className={styles.previewItem}>
-        {isImage && <img src={url} alt={`プレビュー ${index + 1}`} />}
-        {isVideo && <video src={url} controls />}
+        {file.type === 'image' && <img src={file.url} alt={`プレビュー ${index + 1}`} />}
+        {file.type === 'video' && <video src={file.url} controls />}
         <button
           type="button"
           className={styles.removeButton}
@@ -139,7 +138,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
       e.preventDefault();
       const value = e.currentTarget.value.trim();
       if (value) {
-        setFormData((prev: LocalEventFormData) => ({
+        setFormData((prev: FormDataWithFiles) => ({
           ...prev,
           [field]: [...prev[field], value],
         }));
@@ -149,7 +148,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const removeArrayItem = (field: keyof Pick<Event, 'materials' | 'objectives'>, index: number) => {
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
@@ -178,28 +177,28 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const addMaterial = () => {
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       materials: [...prev.materials, '']
     }));
   };
 
   const addObjective = () => {
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       objectives: [...prev.objectives, '']
     }));
   };
 
   const removeMaterial = (index: number) => {
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       materials: prev.materials.filter((_, i) => i !== index)
     }));
   };
 
   const removeObjective = (index: number) => {
-    setFormData((prev: LocalEventFormData) => ({
+    setFormData((prev: FormDataWithFiles) => ({
       ...prev,
       objectives: prev.objectives.filter((_, i) => i !== index)
     }));
@@ -359,8 +358,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 type="number"
                 min="0"
                 max="24"
-                value={hours}
-                onChange={(e) => setHours(e.target.value)}
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
                 placeholder="0"
                 className={styles.timeInput}
               />
@@ -369,8 +368,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 type="number"
                 min="0"
                 max="59"
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
                 placeholder="0"
                 className={styles.timeInput}
               />
