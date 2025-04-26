@@ -782,10 +782,11 @@ export default function EventListPage() {
         onClick={() => handleEventClick(event)}
       >
         <div className={styles.eventImageContainer}>
-          {event.media_files?.some(file => file.type.startsWith('image/')) && 
-           event.media_files.find(file => file.type.startsWith('image/'))?.url ? (
+          {event.media_files && event.media_files.length > 0 && 
+          event.media_files.some(file => file.type === 'image') && 
+          event.media_files.find(file => file.type === 'image')?.url ? (
             <Image
-              src={event.media_files.find(file => file.type.startsWith('image/'))!.url}
+              src={event.media_files.find(file => file.type === 'image')!.url}
               alt={event.title}
               width={200}
               height={200}

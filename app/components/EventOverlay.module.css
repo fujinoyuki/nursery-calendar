@@ -484,4 +484,37 @@
     0 6px 20px rgba(156, 209, 216, 0.4),
     inset 0 -3px 6px rgba(255, 255, 255, 0.3),
     inset 0 3px 6px rgba(255, 255, 255, 0.3);
+}
+
+/* メディアセクションのスタイル */
+.mediaSection {
+  margin: 20px 0;
+}
+
+.mediaGallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.mediaItem {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mediaImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+.mediaVideo {
+  width: 100%;
+  height: auto;
+  display: block;
 } 

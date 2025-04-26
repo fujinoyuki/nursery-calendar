@@ -154,6 +154,32 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
           <span className={styles.duration}>所要時間：{formatDuration(event.duration)}</span>
         </div>
 
+        {/* メディアファイル（画像・動画）の表示 */}
+        {event.media_files && event.media_files.length > 0 && (
+          <div className={styles.mediaSection}>
+            <h3 className={styles.sectionTitle}>画像・動画</h3>
+            <div className={styles.mediaGallery}>
+              {event.media_files.map((media, index) => (
+                <div key={index} className={styles.mediaItem}>
+                  {media.type === 'image' ? (
+                    <img 
+                      src={media.url} 
+                      alt={`${event.title}の画像 ${index + 1}`} 
+                      className={styles.mediaImage}
+                    />
+                  ) : media.type === 'video' ? (
+                    <video 
+                      src={media.url} 
+                      controls
+                      className={styles.mediaVideo}
+                    />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>説明</h3>
           <p className={styles.description}>{event.description}</p>
