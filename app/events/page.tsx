@@ -176,9 +176,15 @@ export default function EventListPage() {
         return;
       }
       
-      console.log('取得したイベントデータ:', eventsData);
-      setEvents(eventsData || []);
-      setFilteredEvents(eventsData || []);
+      // イベントデータにisOwnerフィールドを追加
+      const eventsWithOwnership = eventsData?.map(event => ({
+        ...event,
+        isOwner: event.user_id === session.user.id
+      })) || [];
+      
+      console.log('取得したイベントデータ:', eventsWithOwnership);
+      setEvents(eventsWithOwnership);
+      setFilteredEvents(eventsWithOwnership);
     } catch (error) {
       setError('予期せぬエラーが発生しました');
     } finally {
@@ -625,7 +631,9 @@ export default function EventListPage() {
           </div>
           <div className={styles.eventFooter}>
             <span className={styles.month}>{event.month}月</span>
-            <span className={styles.duration}>所要時間：{event.duration}</span>
+            <div className={styles.rightFooter}>
+              <span className={styles.duration}>所要時間：{event.duration}</span>
+            </div>
           </div>
           </div>
         </div>

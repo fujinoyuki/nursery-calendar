@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './EventOverlay.module.css';
 import { Event } from '../types';
 import { createBrowserClient } from '@supabase/ssr';
@@ -30,6 +30,17 @@ const sortAgeGroups = (ages: string[]) => {
 };
 
 export default function EventOverlay({ event, onClose, onDelete, onEdit, season = 'spring' }: EventOverlayProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // イベントの所有者かどうかを確認
+  const isOwner = event.isOwner;
+
+  const handleDelete = () => {
+    setIsDeleting(true);
+    onDelete(event.id);
+  };
+
   useEffect(() => {
     const updateViewCount = async () => {
       try {
@@ -40,21 +51,19 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
           return;
         }
 
-        // 閲覧数を更新（現在のイベントデータから直接更新）
+        // 閲覧数を更新
         const { error: updateError } = await supabase
           .from('events')
           .update({ 
             views: (event.views || 0) + 1,
             updated_at: new Date().toISOString()
           })
-          .eq('id', event.id)
-          .eq('user_id', session.user.id);
+          .eq('id', event.id);
         
         if (updateError) {
           console.error('閲覧回数の更新に失敗しました:', updateError.message);
           return;
         }
-
       } catch (error) {
         console.error('閲覧回数の更新中にエラーが発生しました:', error);
       }
@@ -68,6 +77,7 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
       <div 
         className={`${styles.content} ${styles[season]}`} 
         onClick={e => e.stopPropagation()}
+        ref={overlayRef}
       >
         <button className={styles.closeButton} onClick={onClose}>×</button>
         
@@ -112,22 +122,35 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
           </ul>
         </div>
 
-        <div className={styles.eventStats}>
-          <span className={styles.viewCount}>
-            閲覧数: {event.views || 0}
-          </span>
-          <span className={styles.dateInfo}>
-            作成日: {formatDate(event.created_at)}
-          </span>
-        </div>
+        <div className={styles.eventFooter}>
+          <div className={styles.eventStats}>
+            <span className={styles.dateInfo}>
+              作成日: {formatDate(event.created_at)}
+            </span>
+            <span className={styles.separator}>|</span>
+            <span className={styles.authorInfo}>
+              投稿者: {event.profiles?.name || '不明'}
+            </span>
+            <span className={styles.separator}>|</span>
+            <span className={styles.viewCount}>
+              閲覧数: {event.views || 0}
+            </span>
+          </div>
 
-        <div className={styles.actions}>
-          <button onClick={onEdit} className={styles.editButton}>
-            編集
-          </button>
-          <button onClick={() => onDelete(event.id)} className={styles.deleteButton}>
-            削除
-          </button>
+          {isOwner && (
+            <div className={styles.eventActions}>
+              <button onClick={onEdit} className={styles.editButton}>
+                編集
+              </button>
+              <button
+                onClick={handleDelete}
+                className={`${styles.deleteButton} ${isDeleting ? styles.deleting : ''}`}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '削除中...' : '削除'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

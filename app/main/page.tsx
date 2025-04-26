@@ -82,10 +82,11 @@ export default function MainPage() {
       console.log('取得したイベントデータ:', eventsData);
 
       if (eventsData) {
-        // 月の値を数値型に変換
+        // イベントデータにisOwnerフィールドを追加し、月を数値型に変換
         const processedEvents = eventsData.map(event => ({
           ...event,
-          month: Number(event.month)
+          month: Number(event.month),
+          isOwner: event.user_id === session.user.id
         }));
         
         console.log('処理後のイベントデータ:', processedEvents);
