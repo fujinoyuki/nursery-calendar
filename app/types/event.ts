@@ -1,12 +1,21 @@
-export type MediaFile = {
-  id: string;
-  url: string;
+export interface Duration {
+  start: string;
+  end: string;
+}
+
+export interface MediaFile {
   type: string;
-};
+  url: string;
+}
 
-export type Duration = string;
+export interface Profile {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
 
-export type Category = '壁面' | '制作物' | 'その他';
+export type Category = '壁　面' | '制作物' | 'その他';
 
 export type AgeGroup = '0歳児' | '1歳児' | '2歳児' | '3歳児' | '4歳児' | '5歳児';
 
@@ -24,27 +33,28 @@ export type Media = {
   type: 'image' | 'video';
 };
 
-export type Event = {
+export interface Event {
   id: string;
   title: string;
   description: string;
-  month: string;
-  duration: string;
-  age_groups: AgeGroup[];
   category: Category;
+  month: string;
+  date: string;
+  duration: string;
   materials: string[];
   objectives: string[];
-  media_files?: MediaFile[];
-  created_at?: string;
-  updated_at?: string;
-  user_id?: string;
-  views?: number;
-};
+  age_groups: AgeGroup[];
+  media_files: MediaFile[];
+  views: number;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  isOwner: boolean;
+  profiles: Profile | null;
+}
 
-export type EventFormData = Omit<Event, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'views' | 'media_files'> & {
+export type EventFormData = Omit<Event, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'views' | 'media_files' | 'isOwner' | 'profiles'> & {
   media_files: File[];
 };
 
-export type LocalEventFormData = Omit<Event, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'views' | 'media_files'> & {
-  media_files: File[];
-}; 
+export type LocalEventFormData = EventFormData; 

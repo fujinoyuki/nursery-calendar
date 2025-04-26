@@ -197,9 +197,10 @@ export default function MainPage() {
         .from('events')
         .insert({
           ...normalizedEventData,
-          date: date.toISOString(),
-          month: selectedMonth,
-          user_id: session.user.id
+          date: new Date(date).toISOString(),
+          month: selectedMonth.toString(),
+          user_id: session.user.id,
+          views: 0
         })
         .select();
 
