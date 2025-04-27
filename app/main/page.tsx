@@ -262,7 +262,7 @@ export default function MainPage() {
         .from('events')
         .insert({
           ...normalizedEventData,
-          date: eventData.date || new Date(date).toISOString(),
+          date: new Date(date).toISOString(), // 常に選択された月の1日を使用
           month: selectedMonth.toString(), // 文字列として保存
           user_id: session.user.id,
           views: 0
