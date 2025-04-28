@@ -7,10 +7,15 @@ import styles from './page.module.css';
 import MonthCard from '../components/MonthCard';
 import EventOverlay from '../components/EventOverlay';
 import AddEventForm from '../components/AddEventForm';
-import EditEventForm, { FormDataWithFiles } from '../components/EditEventForm';
+import EditEventForm from '../components/EditEventForm';
 import { Event, EventFormData, Category, AgeGroup, MediaFile, Duration, LocalEventFormData } from '../types/event';
 import Link from 'next/link';
 import { months } from '../utils/constants';
+
+// 編集フォームからのデータを受け取るための型
+type EditFormData = Omit<EventFormData, 'media_files'> & {
+  media_files: (MediaFile | File)[];
+};
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -97,24 +102,32 @@ export default function MainPage() {
           // 文字列として保存されている場合
           if (typeof eventDuration === 'string') {
             try {
-              eventDuration = JSON.parse(eventDuration);
-              console.log('パース後のduration:', eventDuration);
+              // 有効なJSONかどうかを確認（JSONっぽい形式かチェック）
+              if (eventDuration.startsWith('{') && eventDuration.endsWith('}')) {
+                eventDuration = JSON.parse(eventDuration);
+                console.log('パース後のduration:', eventDuration);
+              } else {
+                // "2時間30分"形式の処理
+                const durationStr = eventDuration as string;
+                const hoursMatch = durationStr.match(/(\d+)時間/);
+                const minutesMatch = durationStr.match(/(\d+)分/);
+                
+                const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+                const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+                
+                // Durationオブジェクトに変換
+                eventDuration = {
+                  start: "00:00",
+                  end: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+                };
+                console.log('時間文字列からのduration:', eventDuration);
+              }
             } catch (e) {
-              console.error('Duration解析エラー:', e);
-              // "2時間30分"形式かもしれない
-              const durationStr = eventDuration as string;
-              const hoursMatch = durationStr.match(/(\d+)時間/);
-              const minutesMatch = durationStr.match(/(\d+)分/);
+              // エラーをデバッグレベルに下げる（警告としてログ出力）
+              console.warn('Duration解析をスキップしました:', eventDuration);
               
-              const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-              const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-              
-              // Durationオブジェクトに変換
-              eventDuration = {
-                start: "00:00",
-                end: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
-              };
-              console.log('時間文字列からのduration:', eventDuration);
+              // 安全なデフォルト値を設定
+              eventDuration = { start: "00:00", end: "00:00" };
             }
           }
           
@@ -292,7 +305,7 @@ export default function MainPage() {
     }
   };
 
-  const handleEditEventSubmit = async (eventData: FormDataWithFiles) => {
+  const handleEditEventSubmit = async (eventData: EditFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -307,7 +320,7 @@ export default function MainPage() {
 
       // media_filesの中からFileオブジェクトだけを抽出
       const files = eventData.media_files.filter(file => file instanceof File) as File[];
-      const existingMediaFiles = eventData.media_files.filter(file => !(file instanceof File)) as MediaFile[];
+      const existingMediaFiles = eventData.media_files.filter(file => !(file instanceof File) && !('file' in file)) as MediaFile[];
       
       // ファイルサイズの制限（5MB）
       const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -374,20 +387,44 @@ export default function MainPage() {
       // 既存のメディアファイルと新しくアップロードしたファイルを結合
       const allMediaFiles = [...existingMediaFiles, ...newMediaFiles];
 
-      // eventDataがLocalEventFormDataの場合もFormDataWithFilesに変換して扱う
+      // durationが文字列の場合は"X時間Y分"形式に変換
+      let durationStr = '';
+      if (typeof eventData.duration === 'object') {
+        // オブジェクト形式の場合は時間と分を抽出
+        const end = eventData.duration.end;
+        if (end) {
+          const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+          if (timeMatch) {
+            const hours = parseInt(timeMatch[1]);
+            const minutes = parseInt(timeMatch[2]);
+            
+            if (hours > 0) {
+              durationStr += `${hours}時間`;
+            }
+            
+            if (minutes > 0) {
+              durationStr += `${minutes}分`;
+            }
+          }
+        }
+      } else {
+        // すでに文字列の場合はそのまま使用
+        durationStr = eventData.duration;
+      }
+
+      // 更新データの作成
       const updateData = {
         ...eventData,
         media_files: allMediaFiles,
-        // 必ず文字列型の月を使用
-        month: String(eventData.month)
+        duration: durationStr || '不明',
+        month: String(eventData.month),
+        updated_at: new Date().toISOString()
       };
 
+      // データベース更新
       const { data, error } = await supabase
         .from('events')
-        .update({
-          ...updateData,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', selectedEvent.id)
         .select();
 
@@ -502,7 +539,23 @@ export default function MainPage() {
               すべてのイベントを見る
             </Link>
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={() => {
+                // すべてのクッキーを削除
+                document.cookie.split(";").forEach(c => {
+                  const key = c.trim().split("=")[0];
+                  if (key) {
+                    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                  }
+                });
+                
+                // Supabase関連のローカルストレージをクリア
+                localStorage.removeItem('supabase.auth.token');
+                localStorage.removeItem('supabase.auth.expires_at');
+                localStorage.removeItem('supabase.auth.refresh_token');
+                
+                // ページをリロード
+                window.location.href = '/';
+              }}
               className={styles.logoutButton}
             >
               ログアウト

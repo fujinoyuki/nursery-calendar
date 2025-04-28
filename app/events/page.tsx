@@ -582,7 +582,7 @@ export default function EventListPage() {
         setIsOverlayOpen(true);
       } else {
         // データがない場合は既存のイベントを使用
-        setSelectedEvent(event);
+    setSelectedEvent(event);
         setIsOverlayOpen(true);
       }
     } catch (error) {
@@ -737,16 +737,27 @@ export default function EventListPage() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error logging out:', error.message);
-        return;
-      }
-      router.push('/');
+      // すべてのクッキーを削除
+      document.cookie.split(";").forEach(c => {
+        const key = c.trim().split("=")[0];
+        if (key) {
+          document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+      
+      // Supabase関連のローカルストレージをクリア
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('supabase.auth.expires_at');
+      localStorage.removeItem('supabase.auth.refresh_token');
+      
+      // ページをリロード
+      window.location.href = '/';
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error('ログアウト処理エラー:', error);
+      // エラーが発生しても強制的にホームページへ
+      window.location.href = '/';
     }
   };
 

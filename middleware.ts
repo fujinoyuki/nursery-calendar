@@ -38,13 +38,31 @@ export async function middleware(request: NextRequest) {
     const { data: { session } } = await supabase.auth.getSession();
     const path = request.nextUrl.pathname;
 
-    // 未認証ユーザーが/mainにアクセスしようとした場合、ログインページにリダイレクト
+    // 特殊なログアウトパスの処理
+    if (path === '/_logout') {
+      const redirectUrl = new URL('/', request.url);
+      response = NextResponse.redirect(redirectUrl);
+      
+      // クッキーを削除
+      const cookieNames = ['sb-access-token', 'sb-refresh-token'];
+      cookieNames.forEach(name => {
+        response.cookies.set({
+          name,
+          value: '',
+          maxAge: 0,
+          path: '/',
+        });
+      });
+      
+      return response;
+    }
+
+    // 通常の認証ルーティング
     if (!session && path.startsWith('/main')) {
       const redirectUrl = new URL('/', request.url);
       return NextResponse.redirect(redirectUrl);
     }
 
-    // 認証済みユーザーがルートページにアクセスした場合、/mainにリダイレクト
     if (session && path === '/') {
       const redirectUrl = new URL('/main', request.url);
       return NextResponse.redirect(redirectUrl);
@@ -53,7 +71,6 @@ export async function middleware(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('認証チェックに失敗しました:', error);
-    // エラーが発生した場合は、安全のためにログインページにリダイレクト
     if (request.nextUrl.pathname.startsWith('/main')) {
       const redirectUrl = new URL('/', request.url);
       return NextResponse.redirect(redirectUrl);
@@ -63,5 +80,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/main/:path*', '/auth/:path*'],
+  matcher: ['/', '/main/:path*', '/auth/:path*', '/_logout'],
 };

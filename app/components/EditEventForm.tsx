@@ -8,18 +8,19 @@ export const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
 export const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'] as const;
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
-export interface FormDataWithFiles extends Omit<EventFormData, 'media_files'> {
-  media_files: MediaFile[];
-}
+// EventFormDataを拡張して実際のファイルを含むことができるようにします
+type EditFormData = Omit<EventFormData, 'media_files'> & {
+  media_files: (MediaFile | File)[];
+};
 
 interface Props {
   data: Omit<Event, 'id' | 'views' | 'created_at' | 'updated_at' | 'user_id' | 'isOwner' | 'profiles'>;
-  onSubmit: (data: FormDataWithFiles) => Promise<void>;
+  onSubmit: (data: EditFormData) => Promise<void>;
   onCancel: () => void;
 }
 
 export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
-  const [formData, setFormData] = useState<FormDataWithFiles>({
+  const [formData, setFormData] = useState<EditFormData>({
     title: data.title,
     description: data.description,
     month: data.month,
@@ -33,12 +34,37 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   });
   
   const [otherCategory, setOtherCategory] = useState('');
-  const [startTime, setStartTime] = useState(data.duration.start);
-  const [endTime, setEndTime] = useState(data.duration.end);
+  const [hours, setHours] = useState('0');
+  const [minutes, setMinutes] = useState('0');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // コンポーネントが初期化されるときにdurationから時間と分を抽出
+  useEffect(() => {
+    if (data.duration) {
+      // オブジェクト形式の場合
+      if (typeof data.duration === 'object' && data.duration.end) {
+        const timeMatch = data.duration.end.match(/^(\d{1,2}):(\d{1,2})$/);
+        if (timeMatch) {
+          setHours(timeMatch[1]);
+          setMinutes(timeMatch[2]);
+        }
+      } 
+      // 文字列形式の場合（例: "2時間30分"）
+      else if (typeof data.duration === 'string') {
+        const durationStr = data.duration as string;
+        const hoursMatch = durationStr.match(/(\d+)時間/);
+        const minutesMatch = durationStr.match(/(\d+)分/);
+        
+        if (hoursMatch) setHours(hoursMatch[1]);
+        if (minutesMatch) setMinutes(minutesMatch[1]);
+      }
+    }
+  }, [data.duration]);
+
   const isDurationValid = () => {
-    return startTime && endTime;
+    const hoursNum = parseInt(hours) || 0;
+    const minutesNum = parseInt(minutes) || 0;
+    return hoursNum > 0 || minutesNum > 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,14 +73,27 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
       alert('所要時間を入力してください');
       return;
     }
-    const duration: Duration = {
-      start: startTime,
-      end: endTime
-    };
+    
+    // 所要時間を文字列形式で保存（"X時間Y分"形式）
+    const hoursNum = parseInt(hours) || 0;
+    const minutesNum = parseInt(minutes) || 0;
+    let durationStr = '';
+    
+    if (hoursNum > 0) {
+      durationStr += `${hoursNum}時間`;
+    }
+    
+    if (minutesNum > 0) {
+      durationStr += `${minutesNum}分`;
+    }
+    
     const finalCategory = formData.category === 'その他' ? otherCategory : formData.category;
-    const formDataToSubmit: FormDataWithFiles = {
+    const formDataToSubmit: EditFormData = {
       ...formData,
-      duration,
+      duration: {
+        start: "00:00",
+        end: `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`
+      },
       category: finalCategory as Category,
       media_files: formData.media_files
     };
@@ -63,14 +102,14 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       [name]: value
     }));
   };
 
   const handleAgeGroupChange = (group: AgeGroup) => {
-    setFormData((prev: FormDataWithFiles) => {
+    setFormData((prev: EditFormData) => {
       const newAgeGroups = prev.age_groups.includes(group)
         ? prev.age_groups.filter(g => g !== group)
         : [...prev.age_groups, group];
@@ -82,7 +121,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const handleCategoryChange = (category: Category) => {
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       category
     }));
@@ -95,7 +134,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
         const type = file.type.startsWith('image/') ? 'image' : 'video';
         return {
           type: type as 'image' | 'video',
-          url: URL.createObjectURL(file)
+          url: URL.createObjectURL(file),
+          file: file // 元のFileオブジェクトを保持
         };
       });
       
@@ -117,7 +157,29 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     });
   };
 
-  const renderPreview = (file: MediaFile, index: number) => {
+  const renderPreview = (file: MediaFile | File, index: number) => {
+    // Fileオブジェクトの場合はURL.createObjectURLを使用
+    if (file instanceof File) {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const url = URL.createObjectURL(file);
+
+      return (
+        <div key={index} className={styles.previewItem}>
+          {isImage && <img src={url} alt={`プレビュー ${index + 1}`} />}
+          {isVideo && <video src={url} controls />}
+          <button
+            type="button"
+            className={styles.removeButton}
+            onClick={() => handleRemoveFile(index)}
+          >
+            ×
+          </button>
+        </div>
+      );
+    }
+
+    // MediaFileオブジェクトの場合
     return (
       <div key={index} className={styles.previewItem}>
         {file.type === 'image' && <img src={file.url} alt={`プレビュー ${index + 1}`} />}
@@ -138,7 +200,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
       e.preventDefault();
       const value = e.currentTarget.value.trim();
       if (value) {
-        setFormData((prev: FormDataWithFiles) => ({
+        setFormData((prev: EditFormData) => ({
           ...prev,
           [field]: [...prev[field], value],
         }));
@@ -148,7 +210,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const removeArrayItem = (field: keyof Pick<Event, 'materials' | 'objectives'>, index: number) => {
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
@@ -177,28 +239,28 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const addMaterial = () => {
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       materials: [...prev.materials, '']
     }));
   };
 
   const addObjective = () => {
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       objectives: [...prev.objectives, '']
     }));
   };
 
   const removeMaterial = (index: number) => {
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       materials: prev.materials.filter((_, i) => i !== index)
     }));
   };
 
   const removeObjective = (index: number) => {
-    setFormData((prev: FormDataWithFiles) => ({
+    setFormData((prev: EditFormData) => ({
       ...prev,
       objectives: prev.objectives.filter((_, i) => i !== index)
     }));
@@ -358,8 +420,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 type="number"
                 min="0"
                 max="24"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
                 placeholder="0"
                 className={styles.timeInput}
               />
@@ -368,8 +430,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 type="number"
                 min="0"
                 max="59"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
                 placeholder="0"
                 className={styles.timeInput}
               />
@@ -392,8 +454,6 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 multiple
               />
               <p>クリックして画像・動画を追加</p>
-              <p>または</p>
-              <p>ファイルをドラッグ＆ドロップ</p>
             </div>
 
             {formData.media_files.length > 0 && (

@@ -26,7 +26,9 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
   const [materials, setMaterials] = useState<string[]>([]);
   const [objectives, setObjectives] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [fileUrls, setFileUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
 
   // 所要時間が有効かどうかをチェックする関数
   const isDurationValid = () => {
@@ -60,7 +62,8 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
       duration: `${hours}時間${minutes}分`,
       materials: materials,
       objectives: objectives,
-      media_files: files
+      media_files: files,
+      date: dateRef.current?.value
     };
     
     console.log('送信する所要時間:', formData.duration);
@@ -98,28 +101,32 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
     }
   };
 
+  // ファイルが変更されたときにURLを作成
+  useEffect(() => {
+    const urls = files.map(file => URL.createObjectURL(file));
+    setFileUrls(urls);
+    
+    // クリーンアップ関数
+    return () => {
+      urls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [files]);
+
   const handleRemoveFile = (index: number) => {
     setFiles(prev => {
       const newFiles = [...prev];
-      const removedFile = newFiles[index];
-      if (removedFile) {
-        URL.revokeObjectURL(URL.createObjectURL(removedFile));
-      }
       newFiles.splice(index, 1);
       return newFiles;
     });
+    // URLの削除はuseEffectで自動的に行われるようになります
   };
 
   const renderPreview = (file: File, index: number) => {
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
-    const url = URL.createObjectURL(file);
+    const url = fileUrls[index];
 
-    useEffect(() => {
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    }, [url]);
+    if (!url) return null;
 
     return (
       <div key={index} className={styles.previewItem}>
@@ -219,6 +226,17 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
           </div>
 
           <div className={styles.formGroup}>
+            <label>
+              日付
+              <input
+                type="date"
+                ref={dateRef}
+                className={styles.dateInput}
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
             <p>所要時間</p>
             <div className={styles.timeInputGroup}>
               <label>
@@ -276,8 +294,6 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
             <h3 className={styles.optionalTitle}>画像・動画（任意）</h3>
             <div className={styles.uploadArea}>
               <p>クリックして画像・動画をアップロード</p>
-              <p>または</p>
-              <p>ファイルをドラッグ＆ドロップ</p>
               <input
                 type="file"
                 multiple
