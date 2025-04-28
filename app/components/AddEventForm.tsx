@@ -28,7 +28,6 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
   const [files, setFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dateRef = useRef<HTMLInputElement>(null);
 
   // 所要時間が有効かどうかをチェックする関数
   const isDurationValid = () => {
@@ -63,7 +62,6 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
       materials: materials,
       objectives: objectives,
       media_files: files,
-      date: dateRef.current?.value
     };
     
     console.log('送信する所要時間:', formData.duration);
@@ -223,17 +221,6 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                 required={category === 'その他'}
               />
             )}
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>
-              日付
-              <input
-                type="date"
-                ref={dateRef}
-                className={styles.dateInput}
-              />
-            </label>
           </div>
 
           <div className={styles.formGroup}>
