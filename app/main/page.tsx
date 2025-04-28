@@ -11,6 +11,7 @@ import EditEventForm from '../components/EditEventForm';
 import { Event, EventFormData, Category, AgeGroup, MediaFile, Duration, LocalEventFormData } from '../types/event';
 import Link from 'next/link';
 import { months } from '../utils/constants';
+import { v4 as uuidv4 } from 'uuid';
 
 // 編集フォームからのデータを受け取るための型
 type EditFormData = Omit<EventFormData, 'media_files'> & {
@@ -40,31 +41,25 @@ export default function MainPage() {
   const getMonthNumber = (monthName: string): number => {
     const monthStr = monthName.replace('月', '');
     const month = parseInt(monthStr);
-    console.log(`月の変換: ${monthName} -> ${month}`);
     return month;
   };
 
   // イベントを取得する関数
   async function fetchEvents() {
     try {
-      setLoading(true);
-      setError(null);
-
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError) {
-        console.error('セッションエラー:', sessionError);
         setError('セッションの取得に失敗しました');
         return;
       }
 
       if (!session) {
-        console.log('セッションなし - ログインページへリダイレクト');
         router.push('/');
         return;
       }
 
-      console.log('イベントを取得中...');
+      // イベントデータの取得
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select(`
@@ -73,41 +68,36 @@ export default function MainPage() {
             name
           )
         `)
-        .order('views', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (eventsError) {
-        console.error('イベント取得エラー:', eventsError);
-        setError('イベントの取得に失敗しました');
+        setError('イベントの取得中に予期せぬエラーが発生しました');
         return;
       }
 
-      console.log('取得したイベントデータ:', eventsData);
-      
-      // durationフィールドの内容をデバッグ出力
-      if (eventsData && eventsData.length > 0) {
-        console.log('最初のイベントのduration:', eventsData[0].duration);
-        
-        // 全イベントのdurationをチェック
-        eventsData.forEach((event, index) => {
-          console.log(`イベント[${index}] ${event.title}のduration:`, event.duration);
-        });
-      }
-
       if (eventsData) {
-        // イベントデータにisOwnerフィールドを追加し、月を数値型に変換
+        // イベントデータを処理
         const processedEvents = eventsData.map(event => {
-          // durationフィールドの処理
           let eventDuration = event.duration;
-          
-          // 文字列として保存されている場合
+
+          // null/undefined チェック
+          if (!eventDuration) {
+            return {
+              ...event,
+              isOwner: event.user_id === session.user.id,
+              profiles: event.profiles || null,
+              duration: { start: '00:00', end: '00:00' }
+            };
+          }
+
+          // 文字列の場合
           if (typeof eventDuration === 'string') {
-            try {
-              // 有効なJSONかどうかを確認（JSONっぽい形式かチェック）
-              if (eventDuration.startsWith('{') && eventDuration.endsWith('}')) {
+            // JSONかどうか判断（{で始まる場合のみパース試行）
+            if (eventDuration.trim().startsWith('{')) {
+              try {
                 eventDuration = JSON.parse(eventDuration);
-                console.log('パース後のduration:', eventDuration);
-              } else {
-                // "2時間30分"形式の処理
+              } catch (e) {
+                // JSONパースに失敗した場合は時間文字列として処理
                 const durationStr = eventDuration as string;
                 const hoursMatch = durationStr.match(/(\d+)時間/);
                 const minutesMatch = durationStr.match(/(\d+)分/);
@@ -115,48 +105,60 @@ export default function MainPage() {
                 const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
                 const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
                 
-                // Durationオブジェクトに変換
-                eventDuration = {
-                  start: "00:00",
-                  end: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
-                };
-                console.log('時間文字列からのduration:', eventDuration);
+                // 時間が取得できた場合
+                if (hours > 0 || minutes > 0) {
+                  if (hours > 0 && minutes > 0) {
+                    eventDuration = `${hours}時間${minutes}分`;
+                  } else if (hours > 0) {
+                    eventDuration = `${hours}時間`;
+                  } else if (minutes > 0) {
+                    eventDuration = `${minutes}分`;
+                  }
+                } else {
+                  // 時間が取得できなかった場合はデフォルト値
+                  eventDuration = { start: '00:00', end: '00:00' };
+                }
               }
-            } catch (e) {
-              // エラーをデバッグレベルに下げる（警告としてログ出力）
-              console.warn('Duration解析をスキップしました:', eventDuration);
+            } else {
+              // JSONではない通常の時間文字列
+              const durationStr = eventDuration as string;
+              const hoursMatch = durationStr.match(/(\d+)時間/);
+              const minutesMatch = durationStr.match(/(\d+)分/);
               
-              // 安全なデフォルト値を設定
-              eventDuration = { start: "00:00", end: "00:00" };
+              const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+              const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+              
+              // 時間が取得できなかった場合はデフォルト値
+              if (hours === 0 && minutes === 0) {
+                eventDuration = { start: '00:00', end: '00:00' };
+              }
             }
           }
           
-          // nullやundefinedの場合や、不正な形式の場合
-          if (!eventDuration || typeof eventDuration !== 'object' || 
-              !('start' in eventDuration) || !('end' in eventDuration) ||
-              !eventDuration.start || !eventDuration.end) {
-            eventDuration = { start: "00:00", end: "00:00" };
-            console.log('デフォルトdurationを使用:', eventDuration);
+          // オブジェクトの場合、必要なフィールドの存在を確認
+          if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
+            eventDuration = { start: '00:00', end: '00:00' };
           }
-          
+
           return {
             ...event,
-            month: String(event.month), // 文字列型として扱う
             isOwner: event.user_id === session.user.id,
-            duration: eventDuration as Duration
+            profiles: event.profiles || null,
+            duration: eventDuration
           };
         });
-        
-        console.log('処理後のイベントデータ:', processedEvents);
-        console.log('イベントデータをセット:', processedEvents.length, '件');
+
+        // イベントを月ごとに整理
+        processedEvents.forEach(event => {
+          const month = event.month;
+        });
+
         setEvents(processedEvents);
       } else {
-        console.log('イベントデータが空です');
         setEvents([]);
       }
     } catch (error) {
-      console.error('予期せぬエラー:', error);
-      setError('予期せぬエラーが発生しました');
+      setError('イベントの取得中に予期せぬエラーが発生しました');
     } finally {
       setLoading(false);
     }
@@ -166,8 +168,6 @@ export default function MainPage() {
     fetchEvents();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('認証状態変更:', event);
-      
       if (event === 'SIGNED_IN') {
         fetchEvents();
       } else if (event === 'SIGNED_OUT') {
@@ -262,8 +262,6 @@ export default function MainPage() {
       // 終了時間を計算
       durationObj.end = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
       
-      console.log('設定する所要時間:', durationString, '->', durationObj);
-
       // カテゴリーの正規化（全角スペースを保持）
       const normalizedEventData = {
         ...eventData,
@@ -462,19 +460,13 @@ export default function MainPage() {
   };
 
   const getEventsForMonth = (month: number) => {
-    console.log('全イベントの月:', events.map(e => e.month));
-    console.log('全イベント:', events);
-    
     const monthEvents = events.filter(event => {
       // 文字列型の月を数値に変換して比較（互換性のため）
       const eventMonth = Number(event.month);
       const isMatch = eventMonth === month;
-      console.log(`イベントの月を比較 - イベント月: ${eventMonth} (${typeof eventMonth}), 現在の月: ${month} (${typeof month}), 一致: ${isMatch}`);
       return isMatch;
     });
     
-    console.log(`${month}月のイベント数: ${monthEvents.length}`);
-    console.log(`${month}月のイベント:`, monthEvents);
     return monthEvents;
   };
 
@@ -521,6 +513,78 @@ export default function MainPage() {
     if ([7, 8, 9].includes(month)) return 'summer';    // 7-9月：夏
     if ([10, 11, 12].includes(month)) return 'autumn'; // 10-12月：秋
     return 'winter';                                   // 1-3月：冬
+  };
+
+  // EventBaseからEventへの変換関数
+  const convertToEvent = (eventBase: any, id?: string): Event => {
+    const defaultDate = new Date();
+    defaultDate.setDate(1);
+    
+    let eventDuration = eventBase.duration;
+
+    // null/undefined チェック
+    if (!eventDuration) {
+      eventDuration = { start: '00:00', end: '00:00' };
+    } else if (typeof eventDuration === 'string') {
+      // JSONかどうか判断（{で始まる場合のみパース試行）
+      if (eventDuration.trim().startsWith('{')) {
+        try {
+          eventDuration = JSON.parse(eventDuration);
+        } catch (e) {
+          // JSONパースに失敗した場合は時間文字列として処理
+          const durationStr = eventDuration as string;
+          const hoursMatch = durationStr.match(/(\d+)時間/);
+          const minutesMatch = durationStr.match(/(\d+)分/);
+          
+          const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+          const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+          
+          // 時間が取得できた場合
+          if (hours > 0 || minutes > 0) {
+            if (hours > 0 && minutes > 0) {
+              eventDuration = `${hours}時間${minutes}分`;
+            } else if (hours > 0) {
+              eventDuration = `${hours}時間`;
+            } else if (minutes > 0) {
+              eventDuration = `${minutes}分`;
+            }
+          } else {
+            // 時間が取得できなかった場合はデフォルト値
+            eventDuration = { start: '00:00', end: '00:00' };
+          }
+        }
+      } else {
+        // JSONではない通常の時間文字列
+        const durationStr = eventDuration as string;
+        const hoursMatch = durationStr.match(/(\d+)時間/);
+        const minutesMatch = durationStr.match(/(\d+)分/);
+        
+        const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        
+        // 時間が取得できなかった場合はデフォルト値
+        if (hours === 0 && minutes === 0) {
+          eventDuration = { start: '00:00', end: '00:00' };
+        }
+      }
+    }
+    
+    // オブジェクトの場合、必要なフィールドの存在を確認
+    if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
+      eventDuration = { start: '00:00', end: '00:00' };
+    }
+
+    return {
+      ...eventBase,
+      id: id || uuidv4(),
+      views: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      user_id: '',
+      isOwner: true,
+      profiles: null,
+      duration: eventDuration
+    };
   };
 
   return (

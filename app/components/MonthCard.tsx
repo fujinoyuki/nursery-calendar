@@ -127,13 +127,6 @@ export const MonthCard: React.FC<MonthCardProps> = ({
       // カテゴリー判定ロジック
       const eventCategory = event.category?.replace(/\s+/g, '　').trim() || '';
       
-      // デバッグログ
-      console.log('カテゴリー判定:', {
-        期待: normalizedCategory,
-        実際: eventCategory,
-        元の値: event.category
-      });
-
       // 「その他」カテゴリーの場合
       if (normalizedCategory === 'その他') {
         return eventCategory !== '壁　面' && eventCategory !== '制作物';
@@ -160,8 +153,6 @@ export const MonthCard: React.FC<MonthCardProps> = ({
           const event = getLatestEventByCategory(events, category);
           const columnStyle = category === '壁　面' ? 'wallColumn' : 
                             category === '制作物' ? 'craftColumn' : 'otherColumn';
-          
-          console.log(`${monthName}の${category}:`, event);
           
           return (
             <div key={category} className={styles.categorySection}>

@@ -213,15 +213,22 @@ export default function EventListPage() {
 
   const fetchEvents = async () => {
     try {
-    setLoading(true);
+      setLoading(true);
+
+      // セッションの確認
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (sessionError || !session) {
+      if (sessionError) {
+        setError('セッションの取得に失敗しました');
+        return;
+      }
+
+      if (!session) {
         router.push('/');
         return;
       }
 
-      console.log('イベントを取得中...');
+      // イベントデータの取得
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select(`
@@ -233,71 +240,90 @@ export default function EventListPage() {
         .order('created_at', { ascending: false });
 
       if (eventsError) {
-        setError('イベントの取得に失敗しました');
+        setError('イベントの取得中に予期せぬエラーが発生しました');
         return;
       }
-      
-      // イベントデータにisOwnerフィールドを追加
-      const eventsWithOwnership = eventsData?.map(event => {
-        // durationの処理を改善
-        let eventDuration = event.duration;
-        if (typeof eventDuration === 'string') {
-          try {
-            eventDuration = JSON.parse(eventDuration);
-          } catch (e) {
-            console.error('Duration解析エラー:', e);
-            
-            // 文字列形式の処理（例: "2時間30分"）
-            const durationStr = eventDuration as string;
-            const hoursMatch = durationStr.match(/(\d+)時間/);
-            const minutesMatch = durationStr.match(/(\d+)分/);
-            
-            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-            
-            // formatDuration関数に渡せる形式に変換
-            if (hours > 0 && minutes > 0) {
-              eventDuration = `${hours}時間${minutes}分`;
-            } else if (hours > 0) {
-              eventDuration = `${hours}時間`;
-            } else if (minutes > 0) {
-              eventDuration = `${minutes}分`;
+
+      if (eventsData) {
+        // イベントデータを処理
+        const processedEvents = eventsData.map(event => {
+          let eventDuration = event.duration;
+
+          // null/undefined チェック
+          if (!eventDuration) {
+            return {
+              ...event,
+              isOwner: event.user_id === session.user.id,
+              profiles: event.profiles || null,
+              duration: { start: '00:00', end: '00:00' }
+            };
+          }
+
+          // 文字列の場合
+          if (typeof eventDuration === 'string') {
+            // JSONかどうか判断（{で始まる場合のみパース試行）
+            if (eventDuration.trim().startsWith('{')) {
+              try {
+                eventDuration = JSON.parse(eventDuration);
+              } catch (e) {
+                // JSONパースに失敗した場合は時間文字列として処理
+                const durationStr = eventDuration as string;
+                const hoursMatch = durationStr.match(/(\d+)時間/);
+                const minutesMatch = durationStr.match(/(\d+)分/);
+                
+                const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+                const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+                
+                // 時間が取得できた場合
+                if (hours > 0 || minutes > 0) {
+                  if (hours > 0 && minutes > 0) {
+                    eventDuration = `${hours}時間${minutes}分`;
+                  } else if (hours > 0) {
+                    eventDuration = `${hours}時間`;
+                  } else if (minutes > 0) {
+                    eventDuration = `${minutes}分`;
+                  }
+                } else {
+                  // 時間が取得できなかった場合はデフォルト値
+                  eventDuration = { start: '00:00', end: '00:00' };
+                }
+              }
             } else {
-              eventDuration = { start: '00:00', end: '00:00' };
+              // JSONではない通常の時間文字列
+              const durationStr = eventDuration as string;
+              const hoursMatch = durationStr.match(/(\d+)時間/);
+              const minutesMatch = durationStr.match(/(\d+)分/);
+              
+              const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+              const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+              
+              // 時間が取得できなかった場合はデフォルト値
+              if (hours === 0 && minutes === 0) {
+                eventDuration = { start: '00:00', end: '00:00' };
+              }
             }
           }
-        }
-        
-        // 空のオブジェクトかnullの場合（古いデータ互換性のため）
-        if (!eventDuration) {
-          eventDuration = { start: '00:00', end: '00:00' };
-        }
-        
-        // オブジェクトだが必要なフィールドがない場合
-        if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
-          eventDuration = { start: '00:00', end: '00:00' };
-        }
-        
-        return {
-        ...event,
-          category: (event.category || 'その他') as Category,
-          age_groups: (event.age_groups || []) as AgeGroup[],
-          media_files: (event.media_files || []).map((file: { type: string; url: string }) => ({
-            type: file.type,
-            url: file.url
-          })) as MediaFile[],
-          views: event.views || 0,
-          isOwner: event.user_id === session.user.id,
-          profiles: event.profiles || null,
-          duration: eventDuration
-        };
-      }) as Event[];
-      
-      console.log('取得したイベントデータ:', eventsWithOwnership);
-      setEvents(eventsWithOwnership);
-      setFilteredEvents(eventsWithOwnership);
+          
+          // オブジェクトの場合、必要なフィールドの存在を確認
+          if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
+            eventDuration = { start: '00:00', end: '00:00' };
+          }
+
+          return {
+            ...event,
+            isOwner: event.user_id === session.user.id,
+            profiles: event.profiles || null,
+            duration: eventDuration
+          };
+        });
+
+        setEvents(processedEvents);
+      } else {
+        setEvents([]);
+      }
     } catch (error) {
-      setError('予期せぬエラーが発生しました');
+      console.error('予期せぬエラー:', error);
+      setError('イベントの取得中に予期せぬエラーが発生しました');
     } finally {
       setLoading(false);
     }
