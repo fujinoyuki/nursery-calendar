@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
-import EditEventForm, { FormDataWithFiles } from '../../../components/EditEventForm';
-import type { Event, EventFormData } from '../../../types/event';
+import EditEventForm from '../../../components/EditEventForm';
+import type { Event, EventFormData, MediaFile } from '../../../types/event';
 import { Metadata } from 'next';
+
+// 編集フォームからのデータを受け取るための型
+type EditFormData = Omit<EventFormData, 'media_files'> & {
+  media_files: (MediaFile | File)[];
+};
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -83,13 +88,37 @@ export default function EditEventPage({ params }: Props) {
     fetchEvent();
   }, [params.id, router]);
 
-  const handleSubmit = async (formData: FormDataWithFiles) => {
+  const handleSubmit = async (formData: EditFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         router.push('/');
         return;
+      }
+
+      // durationが文字列の場合はそのまま使用
+      // durationがオブジェクトの場合は文字列に変換
+      let durationStr = '';
+      if (typeof formData.duration === 'object') {
+        const end = formData.duration.end;
+        if (end) {
+          const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+          if (timeMatch) {
+            const hours = parseInt(timeMatch[1]);
+            const minutes = parseInt(timeMatch[2]);
+            
+            if (hours > 0) {
+              durationStr += `${hours}時間`;
+            }
+            
+            if (minutes > 0) {
+              durationStr += `${minutes}分`;
+            }
+          }
+        }
+      } else {
+        durationStr = formData.duration;
       }
 
       const { error } = await supabase
@@ -101,7 +130,7 @@ export default function EditEventPage({ params }: Props) {
           month: formData.month,
           date: formData.date,
           age_groups: formData.age_groups,
-          duration: formData.duration,
+          duration: durationStr || '不明',
           materials: formData.materials,
           objectives: formData.objectives,
           updated_at: new Date().toISOString()
