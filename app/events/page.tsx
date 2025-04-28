@@ -7,8 +7,13 @@ import Link from 'next/link';
 import styles from './page.module.css';
 import { Event, AgeGroup, EventFormData, LocalEventFormData, Category, MediaFile, Duration } from '../types/event';
 import EventOverlay from '../components/EventOverlay';
-import EditEventForm, { FormDataWithFiles } from '../components/EditEventForm';
+import EditEventForm from '../components/EditEventForm';
 import Image from 'next/image';
+
+// 編集フォームからのデータを受け取るための型
+type EditFormData = Omit<EventFormData, 'media_files'> & {
+  media_files: (MediaFile | File)[];
+};
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -616,7 +621,7 @@ export default function EventListPage() {
     }
   };
 
-  const handleEditEventSubmit = async (formData: FormDataWithFiles) => {
+  const handleEditEventSubmit = async (formData: EditFormData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -629,7 +634,7 @@ export default function EventListPage() {
 
       // media_filesの中からFileオブジェクトだけを抽出
       const files = formData.media_files.filter(file => file instanceof File) as File[];
-      const existingMediaFiles = formData.media_files.filter(file => !(file instanceof File)) as MediaFile[];
+      const existingMediaFiles = formData.media_files.filter(file => !(file instanceof File) && !('file' in file)) as MediaFile[];
       
       // ファイルサイズの制限（5MB）
       const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -696,10 +701,42 @@ export default function EventListPage() {
       // 既存のメディアファイルと新しくアップロードしたファイルを結合
       const allMediaFiles = [...existingMediaFiles, ...newMediaFiles];
 
+      // durationが文字列の場合はそのまま使用
+      // durationがオブジェクトの場合は文字列に変換
+      let durationStr = '';
+      if (typeof formData.duration === 'object') {
+        const end = formData.duration.end;
+        if (end) {
+          const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+          if (timeMatch) {
+            const hours = parseInt(timeMatch[1]);
+            const minutes = parseInt(timeMatch[2]);
+            
+            if (hours > 0) {
+              durationStr += `${hours}時間`;
+            }
+            
+            if (minutes > 0) {
+              durationStr += `${minutes}分`;
+            }
+          }
+        }
+      } else {
+        durationStr = formData.duration;
+      }
+
       const { data, error } = await supabase
         .from('events')
         .update({
-          ...formData,
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          month: formData.month,
+          date: formData.date,
+          age_groups: formData.age_groups,
+          duration: durationStr || '不明',
+          materials: formData.materials,
+          objectives: formData.objectives,
           media_files: allMediaFiles,
           updated_at: new Date().toISOString()
         })
