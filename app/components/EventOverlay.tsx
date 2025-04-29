@@ -214,8 +214,8 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
               : (
                 <>
                   その他
-                  {event.category_detail && (
-                    <span className={styles.categoryDetail}>{event.category_detail}</span>
+                  {(event as any).category_detail && (
+                    <span className={styles.categoryDetail}>{(event as any).category_detail}</span>
                   )}
                 </>
               )
