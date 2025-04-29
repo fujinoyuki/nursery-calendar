@@ -407,18 +407,21 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.eventImageContainer {
+.eventImageContainer,
+.imageContainer {
   width: 100%;
   height: 200px;
   margin-bottom: 16px;
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
 }
 
 .eventImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .noImage {
@@ -605,15 +608,6 @@
   flex-direction: column;
   gap: 12px;
   padding: 8px 0;
-}
-
-.imageContainer {
-  width: 100%;
-  height: 200px;
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 8px 0;
 }
 
 .views {

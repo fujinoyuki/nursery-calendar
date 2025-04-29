@@ -3,6 +3,7 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styles from './EditEventForm.module.css';
 import type { Event, LocalEventFormData, MediaFile, Category, AgeGroup, EventFormData, Duration } from '../types/event';
+import { createBrowserClient } from '@supabase/ssr';
 
 export const CATEGORIES = ['壁　面', '制作物', 'その他'] as const;
 export const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'] as const;
@@ -38,6 +39,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   const [otherCategory, setOtherCategory] = useState('');
   const [hours, setHours] = useState('0');
   const [minutes, setMinutes] = useState('0');
+  const [imageBlobUrls, setImageBlobUrls] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // コンポーネントが初期化されるときにdurationから時間と分を抽出
@@ -66,12 +68,109 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   // 初期メディアファイルを設定
   useEffect(() => {
     if (data.media_files && data.media_files.length > 0) {
+      console.log('初期メディアファイル:', data.media_files);
       setFormData(prev => ({
         ...prev,
         media_files: data.media_files || []
       }));
+      
+      // メディアファイルのBlobURLを生成
+      loadMediaFiles();
     }
   }, [data.media_files]);
+  
+  // メディアファイルのBlobURLを生成する関数
+  const loadMediaFiles = async () => {
+    if (!data.media_files || data.media_files.length === 0) return;
+    
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      // セッションの確認
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('セッションエラー:', sessionError);
+        return;
+      }
+      
+      if (!session) {
+        console.log('セッションがありません');
+        return;
+      }
+
+      const newBlobUrls: Record<string, string> = { ...imageBlobUrls };
+      let updated = false;
+
+      // 各メディアファイルを処理
+      for (let i = 0; i < data.media_files.length; i++) {
+        const media = data.media_files[i];
+        
+        // 画像のみ処理
+        if (media.type === 'image') {
+          try {
+            // URLからファイルパスを抽出する
+            const urlObj = new URL(media.url);
+            const pathSegments = urlObj.pathname.split('/');
+            // "public"と"event-media"の後の部分を取得
+            const bucketPath = pathSegments.slice(pathSegments.indexOf('event-media') + 1).join('/');
+            
+            if (!bucketPath) {
+              console.error(`メディア[${i}]の画像パスが不正です:`, media.url);
+              continue;
+            }
+            
+            // 直接バケットからデータを取得
+            const { data: fileData, error } = await supabase
+              .storage
+              .from('event-media')
+              .download(bucketPath);
+            
+            if (error) {
+              console.error(`メディア[${i}]の画像ダウンロードエラー:`, error);
+              
+              // 直接URLを使用してみる（フォールバック）
+              try {
+                const response = await fetch(media.url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                newBlobUrls[`media_${i}`] = blobUrl;
+                updated = true;
+                console.log(`メディア[${i}]の画像を直接URLから取得しました`);
+              } catch (fetchError) {
+                console.error(`メディア[${i}]の直接URL取得エラー:`, fetchError);
+              }
+              continue;
+            }
+            
+            if (!fileData) {
+              console.error(`メディア[${i}]の画像データが空です`);
+              continue;
+            }
+            
+            // Blobを作成してURLを生成
+            const blob = new Blob([fileData], { type: 'image/png' });
+            const blobUrl = URL.createObjectURL(blob);
+            newBlobUrls[`media_${i}`] = blobUrl;
+            updated = true;
+            console.log(`メディア[${i}]の画像BlobURL作成成功:`, blobUrl);
+          } catch (error) {
+            console.error(`メディア[${i}]の画像処理エラー:`, error);
+          }
+        }
+      }
+
+      if (updated) {
+        setImageBlobUrls(newBlobUrls);
+      }
+    } catch (error) {
+      console.error('メディアファイル読み込み中のエラー:', error);
+    }
+  };
 
   const isDurationValid = () => {
     const hoursNum = parseInt(hours) || 0;
@@ -165,6 +264,8 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const renderPreview = (file: MediaFile | File, index: number) => {
+    console.log('Rendering preview for file:', file, 'index:', index);
+    
     // Fileオブジェクトの場合はURL.createObjectURLを使用
     if (file instanceof File) {
       const isImage = file.type.startsWith('image/');
@@ -187,10 +288,60 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     }
 
     // MediaFileオブジェクトの場合
+    console.log('MediaFile type:', (file as MediaFile).type, 'url:', (file as MediaFile).url);
+    
+    // BlobURLが生成されている場合はそれを使用
+    const blobUrl = imageBlobUrls[`media_${index}`];
+    
     return (
       <div key={index} className={styles.previewItem}>
-        {file.type === 'image' && <img src={file.url} alt={`プレビュー ${index + 1}`} />}
-        {file.type === 'video' && <video src={file.url} controls />}
+        {(file as MediaFile).type === 'image' && (
+          blobUrl ? (
+            <img 
+              src={blobUrl} 
+              alt={`プレビュー ${index + 1}`}
+              onError={(e) => {
+                console.error(`画像読み込みエラー (BlobURL):`, blobUrl);
+                e.currentTarget.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22150%22%20height%3D%22150%22%20viewBox%3D%220%200%20150%20150%22%3E%3Crect%20fill%3D%22%23f0f0f0%22%20width%3D%22150%22%20height%3D%22150%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2214%22%20x%3D%2240%22%20y%3D%2275%22%3E画像なし%3C%2Ftext%3E%3C%2Fsvg%3E';
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f0f0f0',
+              color: '#999'
+            }}>
+              読み込み中...
+            </div>
+          )
+        )}
+        {(file as MediaFile).type === 'video' && (
+          <video 
+            src={(file as MediaFile).url} 
+            controls
+            onError={(e) => {
+              console.error(`動画読み込みエラー (プレビュー):`, (file as MediaFile).url);
+              e.currentTarget.style.display = 'none';
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.width = '100%';
+                errorDiv.style.height = '100%';
+                errorDiv.style.display = 'flex';
+                errorDiv.style.alignItems = 'center';
+                errorDiv.style.justifyContent = 'center';
+                errorDiv.style.background = '#f0f0f0';
+                errorDiv.style.color = '#999';
+                errorDiv.textContent = '動画なし';
+                parent.appendChild(errorDiv);
+              }
+            }}
+          />
+        )}
         <button
           type="button"
           className={styles.removeButton}

@@ -511,6 +511,11 @@ export default function EventListPage() {
                 // "public"と"event-media"の後の部分を取得
                 const bucketPath = pathSegments.slice(pathSegments.indexOf('event-media') + 1).join('/');
                 
+                if (!bucketPath) {
+                  console.error(`イベント ${event.id} の画像パスが不正です:`, media.url);
+                  continue;
+                }
+                
                 // 直接バケットからデータを取得
                 const { data, error } = await supabase
                   .storage
@@ -519,6 +524,19 @@ export default function EventListPage() {
                 
                 if (error) {
                   console.error(`イベント ${event.id} の画像ダウンロードエラー:`, error);
+                  
+                  // 直接URLを使用してみる（フォールバック）
+                  try {
+                    const response = await fetch(media.url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    newBlobUrls[key] = blobUrl;
+                    updated = true;
+                    console.log(`イベント ${event.id} の画像を直接URLから取得しました`);
+                  } catch (fetchError) {
+                    console.error(`イベント ${event.id} の直接URL取得エラー:`, fetchError);
+                  }
                   continue;
                 }
                 
@@ -532,6 +550,7 @@ export default function EventListPage() {
                 const blobUrl = URL.createObjectURL(blob);
                 newBlobUrls[key] = blobUrl;
                 updated = true;
+                console.log(`イベント ${event.id} の画像BlobURL作成成功`);
               } catch (error) {
                 console.error(`イベント ${event.id} の画像処理エラー:`, error);
               }
@@ -965,7 +984,7 @@ export default function EventListPage() {
                 alt={event.title} 
                 className={styles.eventImage}
                 onError={(e) => {
-                  console.error(`画像読み込みエラー:`, event.id);
+                  console.log(`イベント ${event.id} のBlobURL画像読み込みエラー`);
                   e.currentTarget.style.display = 'none';
                   
                   // No Image表示に切り替え
@@ -979,25 +998,9 @@ export default function EventListPage() {
                 }}
               />
             ) : (
-              // BlobURLがまだ作成されていない場合、直接URLから読み込みを試みる
-              <img 
-                src={event.media_files[0].url} 
-                alt={event.title} 
-                className={styles.eventImage}
-                onError={(e) => {
-                  console.error(`画像読み込みエラー (直接URL):`, event.id);
-                  e.currentTarget.style.display = 'none';
-                  
-                  // No Image表示に切り替え
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    const noImageDiv = document.createElement('div');
-                    noImageDiv.className = styles.noImage;
-                    noImageDiv.textContent = 'No Image';
-                    parent.appendChild(noImageDiv);
-                  }
-                }}
-              />
+              <div className={styles.noImage}>
+                <span>読み込み中...</span>
+              </div>
             )
           ) : (
             <div className={styles.noImage}>No Image</div>
