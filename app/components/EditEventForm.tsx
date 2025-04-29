@@ -31,12 +31,13 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     duration: data.duration,
     age_groups: data.age_groups,
     category: data.category,
+    category_detail: (data as any).category_detail,
     materials: data.materials,
     objectives: data.objectives,
     media_files: data.media_files || []
   });
   
-  const [otherCategory, setOtherCategory] = useState('');
+  const [otherCategory, setOtherCategory] = useState((data as any).category_detail || '');
   const [hours, setHours] = useState('0');
   const [minutes, setMinutes] = useState('0');
   const [imageBlobUrls, setImageBlobUrls] = useState<Record<string, string>>({});
@@ -178,6 +179,35 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     return hoursNum > 0 || minutesNum > 0;
   };
 
+  // カテゴリーの初期設定
+  useEffect(() => {
+    console.log('データが読み込まれました:', data);
+    console.log('カテゴリー:', data.category);
+    console.log('カテゴリー詳細:', (data as any).category_detail);
+    
+    // カテゴリーが「その他」の場合、または壁面・制作物でない場合は「その他」として扱う
+    if (data.category !== '壁　面' && data.category !== '制作物') {
+      // category_detailがない場合は、categoryの値を使用
+      if (!(data as any).category_detail && data.category && data.category !== 'その他') {
+        setOtherCategory(data.category);
+        setFormData(prev => ({
+          ...prev,
+          category: 'その他',
+          category_detail: data.category
+        }));
+      } 
+      // category_detailがある場合はそれを使用
+      else if ((data as any).category_detail) {
+        setOtherCategory((data as any).category_detail);
+        setFormData(prev => ({
+          ...prev,
+          category: 'その他',
+          category_detail: (data as any).category_detail
+        }));
+      }
+    }
+  }, [data]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isDurationValid()) {
@@ -198,7 +228,14 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
       durationStr += `${minutesNum}分`;
     }
     
-    const finalCategory = formData.category === 'その他' ? otherCategory : formData.category;
+    const finalCategory = formData.category;
+    let finalCategoryDetail = undefined;
+    
+    // カテゴリーに応じてcategory_detailを設定
+    if (finalCategory === 'その他') {
+      finalCategoryDetail = otherCategory || undefined;
+    }
+    
     const formDataToSubmit: EditFormData = {
       ...formData,
       duration: {
@@ -206,8 +243,11 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
         end: `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`
       },
       category: finalCategory as Category,
+      category_detail: finalCategoryDetail,
       media_files: formData.media_files
     };
+    
+    console.log('送信するデータ:', formDataToSubmit);
     await onSubmit(formDataToSubmit);
   };
 
@@ -232,10 +272,29 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
   };
 
   const handleCategoryChange = (category: Category) => {
-    setFormData((prev: EditFormData) => ({
-      ...prev,
-      category
-    }));
+    setFormData((prev: EditFormData) => {
+      // カテゴリーが「その他」の場合はcategory_detailを保持
+      // それ以外の場合はcategory_detailをクリア
+      if (category === 'その他') {
+        console.log('「その他」カテゴリーが選択されました。', otherCategory);
+        return {
+          ...prev,
+          category,
+          category_detail: otherCategory
+        };
+      } else {
+        return {
+          ...prev,
+          category,
+          category_detail: undefined
+        };
+      }
+    });
+    
+    // 既存のcategory_detailがある場合、それをotherCategoryに設定
+    if (category === 'その他' && formData.category !== 'その他' && (formData as any).category_detail) {
+      setOtherCategory((formData as any).category_detail || '');
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -564,7 +623,14 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
                 type="text"
                 className={`${styles.otherInput} ${styles.visible}`}
                 value={otherCategory}
-                onChange={(e) => setOtherCategory(e.target.value)}
+                onChange={(e) => {
+                  setOtherCategory(e.target.value);
+                  // category_detailも同時に更新
+                  setFormData(prev => ({
+                    ...prev,
+                    category_detail: e.target.value
+                  }));
+                }}
                 placeholder="カテゴリーを入力してください"
                 required={formData.category === 'その他'}
               />
