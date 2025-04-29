@@ -78,6 +78,27 @@ export default function MainPage() {
         // イベントデータを処理
         const processedEvents = eventsData.map(event => {
           let eventDuration = event.duration;
+          let mediaFiles = event.media_files;
+
+          // media_filesがない場合や文字列の配列の場合、適切なオブジェクト形式に変換
+          if (!mediaFiles) {
+            mediaFiles = [];
+          } else if (Array.isArray(mediaFiles)) {
+            // 中身を確認するためのログ
+            console.log('元のmediaFiles形式:', mediaFiles);
+            
+            // 文字列の配列かオブジェクトの配列か判断
+            if (mediaFiles.length > 0) {
+              if (typeof mediaFiles[0] === 'string') {
+                // 文字列の配列からオブジェクト配列に変換
+                mediaFiles = mediaFiles.map((url: string) => ({
+                  type: url.match(/\.(jpg|jpeg|png|gif)$/i) ? 'image' : 'video',
+                  url: url
+                }));
+                console.log('変換後のmediaFiles:', mediaFiles);
+              }
+            }
+          }
 
           // null/undefined チェック
           if (!eventDuration) {
@@ -143,7 +164,8 @@ export default function MainPage() {
             ...event,
             isOwner: event.user_id === session.user.id,
             profiles: event.profiles || null,
-            duration: eventDuration
+            duration: eventDuration,
+            media_files: mediaFiles
           };
         });
 
@@ -322,6 +344,19 @@ export default function MainPage() {
               return;
             }
 
+            console.log('取得した公開URL:', urlData.publicUrl);
+            
+            // 直接アクセス可能なURLを確認（CORS対策）
+            try {
+              const response = await fetch(urlData.publicUrl, { method: 'HEAD' });
+              console.log('URLのアクセスステータス:', response.status);
+              if (response.status >= 400) {
+                console.error('URLアクセスエラー:', response.status);
+              }
+            } catch (error) {
+              console.error('URLアクセス確認エラー:', error);
+            }
+
             // ファイルタイプを判断
             const type = file.type.startsWith('image/') ? 'image' : 'video';
             
@@ -345,6 +380,9 @@ export default function MainPage() {
         duration: durationObj,
         category: eventData.category.trim()
       };
+
+      console.log("mediaFiles", mediaFiles);
+      console.log("mediaFiles.map(file => file.url)", mediaFiles.map(file => file.url));
 
       const { data, error } = await supabase
         .from('events')
@@ -444,6 +482,19 @@ export default function MainPage() {
 
             if (!urlData || !urlData.publicUrl) {
               throw new Error('公開URLの取得に失敗しました');
+            }
+
+            console.log('取得した公開URL:', urlData.publicUrl);
+            
+            // 直接アクセス可能なURLを確認（CORS対策）
+            try {
+              const response = await fetch(urlData.publicUrl, { method: 'HEAD' });
+              console.log('URLのアクセスステータス:', response.status);
+              if (response.status >= 400) {
+                console.error('URLアクセスエラー:', response.status);
+              }
+            } catch (error) {
+              console.error('URLアクセス確認エラー:', error);
             }
 
             // ファイルタイプを判断

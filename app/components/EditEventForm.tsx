@@ -14,7 +14,9 @@ type EditFormData = Omit<EventFormData, 'media_files'> & {
 };
 
 interface Props {
-  data: Omit<Event, 'id' | 'views' | 'created_at' | 'updated_at' | 'user_id' | 'isOwner' | 'profiles'>;
+  data: Omit<Event, 'id' | 'views' | 'created_at' | 'updated_at' | 'user_id' | 'isOwner' | 'profiles'> & {
+    media_files?: MediaFile[];
+  };
   onSubmit: (data: EditFormData) => Promise<void>;
   onCancel: () => void;
 }
@@ -30,7 +32,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     category: data.category,
     materials: data.materials,
     objectives: data.objectives,
-    media_files: []
+    media_files: data.media_files || []
   });
   
   const [otherCategory, setOtherCategory] = useState('');
@@ -60,6 +62,16 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
       }
     }
   }, [data.duration]);
+
+  // 初期メディアファイルを設定
+  useEffect(() => {
+    if (data.media_files && data.media_files.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        media_files: data.media_files || []
+      }));
+    }
+  }, [data.media_files]);
 
   const isDurationValid = () => {
     const hoursNum = parseInt(hours) || 0;
@@ -131,12 +143,7 @@ export default function EditEventForm({ data, onSubmit, onCancel }: Props) {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       const newMediaFiles = newFiles.map(file => {
-        const type = file.type.startsWith('image/') ? 'image' : 'video';
-        return {
-          type: type as 'image' | 'video',
-          url: URL.createObjectURL(file),
-          file: file // 元のFileオブジェクトを保持
-        };
+        return file; // ファイルをそのまま保持
       });
       
       setFormData(prev => ({

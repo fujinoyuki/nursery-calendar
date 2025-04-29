@@ -146,6 +146,7 @@ export default function EventListPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [imageBlobUrls, setImageBlobUrls] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState({
     title: '',
     description: '',
@@ -470,6 +471,92 @@ export default function EventListPage() {
 
     setFilteredEvents(filtered);
   }, [events, searchTerm, showAdvancedSearch, advancedFilters, sortType, currentMonth]);
+
+  // イベントが変更されたときに画像を読み込む
+  useEffect(() => {
+    const loadEventImages = async () => {
+      if (!filteredEvents.length) return;
+      
+      try {
+        // セッションの確認
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('セッションエラー:', sessionError);
+          return;
+        }
+        
+        if (!session) {
+          console.log('セッションがありません');
+          return;
+        }
+
+        const newBlobUrls: Record<string, string> = { ...imageBlobUrls };
+        let updated = false;
+
+        // 各イベントのメディアファイルを処理
+        for (const event of filteredEvents) {
+          if (event.media_files && event.media_files.length > 0) {
+            const media = event.media_files[0]; // 最初の画像のみを処理
+            
+            // すでにBlobURLがある場合はスキップ
+            const key = `${event.id}_0`;
+            if (imageBlobUrls[key]) continue;
+            
+            if (media.type === 'image') {
+              try {
+                // URLからファイルパスを抽出する
+                const urlObj = new URL(media.url);
+                const pathSegments = urlObj.pathname.split('/');
+                // "public"と"event-media"の後の部分を取得
+                const bucketPath = pathSegments.slice(pathSegments.indexOf('event-media') + 1).join('/');
+                
+                // 直接バケットからデータを取得
+                const { data, error } = await supabase
+                  .storage
+                  .from('event-media')
+                  .download(bucketPath);
+                
+                if (error) {
+                  console.error(`イベント ${event.id} の画像ダウンロードエラー:`, error);
+                  continue;
+                }
+                
+                if (!data) {
+                  console.error(`イベント ${event.id} の画像データが空です`);
+                  continue;
+                }
+                
+                // Blobを作成してURLを生成
+                const blob = new Blob([data], { type: 'image/png' });
+                const blobUrl = URL.createObjectURL(blob);
+                newBlobUrls[key] = blobUrl;
+                updated = true;
+              } catch (error) {
+                console.error(`イベント ${event.id} の画像処理エラー:`, error);
+              }
+            }
+          }
+        }
+
+        if (updated) {
+          setImageBlobUrls(newBlobUrls);
+        }
+      } catch (error) {
+        console.error('画像読み込み中のエラー:', error);
+      }
+    };
+
+    loadEventImages();
+    
+    // クリーンアップ関数
+    return () => {
+      // BlobURLの解放
+      Object.values(imageBlobUrls).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, [filteredEvents]);
 
   // 検索クエリの変更を処理
   const handleSearch = (e: React.FormEvent) => {
@@ -858,6 +945,11 @@ export default function EventListPage() {
       color: borderColor
     };
     
+    // イベントのBlobURLキーを取得
+    const blobUrlKey = `${event.id}_0`;
+    const hasImage = event.media_files && event.media_files.length > 0 && event.media_files[0].type === 'image';
+    const blobUrl = imageBlobUrls[blobUrlKey];
+    
     return (
       <div 
         key={event.id}
@@ -866,12 +958,47 @@ export default function EventListPage() {
         onClick={() => handleEventClick(event)}
       >
         <div className={styles.imageContainer}>
-          {event.media_files && event.media_files.length > 0 && event.media_files[0].type === 'image' ? (
-            <img 
-              src={event.media_files[0].url} 
-              alt={event.title} 
-              className={styles.eventImage}
-            />
+          {hasImage ? (
+            blobUrl ? (
+              <img 
+                src={blobUrl} 
+                alt={event.title} 
+                className={styles.eventImage}
+                onError={(e) => {
+                  console.error(`画像読み込みエラー:`, event.id);
+                  e.currentTarget.style.display = 'none';
+                  
+                  // No Image表示に切り替え
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    const noImageDiv = document.createElement('div');
+                    noImageDiv.className = styles.noImage;
+                    noImageDiv.textContent = 'No Image';
+                    parent.appendChild(noImageDiv);
+                  }
+                }}
+              />
+            ) : (
+              // BlobURLがまだ作成されていない場合、直接URLから読み込みを試みる
+              <img 
+                src={event.media_files[0].url} 
+                alt={event.title} 
+                className={styles.eventImage}
+                onError={(e) => {
+                  console.error(`画像読み込みエラー (直接URL):`, event.id);
+                  e.currentTarget.style.display = 'none';
+                  
+                  // No Image表示に切り替え
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    const noImageDiv = document.createElement('div');
+                    noImageDiv.className = styles.noImage;
+                    noImageDiv.textContent = 'No Image';
+                    parent.appendChild(noImageDiv);
+                  }
+                }}
+              />
+            )
           ) : (
             <div className={styles.noImage}>No Image</div>
           )}
@@ -1037,7 +1164,7 @@ export default function EventListPage() {
                 materials: editingEvent.materials || [],
                 objectives: editingEvent.objectives || [],
                 age_groups: editingEvent.age_groups,
-                media_files: []
+                media_files: editingEvent.media_files || []
               }}
               onSubmit={handleEditEventSubmit}
               onCancel={handleEditCancel}

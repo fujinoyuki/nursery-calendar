@@ -88,6 +88,7 @@ const formatDuration = (duration: { start?: string, end?: string } | string | nu
 export default function EventOverlay({ event, onClose, onDelete, onEdit, season = 'spring' }: EventOverlayProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [imageBlobUrls, setImageBlobUrls] = useState<Record<number, string>>({});
 
   // イベントの所有者かどうかを確認
   const isOwner = event.isOwner;
@@ -96,6 +97,75 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
     setIsDeleting(true);
     onDelete(event.id);
   };
+
+  useEffect(() => {
+    // 画像のURLをBlobURLに変換する
+    const loadImages = async () => {
+      if (event.media_files && event.media_files.length > 0) {
+        const newBlobUrls: Record<number, string> = {};
+        
+        for (let i = 0; i < event.media_files.length; i++) {
+          const media = event.media_files[i];
+          if (media.type === 'image') {
+            try {
+              console.log(`画像[${i}]のURL取得開始:`, media.url);
+              
+              // トークンを取得
+              const { data: { session } } = await supabase.auth.getSession();
+              if (!session) {
+                console.error('セッションが見つかりません');
+                continue;
+              }
+              
+              // URLからファイルパスを抽出する
+              const urlObj = new URL(media.url);
+              const pathSegments = urlObj.pathname.split('/');
+              // "public"と"event-media"の後の部分を取得
+              const bucketPath = pathSegments.slice(pathSegments.indexOf('event-media') + 1).join('/');
+              
+              console.log(`抽出したバケットパス: ${bucketPath}`);
+              
+              // 直接バケットからデータを取得
+              const { data, error } = await supabase
+                .storage
+                .from('event-media')
+                .download(bucketPath);
+              
+              if (error) {
+                console.error(`画像[${i}]のダウンロードエラー:`, error);
+                continue;
+              }
+              
+              if (!data) {
+                console.error(`画像[${i}]のデータが空です`);
+                continue;
+              }
+              
+              // Blobを作成してURLを生成
+              const blob = new Blob([data], { type: 'image/png' });
+              const blobUrl = URL.createObjectURL(blob);
+              newBlobUrls[i] = blobUrl;
+              console.log(`画像[${i}]のBlobURL作成成功:`, blobUrl);
+            } catch (error) {
+              console.error(`画像[${i}]の処理中にエラー:`, error);
+            }
+          }
+        }
+        
+        setImageBlobUrls(newBlobUrls);
+      }
+    };
+
+    loadImages();
+    
+    // クリーンアップ関数
+    return () => {
+      // BlobURLの解放
+      Object.values(imageBlobUrls).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, [event.media_files]);
 
   useEffect(() => {
     const updateViewCount = async () => {
@@ -160,25 +230,42 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
           <div className={styles.mediaSection}>
             <h3 className={styles.sectionTitle}>画像・動画</h3>
             <div className={styles.mediaGallery}>
-              {event.media_files.map((media, index) => (
-                <div key={index} className={styles.mediaItem}>
-                  {media.type === 'image' ? (
-                    <Image 
-                      src={media.url} 
-                      alt={`${event.title}の画像 ${index + 1}`} 
-                      className={styles.mediaImage}
-                      width={500}
-                      height={300}
-                    />
-                  ) : media.type === 'video' ? (
-                    <video 
-                      src={media.url} 
-                      controls
-                      className={styles.mediaVideo}
-                    />
-                  ) : null}
-                </div>
-              ))}
+              {event.media_files.map((media, index) => {
+                // デバッグ用に画像URLをコンソールに出力
+                console.log(`メディア[${index}]のタイプ:`, media.type);
+                console.log(`メディア[${index}]のURL:`, media.url);
+                
+                return (
+                  <div key={index} className={styles.mediaItem}>
+                    {media.type === 'image' ? (
+                      imageBlobUrls[index] ? (
+                        // BlobURLがある場合はそれを使用
+                        <img 
+                          src={imageBlobUrls[index]} 
+                          alt={`${event.title}の画像 ${index + 1}`} 
+                          className={styles.mediaImage}
+                          onError={(e) => {
+                            console.error(`BlobURL画像[${index}]の読み込みエラー:`, imageBlobUrls[index]);
+                            e.currentTarget.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%22300%22%20viewBox%3D%220%200%20500%20300%22%3E%3Crect%20fill%3D%22%23f0f0f0%22%20width%3D%22500%22%20height%3D%22300%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2220%22%20x%3D%22190%22%20y%3D%22160%22%3E画像読み込みエラー%3C%2Ftext%3E%3C%2Fsvg%3E';
+                          }}
+                        />
+                      ) : (
+                        // プレースホルダーを表示
+                        <div className={styles.mediaPlaceholder}>
+                          <span>画像読み込み中...</span>
+                        </div>
+                      )
+                    ) : media.type === 'video' ? (
+                      <video 
+                        src={media.url} 
+                        controls
+                        className={styles.mediaVideo}
+                        onError={() => console.error(`動画[${index}]の読み込みエラー:`, media.url)}
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
