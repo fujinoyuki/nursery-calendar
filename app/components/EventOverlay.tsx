@@ -208,8 +208,18 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
         <button className={styles.closeButton} onClick={onClose}>×</button>
         
         <div className={styles.header}>
-          <div className={styles.categoryLabel} data-category={event.category}>
-            {event.category}
+          <div className={styles.categoryLabel} data-category={event.category === '壁　面' || event.category === '制作物' ? event.category : 'その他'}>
+            {event.category === '壁　面' || event.category === '制作物' 
+              ? event.category 
+              : (
+                <>
+                  その他
+                  {event.category_detail && (
+                    <span className={styles.categoryDetail}>{event.category_detail}</span>
+                  )}
+                </>
+              )
+            }
           </div>
           <h2 className={styles.title}>{event.title}</h2>
         </div>

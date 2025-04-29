@@ -65,7 +65,7 @@ const getAgeGroupStyle = (age: string) => {
 
 // カテゴリーの表示テキストを取得する関数
 const getCategoryDisplayText = (category: string) => {
-  if (category !== '壁　面' && category !== '制作物') {
+  if (!category || (category !== '壁　面' && category !== '制作物')) {
     return 'その他';
   }
   return category;
