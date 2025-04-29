@@ -488,33 +488,36 @@
 
 /* メディアセクションのスタイル */
 .mediaSection {
-  margin: 20px 0;
+  margin-bottom: 2rem;
 }
 
 .mediaGallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 1rem;
+  justify-content: flex-start;
 }
 
 .mediaItem {
   width: 100%;
-  max-width: 300px;
+  max-width: 500px;
+  margin-bottom: 1rem;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .mediaImage {
   width: 100%;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
+  max-height: 300px;
+  border-radius: 8px;
   display: block;
 }
 
 .mediaVideo {
   width: 100%;
-  height: auto;
-  display: block;
+  max-height: 300px;
+  border-radius: 8px;
 } 

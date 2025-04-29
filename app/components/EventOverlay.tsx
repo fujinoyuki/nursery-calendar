@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import styles from './EventOverlay.module.css';
 import type { Event } from '../types/event';
 import { createBrowserClient } from '@supabase/ssr';
+import Image from 'next/image';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -162,10 +163,12 @@ export default function EventOverlay({ event, onClose, onDelete, onEdit, season 
               {event.media_files.map((media, index) => (
                 <div key={index} className={styles.mediaItem}>
                   {media.type === 'image' ? (
-                    <img 
+                    <Image 
                       src={media.url} 
                       alt={`${event.title}の画像 ${index + 1}`} 
                       className={styles.mediaImage}
+                      width={500}
+                      height={300}
                     />
                   ) : media.type === 'video' ? (
                     <video 

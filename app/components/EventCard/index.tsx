@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import styles from './styles.module.css';
-import { Event, AgeGroup } from '../../types';
+import { Event, AgeGroup } from '../../types/event';
 
 interface EventCardProps {
   event: Event;
@@ -26,14 +26,78 @@ const getCategoryStyle = (category: string): string => {
   return styles.otherColumn;
 };
 
+// 所要時間をフォーマットする関数
+const formatDuration = (duration: { start?: string, end?: string } | string | null | undefined) => {
+  // 値が存在しない場合
+  if (!duration) return '不明';
+  
+  // 文字列の場合はJSONとしてパース
+  if (typeof duration === 'string') {
+    try {
+      const parsedDuration = JSON.parse(duration);
+      return formatDuration(parsedDuration);
+    } catch (e) {
+      // 時間と分を抽出（例: "2時間30分"）
+      const durationStr = duration as string;
+      const hoursMatch = durationStr.match(/(\d+)時間/);
+      const minutesMatch = durationStr.match(/(\d+)分/);
+      
+      if (hoursMatch || minutesMatch) {
+        const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+        const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        
+        if (hours > 0 && minutes > 0) {
+          return `${hours}時間${minutes}分`;
+        } else if (hours > 0) {
+          return `${hours}時間`;
+        } else if (minutes > 0) {
+          return `${minutes}分`;
+        }
+      }
+      return durationStr;
+    }
+  }
+  
+  // オブジェクトの場合はend値を使う
+  const durationObj = duration as { start?: string, end?: string };
+  const end = durationObj.end;
+  if (!end) return '不明';
+  
+  // HH:MM形式の場合
+  const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    
+    if (hours > 0 && minutes > 0) {
+      return `${hours}時間${minutes}分`;
+    } else if (hours > 0) {
+      return `${hours}時間`;
+    } else if (minutes > 0) {
+      return `${minutes}分`;
+    }
+  }
+  
+  return end;
+};
+
 const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
+  // イベントに画像があるかどうかを確認
+  const hasImage = event.media_files && event.media_files.length > 0 && 
+                  event.media_files.some(file => file.type === 'image');
+  
+  // 最初の画像を取得
+  const imageUrl = hasImage ? 
+    event.media_files.find(file => file.type === 'image')?.url : 
+    null;
+
   return (
     <div className={styles.eventCard} onClick={() => onClick(event)}>
       {/* 1. 画像エリア */}
       <div className={styles.imageContainer}>
-        {event.image_url ? (
+        {imageUrl ? (
           <Image
-            src={event.image_url}
+            src={imageUrl}
             alt={event.title}
             className={styles.eventImage}
             fill
@@ -69,7 +133,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
         {/* 4. 月と所要時間 */}
         <div className={styles.footer}>
           <span className={styles.month}>{event.month}月</span>
-          <span className={styles.duration}>所要時間：{event.duration}分</span>
+          <span className={styles.duration}>所要時間：{formatDuration(event.duration)}</span>
         </div>
       </div>
     </div>

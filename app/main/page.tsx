@@ -11,7 +11,6 @@ import EditEventForm from '../components/EditEventForm';
 import { Event, EventFormData, Category, AgeGroup, MediaFile, Duration, LocalEventFormData } from '../types/event';
 import Link from 'next/link';
 import { months } from '../utils/constants';
-import { v4 as uuidv4 } from 'uuid';
 
 // 編集フォームからのデータを受け取るための型
 type EditFormData = Omit<EventFormData, 'media_files'> & {
@@ -261,6 +260,84 @@ export default function MainPage() {
       
       // 終了時間を計算
       durationObj.end = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+      // ファイルのアップロード処理
+      const files = eventData.media_files;
+      const mediaFiles: MediaFile[] = [];
+      
+      // ファイルサイズの制限（5MB）
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+      // ファイルがある場合のみアップロード処理を実行
+      if (files && files.length > 0) {
+        try {
+          // ファイルをアップロード
+          for (const file of files) {
+            // ファイルサイズのチェック
+            if (file.size > MAX_FILE_SIZE) {
+              showFeedback(`ファイル ${file.name} が大きすぎます。5MB以下のファイルを選択してください。`, 'error');
+              return;
+            }
+
+            // 許可されるファイルタイプ
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'];
+            if (!allowedTypes.includes(file.type)) {
+              showFeedback(`ファイル ${file.name} の形式がサポートされていません。`, 'error');
+              return;
+            }
+
+            // ファイル名を一意にする
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            
+            showFeedback(`ファイル ${file.name} をアップロード中...`, 'success');
+            
+            // ファイルをストレージにアップロード
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('event-media')
+              .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: true
+              });
+
+            if (uploadError) {
+              // アップロードエラーの詳細情報を表示
+              showFeedback(`アップロードエラー: ${uploadError.message}`, 'error');
+              console.error('ファイルアップロードエラー詳細:', uploadError);
+              return;
+            }
+
+            if (!uploadData || !uploadData.path) {
+              showFeedback('ファイルのアップロードに失敗しました: パスが取得できません', 'error');
+              return;
+            }
+
+            // アップロードしたファイルのURLを取得
+            const { data: urlData } = supabase.storage
+              .from('event-media')
+              .getPublicUrl(uploadData.path);
+
+            if (!urlData || !urlData.publicUrl) {
+              showFeedback('公開URLの取得に失敗しました', 'error');
+              return;
+            }
+
+            // ファイルタイプを判断
+            const type = file.type.startsWith('image/') ? 'image' : 'video';
+            
+            mediaFiles.push({
+              type,
+              url: urlData.publicUrl
+            });
+            
+            showFeedback(`ファイル ${file.name} のアップロードが完了しました`, 'success');
+          }
+        } catch (error) {
+          console.error('ファイルアップロード中の例外:', error);
+          showFeedback(`ファイルアップロード中にエラーが発生しました: ${error instanceof Error ? error.message : '不明なエラー'}`, 'error');
+          return;
+        }
+      }
       
       // カテゴリーの正規化（全角スペースを保持）
       const normalizedEventData = {
@@ -276,18 +353,17 @@ export default function MainPage() {
           date: new Date(date).toISOString(), // 常に選択された月の1日を使用
           month: selectedMonth.toString(), // 文字列として保存
           user_id: session.user.id,
-          views: 0
+          views: 0,
+          media_files: mediaFiles // アップロードしたメディアファイル情報を保存
         })
         .select();
 
       if (error) {
-        console.error('イベント追加エラー:', error);
         showFeedback('イベントの追加に失敗しました', 'error');
         return;
       }
 
       if (data) {
-        console.log('追加されたイベント:', data);
         setNewEventId(data[0].id); // アニメーション用にIDを保存
         showFeedback('イベントを追加しました', 'success');
         await fetchEvents();
@@ -298,7 +374,6 @@ export default function MainPage() {
         setTimeout(() => setNewEventId(null), 3000);
       }
     } catch (error) {
-      console.error('Error:', error);
       showFeedback('予期せぬエラーが発生しました', 'error');
     }
   };
@@ -327,8 +402,6 @@ export default function MainPage() {
       const newMediaFiles = await Promise.all(
         files.map(async (file: File) => {
           try {
-            console.log('処理中のファイル:', file.name, file.type, file.size);
-
             // ファイルサイズのチェック
             if (file.size > MAX_FILE_SIZE) {
               throw new Error(`ファイル ${file.name} が大きすぎます。5MB以下のファイルを選択してください。`);
@@ -344,36 +417,43 @@ export default function MainPage() {
             const fileExt = file.name.split('.').pop();
             const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
             
-            console.log('アップロード前のファイル名:', fileName);
-
+            showFeedback(`ファイル ${file.name} をアップロード中...`, 'success');
+            
             // ファイルをストレージにアップロード
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('event-media')
               .upload(fileName, file, {
                 cacheControl: '3600',
-                upsert: false
+                upsert: true
               });
 
             if (uploadError) {
-              console.error('ファイルアップロードエラー:', uploadError);
+              showFeedback(`アップロードエラー: ${uploadError.message}`, 'error');
+              console.error('ファイルアップロードエラー詳細:', uploadError);
               throw uploadError;
             }
-
-            console.log('アップロード成功:', uploadData);
+            
+            if (!uploadData || !uploadData.path) {
+              throw new Error('ファイルのアップロードに失敗しました: パスが取得できません');
+            }
 
             // アップロードしたファイルのURLを取得
-            const { data: { publicUrl } } = supabase.storage
+            const { data: urlData } = supabase.storage
               .from('event-media')
-              .getPublicUrl(fileName);
+              .getPublicUrl(uploadData.path);
 
-            console.log('取得したパブリックURL:', publicUrl);
+            if (!urlData || !urlData.publicUrl) {
+              throw new Error('公開URLの取得に失敗しました');
+            }
 
             // ファイルタイプを判断
             const type = file.type.startsWith('image/') ? 'image' : 'video';
             
+            showFeedback(`ファイル ${file.name} のアップロードが完了しました`, 'success');
+            
             return {
               type,
-              url: publicUrl
+              url: urlData.publicUrl
             } as MediaFile;
           } catch (error) {
             console.error('ファイル処理エラー:', error);
@@ -385,9 +465,9 @@ export default function MainPage() {
       // 既存のメディアファイルと新しくアップロードしたファイルを結合
       const allMediaFiles = [...existingMediaFiles, ...newMediaFiles];
 
-      // durationが文字列の場合は"X時間Y分"形式に変換
+      // durationの処理
       let durationStr = '';
-      if (typeof eventData.duration === 'object') {
+      if (typeof eventData.duration === 'object' && eventData.duration !== null) {
         // オブジェクト形式の場合は時間と分を抽出
         const end = eventData.duration.end;
         if (end) {
@@ -405,9 +485,9 @@ export default function MainPage() {
             }
           }
         }
-      } else {
+      } else if (eventData.duration) {
         // すでに文字列の場合はそのまま使用
-        durationStr = eventData.duration;
+        durationStr = String(eventData.duration);
       }
 
       // 更新データの作成
@@ -570,13 +650,14 @@ export default function MainPage() {
     }
     
     // オブジェクトの場合、必要なフィールドの存在を確認
-    if (typeof eventDuration === 'object' && (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
+    if (typeof eventDuration === 'object' && eventDuration !== null && 
+        (!('start' in eventDuration) || !('end' in eventDuration) || !eventDuration.start || !eventDuration.end)) {
       eventDuration = { start: '00:00', end: '00:00' };
     }
 
     return {
       ...eventBase,
-      id: id || uuidv4(),
+      id: id || crypto.randomUUID(), // crypto.randomUUID()を使用
       views: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

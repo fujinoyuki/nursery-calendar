@@ -340,18 +340,54 @@
 }
 
 /* 月ごとのカラー設定 */
-.month1 .eventCard { border-color: #FF6B6B; }
-.month2 .eventCard { border-color: #4A90E2; }
-.month3 .eventCard { border-color: #FF9FB2; }
-.month4 .eventCard { border-color: #7ED321; }
-.month5 .eventCard { border-color: #4FD1C5; }
-.month6 .eventCard { border-color: #9B6DFF; }
-.month7 .eventCard { border-color: #54C7FC; }
-.month8 .eventCard { border-color: #FFB347; }
-.month9 .eventCard { border-color: #4CAF50; }
-.month10 .eventCard { border-color: #FFB74D; }
-.month11 .eventCard { border-color: #FF7043; }
-.month12 .eventCard { border-color: #5C6BC0; }
+.month1.eventCard { 
+  border-color: #FF6B6B !important; 
+  background: linear-gradient(135deg, #fff, #fff5f5) !important;
+}
+.month2.eventCard { 
+  border-color: #4A90E2 !important; 
+  background: linear-gradient(135deg, #fff, #f5f8ff) !important;
+}
+.month3.eventCard { 
+  border-color: #FF9FB2 !important; 
+  background: linear-gradient(135deg, #fff, #fff5f7) !important;
+}
+.month4.eventCard { 
+  border-color: #7ED321 !important; 
+  background: linear-gradient(135deg, #fff, #f7fff0) !important;
+}
+.month5.eventCard { 
+  border-color: #4FD1C5 !important; 
+  background: linear-gradient(135deg, #fff, #f0fffd) !important;
+}
+.month6.eventCard { 
+  border-color: #9B6DFF !important; 
+  background: linear-gradient(135deg, #fff, #f8f5ff) !important;
+}
+.month7.eventCard { 
+  border-color: #54C7FC !important; 
+  background: linear-gradient(135deg, #fff, #f0faff) !important;
+}
+.month8.eventCard { 
+  border-color: #FFB347 !important; 
+  background: linear-gradient(135deg, #fff, #fff7f0) !important;
+}
+.month9.eventCard { 
+  border-color: #4CAF50 !important; 
+  background: linear-gradient(135deg, #fff, #f0fff1) !important;
+}
+.month10.eventCard { 
+  border-color: #FFB74D !important; 
+  background: linear-gradient(135deg, #fff, #fff8f0) !important;
+}
+.month11.eventCard { 
+  border-color: #FF7043 !important; 
+  background: linear-gradient(135deg, #fff, #fff5f0) !important;
+}
+.month12.eventCard { 
+  border-color: #5C6BC0 !important; 
+  background: linear-gradient(135deg, #fff, #f5f6ff) !important;
+}
 
 .eventCard {
   background: white;
@@ -363,22 +399,8 @@
   height: 480px;
   display: flex;
   flex-direction: column;
-  border: 2px solid;
+  border: 2px solid #ddd;
 }
-
-/* 月ごとの背景グラデーション */
-.month1 .eventCard { background: linear-gradient(135deg, #fff, #fff5f5); }
-.month2 .eventCard { background: linear-gradient(135deg, #fff, #f5f8ff); }
-.month3 .eventCard { background: linear-gradient(135deg, #fff, #fff5f7); }
-.month4 .eventCard { background: linear-gradient(135deg, #fff, #f7fff0); }
-.month5 .eventCard { background: linear-gradient(135deg, #fff, #f0fffd); }
-.month6 .eventCard { background: linear-gradient(135deg, #fff, #f8f5ff); }
-.month7 .eventCard { background: linear-gradient(135deg, #fff, #f0faff); }
-.month8 .eventCard { background: linear-gradient(135deg, #fff, #fff7f0); }
-.month9 .eventCard { background: linear-gradient(135deg, #fff, #f0fff1); }
-.month10 .eventCard { background: linear-gradient(135deg, #fff, #fff8f0); }
-.month11 .eventCard { background: linear-gradient(135deg, #fff, #fff5f0); }
-.month12 .eventCard { background: linear-gradient(135deg, #fff, #f5f6ff); }
 
 .eventCard:hover {
   transform: translateY(-4px);
@@ -483,8 +505,13 @@
 .month12 .month { color: #5C6BC0; }
 
 .duration {
+  font-size: 0.9rem;
   color: #666;
-  font-size: 0.9em;
+  background-color: rgba(96, 165, 250, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  white-space: nowrap;
 }
 
 .category {
@@ -572,14 +599,30 @@
   color: #d4b48c;
 }
 
-.duration {
+.eventBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.views {
   font-size: 0.9rem;
   color: #666;
   background-color: rgba(96, 165, 250, 0.1);
-  padding: 0.4rem 0.8rem;
+  padding: 4px 8px;
   border-radius: 15px;
   font-family: "M PLUS Rounded 1c", sans-serif;
-  white-space: nowrap;
 }
 
 /* モーダル関連のスタイル */

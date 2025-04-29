@@ -2,13 +2,19 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['images.unsplash.com'],
+    domains: ['images.unsplash.com', 'tlmaupowcuasyusfvswz.supabase.co'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tlmaupowcuasyusfvswz.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
       },
     ],
     minimumCacheTTL: 60,

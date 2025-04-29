@@ -43,7 +43,7 @@ export interface EventBase {
   category: Category;
   month: string;
   date: string;
-  duration: Duration;
+  duration: Duration | string | null | undefined;
   materials: string[];
   objectives: string[];
   age_groups: AgeGroup[];

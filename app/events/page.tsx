@@ -35,11 +35,11 @@ const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳
 const getCategoryStyle = (category: string) => {
   switch (category) {
     case '壁　面':
-    return styles.categoryWall;
+      return styles.categoryWall;
     case '制作物':
-    return styles.categoryArt;
+      return styles.categoryArt;
     default:
-  return styles.categoryOther;
+      return styles.categoryOther;
   }
 };
 
@@ -66,13 +66,18 @@ const getAgeGroupStyle = (age: string) => {
 // カテゴリーの表示テキストを取得する関数
 const getCategoryDisplayText = (category: string) => {
   if (category !== '壁　面' && category !== '制作物') {
-  return 'その他';
+    return 'その他';
   }
   return category;
 };
 
 const getMonthClass = (month: number) => {
-  return styles[`month${month}`];
+  const monthNumber = Number(month);
+  if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+    console.log('Invalid month:', month);
+    return '';
+  }
+  return styles[`month${monthNumber}`];
 };
 
 // 所要時間をフォーマットする関数
@@ -128,63 +133,6 @@ const formatDuration = (duration: { start?: string, end?: string } | string | nu
   }
   
   return end;
-};
-
-const EventCard = ({ event, onEventClick }: { event: Event; onEventClick: (event: Event) => void }) => {
-  return (
-    <div
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-      onClick={() => onEventClick(event)}
-    >
-      {/* 画像を上部に表示 */}
-      <div className="relative w-full h-48">
-        {event.media_files && event.media_files.length > 0 ? (
-          event.media_files[0].type === 'video' ? (
-            <video
-              src={event.media_files[0].url}
-              className="w-full h-full object-cover"
-              controls
-            />
-          ) : (
-            <Image
-              src={event.media_files[0].url}
-              alt={event.title}
-              className="w-full h-full object-cover"
-              width={400}
-              height={300}
-            />
-          )
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-400">No image</span>
-          </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
-        <p className="text-gray-600 mb-2">{event.description}</p>
-        
-        <div className="flex flex-wrap gap-2 mb-2">
-          {[...event.age_groups].sort().map((age) => (
-            <span
-              key={age}
-              className={`px-2 py-1 rounded-full text-sm ${getAgeGroupStyle(age)}`}
-            >
-              {age}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className={`px-2 py-1 rounded-full text-sm ${getCategoryStyle(event.category)}`}>
-            {event.category}
-          </span>
-          <span className="text-gray-500 text-sm">{event.month}月</span>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 export default function EventListPage() {
@@ -336,24 +284,24 @@ export default function EventListPage() {
   // イベントが更新されたときにイベント一覧を再取得する
   useEffect(() => {
     if (selectedEvent) {
-    const channel = supabase
+      const channel = supabase
         .channel('events_changes')
-      .on('postgres_changes', 
-        { 
+        .on('postgres_changes', 
+          { 
             event: 'UPDATE', 
-          schema: 'public', 
+            schema: 'public', 
             table: 'events',
             filter: `id=eq.${selectedEvent.id}`
-        }, 
+          }, 
           () => {
-          fetchEvents();
-        }
-      )
+            fetchEvents();
+          }
+        )
         .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [selectedEvent]);
 
@@ -419,9 +367,35 @@ export default function EventListPage() {
       // 所要時間
       if (advancedFilters.duration) {
         filtered = filtered.filter(event => {
+          // durationがない場合はフィルタリングから除外
           if (!event.duration) return false;
-          const durationStr = `${event.duration.start}～${event.duration.end}`;
-          return durationStr.includes(advancedFilters.duration);
+          
+          let durationStr = '';
+          
+          // durationが文字列の場合
+          if (typeof event.duration === 'string') {
+            try {
+              // JSONとして解析を試みる
+              const parsedDuration = JSON.parse(event.duration);
+              if (parsedDuration && typeof parsedDuration === 'object' && parsedDuration.start && parsedDuration.end) {
+                durationStr = `${parsedDuration.start}～${parsedDuration.end}`;
+              } else {
+                // 解析できたが適切なプロパティがない場合は元の文字列を使用
+                durationStr = event.duration;
+              }
+            } catch (e) {
+              // JSON解析に失敗した場合は元の文字列を使用
+              durationStr = event.duration;
+            }
+          } 
+          // durationがオブジェクトの場合
+          else if (typeof event.duration === 'object' && event.duration !== null) {
+            if (event.duration.start && event.duration.end) {
+              durationStr = `${event.duration.start}～${event.duration.end}`;
+            }
+          }
+          
+          return durationStr.toLowerCase().includes(advancedFilters.duration.toLowerCase());
         });
       }
 
@@ -456,7 +430,7 @@ export default function EventListPage() {
 
       // 動画あり
       if (advancedFilters.hasVideo) {
-      filtered = filtered.filter(event => 
+        filtered = filtered.filter(event => 
           event.media_files && event.media_files.some(file => 
             file.type.startsWith('video/')
           )
@@ -508,9 +482,10 @@ export default function EventListPage() {
     setShowAdvancedSearch(true);
   };
 
-  // 詳細検索モーダルを閉じる
+  // 詳細検索モーダルを閉じる（キャンセル時）
   const closeAdvancedSearch = () => {
     setShowAdvancedSearch(false);
+    // フィルターの状態は保持したまま閉じる（変更なし）
   };
 
   // 詳細検索フィルターをリセット
@@ -530,7 +505,10 @@ export default function EventListPage() {
 
   // 詳細検索フィルターを適用
   const applyAdvancedFilters = () => {
-    // 検索は自動的に実行されるため、モーダルを閉じるだけ
+    // フィルターを適用してモーダルを閉じる
+    // フィルター状態は既にadvancedFiltersステートに保存されているため
+    // 追加のフィルタリングロジックを実行する必要はなく、
+    // useEffectの依存配列にadvancedFiltersが含まれているため自動的に再フィルタリングされる
     setShowAdvancedSearch(false);
   };
 
@@ -613,7 +591,7 @@ export default function EventListPage() {
         setIsOverlayOpen(true);
       } else {
         // データがない場合は既存のイベントを使用
-    setSelectedEvent(event);
+        setSelectedEvent(event);
         setIsOverlayOpen(true);
       }
     } catch (error) {
@@ -730,7 +708,7 @@ export default function EventListPage() {
       // durationが文字列の場合はそのまま使用
       // durationがオブジェクトの場合は文字列に変換
       let durationStr = '';
-      if (typeof formData.duration === 'object') {
+      if (typeof formData.duration === 'object' && formData.duration) {
         const end = formData.duration.end;
         if (end) {
           const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
@@ -747,10 +725,10 @@ export default function EventListPage() {
             }
           }
         }
-      } else {
-        durationStr = formData.duration;
+      } else if (formData.duration) {
+        durationStr = formData.duration.toString();
       }
-
+      
       const { data, error } = await supabase
         .from('events')
         .update({
@@ -768,7 +746,7 @@ export default function EventListPage() {
         })
         .eq('id', editingEvent.id)
         .select();
-
+        
       if (error) {
         console.error('イベント更新エラー:', error);
         alert('イベントの更新に失敗しました: ' + error.message);
@@ -832,7 +810,7 @@ export default function EventListPage() {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
         const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
         return dateB - dateA;
-    } else {
+      } else {
         // 人気順（閲覧数で降順）
         const viewsA = a.views || 0;
         const viewsB = b.views || 0;
@@ -848,55 +826,97 @@ export default function EventListPage() {
     setFilteredEvents(sorted);
   };
 
-  // イベントカードのレンダリング部分を修正
-  const renderEventCard = (event: Event) => (
-    <div key={event.id} className={getMonthClass(Number(event.month))}>
-      <div
+  // イベントカードのレンダリング部分
+  const renderEventCard = (event: Event) => {
+    // 月の値を取得
+    const monthNumber = Number(event.month);
+    let borderColor = '#ddd';
+    let bgColor = 'white';
+    
+    // 月ごとに色を設定
+    switch(monthNumber) {
+      case 1: borderColor = '#FF6B6B'; bgColor = 'linear-gradient(135deg, #fff, #fff5f5)'; break;
+      case 2: borderColor = '#4A90E2'; bgColor = 'linear-gradient(135deg, #fff, #f5f8ff)'; break;
+      case 3: borderColor = '#FF9FB2'; bgColor = 'linear-gradient(135deg, #fff, #fff5f7)'; break;
+      case 4: borderColor = '#7ED321'; bgColor = 'linear-gradient(135deg, #fff, #f7fff0)'; break;
+      case 5: borderColor = '#4FD1C5'; bgColor = 'linear-gradient(135deg, #fff, #f0fffd)'; break;
+      case 6: borderColor = '#9B6DFF'; bgColor = 'linear-gradient(135deg, #fff, #f8f5ff)'; break;
+      case 7: borderColor = '#54C7FC'; bgColor = 'linear-gradient(135deg, #fff, #f0faff)'; break;
+      case 8: borderColor = '#FFB347'; bgColor = 'linear-gradient(135deg, #fff, #fff7f0)'; break;
+      case 9: borderColor = '#4CAF50'; bgColor = 'linear-gradient(135deg, #fff, #f0fff1)'; break;
+      case 10: borderColor = '#FFB74D'; bgColor = 'linear-gradient(135deg, #fff, #fff8f0)'; break;
+      case 11: borderColor = '#FF7043'; bgColor = 'linear-gradient(135deg, #fff, #fff5f0)'; break;
+      case 12: borderColor = '#5C6BC0'; bgColor = 'linear-gradient(135deg, #fff, #f5f6ff)'; break;
+    }
+    
+    const cardStyle = {
+      borderColor: borderColor,
+      background: bgColor
+    };
+    
+    const monthTextStyle = {
+      color: borderColor
+    };
+    
+    return (
+      <div 
+        key={event.id}
         className={styles.eventCard}
+        style={cardStyle}
         onClick={() => handleEventClick(event)}
       >
-        <div className={styles.eventImageContainer}>
-          {event.media_files && event.media_files.length > 0 && 
-          event.media_files.some(file => file.type === 'image') && 
-          event.media_files.find(file => file.type === 'image')?.url ? (
-            <Image
-              src={event.media_files.find(file => file.type === 'image')!.url}
-              alt={event.title}
-              width={200}
-              height={200}
+        <div className={styles.imageContainer}>
+          {event.media_files && event.media_files.length > 0 && event.media_files[0].type === 'image' ? (
+            <img 
+              src={event.media_files[0].url} 
+              alt={event.title} 
               className={styles.eventImage}
             />
           ) : (
             <div className={styles.noImage}>No Image</div>
           )}
         </div>
-        <div className={styles.eventContent}>
-          <div className={styles.eventHeader}>
-            <span className={`${styles.category} ${getCategoryStyle(event.category)}`}>
-              {getCategoryDisplayText(event.category)}
-            </span>
-            <h3 className={styles.eventTitle}>{event.title}</h3>
-          </div>
-          <p className={styles.eventDescription}>{event.description}</p>
-          <div className={styles.ageGroups}>
-            {[...event.age_groups]
-              .sort((a, b) => Number(a) - Number(b))
-              .map((age) => (
-                <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>
-                {age}
-              </span>
-            ))}
-          </div>
-          <div className={styles.eventFooter}>
-            <span className={styles.month}>{event.month}月</span>
-            <div className={styles.rightFooter}>
-              <span className={styles.duration}>所要時間：{formatDuration(event.duration)}</span>
-            </div>
-          </div>
-          </div>
+        
+        <div style={{marginBottom: '12px'}}>
+          <span 
+            className={getCategoryStyle(event.category || 'その他')}
+            style={{
+              display: 'inline-block',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              color: 'white',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              marginBottom: '8px'
+            }}
+          >
+            {getCategoryDisplayText(event.category || 'その他')}
+          </span>
+          <h3 className={styles.title}>{event.title}</h3>
+        </div>
+        
+        {event.description && (
+          <div className={styles.eventDescription}>{event.description}</div>
+        )}
+        
+        <div className={styles.ageGroups}>
+          {event.age_groups && 
+            [...event.age_groups].sort((a, b) => {
+              const order = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳児'];
+              return order.indexOf(a) - order.indexOf(b);
+            }).map(age => (
+              <span key={age} className={`${styles.ageGroup} ${getAgeGroupStyle(age)}`}>{age}</span>
+            ))
+          }
+        </div>
+        
+        <div className={styles.eventFooter}>
+          <div className={styles.month} style={monthTextStyle}>{event.month}月</div>
+          <div className={styles.duration}>所要時間: {formatDuration(event.duration)}</div>
         </div>
       </div>
     );
+  };
 
   if (loading) {
     return (
@@ -984,9 +1004,9 @@ export default function EventListPage() {
 
         <div className={styles.eventsGrid}>
           {filteredEvents.map(renderEventCard)}
-            </div>
         </div>
-        
+      </div>
+      
       {selectedEvent && isOverlayOpen && (
         <EventOverlay
           event={selectedEvent}
@@ -1026,7 +1046,6 @@ export default function EventListPage() {
         </div>
       )}
 
-      {/* 詳細検索モーダル */}
       {showAdvancedSearch && (
         <div className={styles.modalOverlay} onClick={closeAdvancedSearch}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
