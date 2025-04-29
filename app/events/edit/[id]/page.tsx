@@ -100,7 +100,7 @@ export default function EditEventPage({ params }: Props) {
       // durationが文字列の場合はそのまま使用
       // durationがオブジェクトの場合は文字列に変換
       let durationStr = '';
-      if (typeof formData.duration === 'object') {
+      if (typeof formData.duration === 'object' && formData.duration !== null) {
         const end = formData.duration.end;
         if (end) {
           const timeMatch = end.match(/^(\d{1,2}):(\d{1,2})$/);
@@ -117,8 +117,8 @@ export default function EditEventPage({ params }: Props) {
             }
           }
         }
-      } else {
-        durationStr = formData.duration;
+      } else if (formData.duration) {
+        durationStr = formData.duration.toString();
       }
 
       const { error } = await supabase
