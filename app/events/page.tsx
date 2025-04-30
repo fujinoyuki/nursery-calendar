@@ -490,8 +490,14 @@ export default function EventListPage() {
         const newBlobUrls: Record<string, string> = { ...imageBlobUrls };
         let updated = false;
 
+        // 表示される画像のみを先に読み込む（現在のページに表示されるイベントのみ）
+        const visibleEvents = filteredEvents.slice(
+          (currentPage - 1) * eventsPerPage, 
+          currentPage * eventsPerPage
+        );
+
         // 各イベントのメディアファイルを処理
-        for (const event of filteredEvents) {
+        for (const event of visibleEvents) {
           if (event.media_files && event.media_files.length > 0) {
             const media = event.media_files[0]; // 最初の画像のみを処理
             
@@ -512,11 +518,17 @@ export default function EventListPage() {
                   continue;
                 }
                 
-                // 直接バケットからデータを取得
+                // 直接バケットからデータを取得（サムネイル変換オプションを指定）
                 const { data, error } = await supabase
                   .storage
                   .from('event-media')
-                  .download(bucketPath);
+                  .download(bucketPath, {
+                    transform: {
+                      width: 300,
+                      height: 200,
+                      resize: 'cover'
+                    }
+                  });
                 
                 if (error) {
                   console.error(`イベント ${event.id} の画像ダウンロードエラー:`, error);
@@ -1171,6 +1183,7 @@ export default function EventListPage() {
                 src={blobUrl} 
                 alt={event.title} 
                 className={styles.eventImage}
+                loading="lazy"
                 onError={(e) => {
                   console.log(`イベント ${event.id} のBlobURL画像読み込みエラー`);
                   e.currentTarget.style.display = 'none';
@@ -1188,6 +1201,7 @@ export default function EventListPage() {
             ) : (
               <div className={styles.noImage}>
                 <span>読み込み中...</span>
+                <div className={styles.loadingIndicator}></div>
               </div>
             )
           ) : (
