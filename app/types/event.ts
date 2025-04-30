@@ -41,6 +41,7 @@ export interface EventBase {
   title: string;
   description: string;
   category: Category;
+  category_detail?: string;
   month: string;
   date: string;
   duration: Duration | string | null | undefined;

@@ -64,7 +64,6 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
       media_files: files,
     };
     
-    console.log('送信する所要時間:', formData.duration);
     onSubmit(formData);
   };
 
@@ -230,9 +229,22 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                 <input
                   type="number"
                   min="0"
-                  max="24"
+                  max="9"
                   value={hours}
-                  onChange={(e) => setHours(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = parseInt(value);
+                    // 一桁の数字のみ許可 (0-9)
+                    if (value === '' || (numValue >= 0 && numValue <= 9 && value.length <= 1)) {
+                      setHours(value);
+                    }
+                  }}
+                  onBlur={() => {
+                    // 空の場合は0にする
+                    if (hours === '') {
+                      setHours('0');
+                    }
+                  }}
                   placeholder="0"
                 />
                 時間
@@ -243,7 +255,20 @@ export default function AddEventForm({ onSubmit, onCancel, selectedMonth }: AddE
                   min="0"
                   max="59"
                   value={minutes}
-                  onChange={(e) => setMinutes(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = parseInt(value);
+                    // 二桁まで許可 (0-59)
+                    if (value === '' || (numValue >= 0 && numValue <= 59 && value.length <= 2)) {
+                      setMinutes(value);
+                    }
+                  }}
+                  onBlur={() => {
+                    // 空の場合は0にする
+                    if (minutes === '') {
+                      setMinutes('0');
+                    }
+                  }}
                   placeholder="0"
                 />
                 分

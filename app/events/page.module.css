@@ -407,21 +407,18 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.eventImageContainer,
-.imageContainer {
+.eventImageContainer {
   width: 100%;
   height: 200px;
   margin-bottom: 16px;
   border-radius: 8px;
   overflow: hidden;
-  position: relative;
 }
 
 .eventImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
 }
 
 .noImage {
@@ -608,6 +605,15 @@
   flex-direction: column;
   gap: 12px;
   padding: 8px 0;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
 }
 
 .views {
@@ -829,4 +835,83 @@
   .description {
     font-size: 0.9rem;
   }
+}
+
+/* ページネーション */
+.paginationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 2px dotted #B5B0E2;
+}
+
+.resultsCount {
+  margin-bottom: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pageButton {
+  min-width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #666;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageButton:hover {
+  background: #f5f8ff;
+  border-color: #a7d2ff;
+}
+
+.pageButton.active {
+  background: #a7d2ff;
+  color: white;
+  border-color: #a7d2ff;
+}
+
+@media (max-width: 768px) {
+  .paginationContainer {
+    padding: 0.75rem;
+  }
+  
+  .pageButton {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+  }
+}
+
+.active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.categoryDetail {
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: #555;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
 } 

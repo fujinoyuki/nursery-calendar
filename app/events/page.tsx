@@ -142,11 +142,13 @@ export default function EventListPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [sortType, setSortType] = useState<'date' | 'popular'>('date');
+  const [sortType, setSortType] = useState<'date' | 'popular'>('popular');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [imageBlobUrls, setImageBlobUrls] = useState<Record<string, string>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 15;
   const [advancedFilters, setAdvancedFilters] = useState({
     title: '',
     description: '',
@@ -440,37 +442,46 @@ export default function EventListPage() {
     }
 
     // 並び替え
+    const currentMonth = new Date().getMonth() + 1; // 1-12の値
+    
     if (sortType === 'date') {
+      // 月の登録順（今月を先頭に）
       filtered.sort((a, b) => {
-        // 月を数値として比較
-        const monthA = Number(a.month);
-        const monthB = Number(b.month);
+        const monthA = Number(a.month) || 0;
+        const monthB = Number(b.month) || 0;
         
-        if (monthA !== monthB) {
-          return monthA - monthB;
+        // 今月からの距離を計算
+        const distanceA = (monthA - currentMonth + 12) % 12;
+        const distanceB = (monthB - currentMonth + 12) % 12;
+        
+        if (distanceA !== distanceB) {
+          return distanceA - distanceB;
         }
         
-        // 月が同じ場合は作成日時で比較
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
+        // 同じ月の場合は登録日順（新しい順）
+        const dateA = new Date(a.created_at || '').getTime();
+        const dateB = new Date(b.created_at || '').getTime();
         return dateB - dateA;
       });
     } else if (sortType === 'popular') {
+      // 人気順（閲覧数順）
       filtered.sort((a, b) => {
         const viewsA = a.views || 0;
         const viewsB = b.views || 0;
+        
         if (viewsA !== viewsB) {
           return viewsB - viewsA;
         }
-        // 閲覧数が同じ場合は作成日時で比較
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
+        
+        // 閲覧数が同じ場合は登録日順
+        const dateA = new Date(a.created_at || '').getTime();
+        const dateB = new Date(b.created_at || '').getTime();
         return dateB - dateA;
       });
     }
 
     setFilteredEvents(filtered);
-  }, [events, searchTerm, showAdvancedSearch, advancedFilters, sortType, currentMonth]);
+  }, [events, searchTerm, showAdvancedSearch, advancedFilters, sortType]);
 
   // イベントが変更されたときに画像を読み込む
   useEffect(() => {
@@ -580,7 +591,19 @@ export default function EventListPage() {
   // 検索クエリの変更を処理
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // 検索は自動的に実行されるため、フォームのデフォルトの送信を防ぐだけ
+    
+    // 検索条件に一致するイベントをフィルタリング
+    const filtered = events.filter(event => {
+      // タイトルか説明文に検索語が含まれているかチェック
+      const searchLower = searchTerm.toLowerCase();
+      const titleMatch = event.title?.toLowerCase().includes(searchLower);
+      const descMatch = event.description?.toLowerCase().includes(searchLower);
+      
+      return titleMatch || descMatch;
+    });
+    
+    setFilteredEvents(filtered);
+    setCurrentPage(1); // 検索時にページを1にリセット
   };
 
   // 詳細検索モーダルを開く
@@ -611,10 +634,56 @@ export default function EventListPage() {
 
   // 詳細検索フィルターを適用
   const applyAdvancedFilters = () => {
-    // フィルターを適用してモーダルを閉じる
-    // フィルター状態は既にadvancedFiltersステートに保存されているため
-    // 追加のフィルタリングロジックを実行する必要はなく、
-    // useEffectの依存配列にadvancedFiltersが含まれているため自動的に再フィルタリングされる
+    const filtered = events.filter(event => {
+      // タイトルフィルター
+      if (advancedFilters.title && 
+          !event.title?.toLowerCase().includes(advancedFilters.title.toLowerCase())) {
+        return false;
+      }
+      
+      // 説明文フィルター
+      if (advancedFilters.description && 
+          !event.description?.toLowerCase().includes(advancedFilters.description.toLowerCase())) {
+        return false;
+      }
+      
+      // カテゴリーフィルター
+      if (advancedFilters.category && event.category !== advancedFilters.category) {
+        return false;
+      }
+      
+      // 年齢グループフィルター
+      if (advancedFilters.ageGroups.length > 0) {
+        // 選択された年齢グループのうち、少なくとも1つがイベントの年齢グループに含まれているか確認
+        const hasMatchingAgeGroup = advancedFilters.ageGroups.some(age => 
+          event.age_groups?.includes(age as AgeGroup)
+        );
+        if (!hasMatchingAgeGroup) {
+          return false;
+        }
+      }
+      
+      // 画像ありフィルター
+      if (advancedFilters.hasImage) {
+        const hasImages = event.media_files?.some(file => file.type === 'image');
+        if (!hasImages) {
+          return false;
+        }
+      }
+      
+      // 動画ありフィルター
+      if (advancedFilters.hasVideo) {
+        const hasVideos = event.media_files?.some(file => file.type === 'video');
+        if (!hasVideos) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    setFilteredEvents(filtered);
+    setCurrentPage(1); // 詳細検索適用時にページを1にリセット
     setShowAdvancedSearch(false);
   };
 
@@ -841,6 +910,7 @@ export default function EventListPage() {
           title: formData.title,
           description: formData.description,
           category: formData.category,
+          category_detail: (formData as any).category_detail,
           month: formData.month,
           date: formData.date,
           age_groups: formData.age_groups,
@@ -908,28 +978,161 @@ export default function EventListPage() {
     }
   };
 
-  // 並び替え処理を行う関数
+  // ソートの処理を行う関数
   const handleSort = (type: 'date' | 'popular') => {
+    if (type === sortType) return;
+    
     setSortType(type);
-    const sorted = [...events].sort((a, b) => {
+    setCurrentPage(1); // ソート時にページを1に戻す
+    
+    const currentMonth = new Date().getMonth() + 1; // 1-12の値
+    
+    const sorted = [...filteredEvents].sort((a, b) => {
       if (type === 'date') {
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now();
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now();
+        // 月の登録順（今月を先頭に）
+        const monthA = Number(a.month) || 0;
+        const monthB = Number(b.month) || 0;
+        
+        // 今月からの距離を計算
+        const distanceA = (monthA - currentMonth + 12) % 12;
+        const distanceB = (monthB - currentMonth + 12) % 12;
+        
+        if (distanceA !== distanceB) {
+          return distanceA - distanceB;
+        }
+        
+        // 同じ月の場合は登録日順（新しい順）
+        const dateA = new Date(a.created_at || '').getTime();
+        const dateB = new Date(b.created_at || '').getTime();
         return dateB - dateA;
       } else {
-        // 人気順（閲覧数で降順）
+        // 人気順（閲覧数順）
         const viewsA = a.views || 0;
         const viewsB = b.views || 0;
+        
         if (viewsA !== viewsB) {
           return viewsB - viewsA;
         }
-        // 閲覧数が同じ場合は作成日時で比較
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
+        
+        // 閲覧数が同じ場合は登録日順
+        const dateA = new Date(a.created_at || '').getTime();
+        const dateB = new Date(b.created_at || '').getTime();
         return dateB - dateA;
       }
     });
+    
     setFilteredEvents(sorted);
+  };
+
+  // ページ変更を処理する関数
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo(0, 0); // ページトップにスクロール
+  };
+
+  // 現在のページに表示するイベントを計算
+  const currentEvents = filteredEvents.slice(
+    (currentPage - 1) * eventsPerPage, 
+    currentPage * eventsPerPage
+  );
+
+  // 全ページ数を計算
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+
+  // ページネーションボタンを生成する関数
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxButtons = 5; // 表示するボタンの最大数
+    
+    // ページ数が少ない場合
+    if (totalPages <= maxButtons) {
+      for (let i = 1; i <= totalPages; i++) {
+        buttons.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`${styles.pageButton} ${currentPage === i ? styles.active : ''}`}
+          >
+            {i}
+          </button>
+        );
+      }
+    } else {
+      // 最初のページへのボタン
+      if (currentPage > 1) {
+        buttons.push(
+          <button
+            key="first"
+            onClick={() => handlePageChange(1)}
+            className={styles.pageButton}
+          >
+            ＜＜
+          </button>
+        );
+      }
+      
+      // 前のページへのボタン
+      if (currentPage > 1) {
+        buttons.push(
+          <button
+            key="prev"
+            onClick={() => handlePageChange(currentPage - 1)}
+            className={styles.pageButton}
+          >
+            ＜
+          </button>
+        );
+      }
+      
+      // ページ番号ボタン
+      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+      
+      // endPageが最大数より少ない場合は、startPageを調整
+      if (endPage - startPage + 1 < maxButtons) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        buttons.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`${styles.pageButton} ${currentPage === i ? styles.active : ''}`}
+          >
+            {i}
+          </button>
+        );
+      }
+      
+      // 次のページへのボタン
+      if (currentPage < totalPages) {
+        buttons.push(
+          <button
+            key="next"
+            onClick={() => handlePageChange(currentPage + 1)}
+            className={styles.pageButton}
+          >
+            ＞
+          </button>
+        );
+      }
+      
+      // 最後のページへのボタン
+      if (currentPage < totalPages) {
+        buttons.push(
+          <button
+            key="last"
+            onClick={() => handlePageChange(totalPages)}
+            className={styles.pageButton}
+          >
+            ＞＞
+          </button>
+        );
+      }
+    }
+    
+    return buttons;
   };
 
   // イベントカードのレンダリング部分
@@ -1133,8 +1336,20 @@ export default function EventListPage() {
         </div>
 
         <div className={styles.eventsGrid}>
-          {filteredEvents.map(renderEventCard)}
+          {currentEvents.map(renderEventCard)}
         </div>
+
+        {totalPages > 1 && (
+          <div className={styles.paginationContainer}>
+            <div className={styles.resultsCount}>
+              全{filteredEvents.length}件中 {(currentPage - 1) * eventsPerPage + 1}～
+              {Math.min(currentPage * eventsPerPage, filteredEvents.length)}件を表示
+            </div>
+            <div className={styles.pagination}>
+              {renderPaginationButtons()}
+            </div>
+          </div>
+        )}
       </div>
       
       {selectedEvent && isOverlayOpen && (
@@ -1161,6 +1376,7 @@ export default function EventListPage() {
                 title: editingEvent.title,
                 description: editingEvent.description,
                 category: editingEvent.category,
+                category_detail: (editingEvent as any).category_detail,
                 month: editingEvent.month,
                 date: editingEvent.date,
                 duration: editingEvent.duration,
