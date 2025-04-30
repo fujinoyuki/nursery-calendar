@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Event, AgeGroup, EventFormData, LocalEventFormData, Category, MediaFile, Duration } from '../types/event';
+import { Event, AgeGroup, EventFormData, Category, MediaFile, Duration } from '../types/event';
 import EventOverlay from '../components/EventOverlay';
 import EditEventForm from '../components/EditEventForm';
 import Image from 'next/image';
@@ -35,11 +35,11 @@ const AGE_GROUPS = ['0歳児', '1歳児', '2歳児', '3歳児', '4歳児', '5歳
 const getCategoryStyle = (category: string) => {
   switch (category) {
     case '壁　面':
-      return styles.categoryWall;
+    return styles.categoryWall;
     case '制作物':
-      return styles.categoryArt;
+    return styles.categoryArt;
     default:
-      return styles.categoryOther;
+  return styles.categoryOther;
   }
 };
 
@@ -66,18 +66,9 @@ const getAgeGroupStyle = (age: string) => {
 // カテゴリーの表示テキストを取得する関数
 const getCategoryDisplayText = (category: string) => {
   if (!category || (category !== '壁　面' && category !== '制作物')) {
-    return 'その他';
+  return 'その他';
   }
   return category;
-};
-
-const getMonthClass = (month: number) => {
-  const monthNumber = Number(month);
-  if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
-    console.log('Invalid month:', month);
-    return '';
-  }
-  return styles[`month${monthNumber}`];
 };
 
 // 所要時間をフォーマットする関数
@@ -164,7 +155,7 @@ export default function EventListPage() {
 
   const fetchEvents = async () => {
     try {
-      setLoading(true);
+    setLoading(true);
 
       // セッションの確認
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -261,14 +252,14 @@ export default function EventListPage() {
           }
 
           return {
-            ...event,
+        ...event,
             isOwner: event.user_id === session.user.id,
             profiles: event.profiles || null,
             duration: eventDuration
           };
         });
 
-        setEvents(processedEvents);
+      setEvents(processedEvents);
       } else {
         setEvents([]);
       }
@@ -287,35 +278,29 @@ export default function EventListPage() {
   // イベントが更新されたときにイベント一覧を再取得する
   useEffect(() => {
     if (selectedEvent) {
-      const channel = supabase
+    const channel = supabase
         .channel('events_changes')
-        .on('postgres_changes', 
-          { 
+      .on('postgres_changes', 
+        { 
             event: 'UPDATE', 
-            schema: 'public', 
+          schema: 'public', 
             table: 'events',
             filter: `id=eq.${selectedEvent.id}`
-          }, 
+        }, 
           () => {
-            fetchEvents();
-          }
-        )
+          fetchEvents();
+        }
+      )
         .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    return () => {
+      supabase.removeChannel(channel);
+    };
     }
   }, [selectedEvent]);
 
   // 現在の月を取得
   const currentMonth = new Date().getMonth() + 1; // JavaScriptの月は0から始まるため+1
-
-  // 月の比較関数（現在の月からの距離を計算）
-  const getMonthDistance = (month: number) => {
-    const diff = month - currentMonth;
-    return diff >= 0 ? diff : diff + 12;
-  };
 
   // 検索機能とソート機能を実装
   useEffect(() => {
@@ -382,7 +367,7 @@ export default function EventListPage() {
               const parsedDuration = JSON.parse(event.duration);
               if (parsedDuration && typeof parsedDuration === 'object' && parsedDuration.start && parsedDuration.end) {
                 durationStr = `${parsedDuration.start}～${parsedDuration.end}`;
-              } else {
+            } else {
                 // 解析できたが適切なプロパティがない場合は元の文字列を使用
                 durationStr = event.duration;
               }
@@ -424,7 +409,7 @@ export default function EventListPage() {
 
       // 画像あり
       if (advancedFilters.hasImage) {
-        filtered = filtered.filter(event => 
+      filtered = filtered.filter(event => 
           event.media_files && event.media_files.some(file => 
             file.type.startsWith('image/')
           )
@@ -766,7 +751,7 @@ export default function EventListPage() {
         setIsOverlayOpen(true);
       } else {
         // データがない場合は既存のイベントを使用
-        setSelectedEvent(event);
+    setSelectedEvent(event);
         setIsOverlayOpen(true);
       }
     } catch (error) {
@@ -910,7 +895,7 @@ export default function EventListPage() {
           title: formData.title,
           description: formData.description,
           category: formData.category,
-          category_detail: (formData as any).category_detail,
+          category_detail: formData.category_detail,
           month: formData.month,
           date: formData.date,
           age_groups: formData.age_groups,
@@ -986,9 +971,9 @@ export default function EventListPage() {
     setCurrentPage(1); // ソート時にページを1に戻す
     
     const currentMonth = new Date().getMonth() + 1; // 1-12の値
-    
+
     const sorted = [...filteredEvents].sort((a, b) => {
-      if (type === 'date') {
+    if (type === 'date') {
         // 月の登録順（今月を先頭に）
         const monthA = Number(a.month) || 0;
         const monthB = Number(b.month) || 0;
@@ -1005,13 +990,13 @@ export default function EventListPage() {
         const dateA = new Date(a.created_at || '').getTime();
         const dateB = new Date(b.created_at || '').getTime();
         return dateB - dateA;
-      } else {
+    } else {
         // 人気順（閲覧数順）
         const viewsA = a.views || 0;
         const viewsB = b.views || 0;
         
         if (viewsA !== viewsB) {
-          return viewsB - viewsA;
+        return viewsB - viewsA;
         }
         
         // 閲覧数が同じ場合は登録日順
@@ -1338,20 +1323,20 @@ export default function EventListPage() {
         <div className={styles.eventsGrid}>
           {currentEvents.map(renderEventCard)}
         </div>
-
+        
         {totalPages > 1 && (
           <div className={styles.paginationContainer}>
             <div className={styles.resultsCount}>
               全{filteredEvents.length}件中 {(currentPage - 1) * eventsPerPage + 1}～
               {Math.min(currentPage * eventsPerPage, filteredEvents.length)}件を表示
-            </div>
+        </div>
             <div className={styles.pagination}>
               {renderPaginationButtons()}
             </div>
           </div>
         )}
       </div>
-      
+
       {selectedEvent && isOverlayOpen && (
         <EventOverlay
           event={selectedEvent}
@@ -1376,7 +1361,7 @@ export default function EventListPage() {
                 title: editingEvent.title,
                 description: editingEvent.description,
                 category: editingEvent.category,
-                category_detail: (editingEvent as any).category_detail,
+                category_detail: editingEvent.category_detail,
                 month: editingEvent.month,
                 date: editingEvent.date,
                 duration: editingEvent.duration,
